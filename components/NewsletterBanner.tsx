@@ -1,3 +1,4 @@
+import { trackGoal } from 'fathom-client'
 import { useRef, useState } from 'react'
 
 type FormState = 'initial' | 'loading' | 'success' | 'error'
@@ -33,7 +34,7 @@ export default function NewsletterBanner() {
       return
     }
 
-    // trackGoal('JYFUFMSF', 0)
+    trackGoal('SWSM6DKP', 0)
     inputEl.current.value = ''
     setForm({
       state: 'success',
