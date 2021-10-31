@@ -195,7 +195,7 @@ export default function Timeline() {
       <Year>2019</Year>
       <ul>
         <Step title="Moved to Switzerland">
-          Long-distance realtionship ship came to an end, happy end — we&apos;re
+          Long-distance relationship came to an end, happy end — we&apos;re
           moving in together, and we&apos;re doing it in Switzerland! 🇨🇭
         </Step>
         <Step title="Promoted to Senior Frontend Developer 🤓">
