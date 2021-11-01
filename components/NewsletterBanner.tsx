@@ -62,7 +62,7 @@ export default function NewsletterBanner() {
               disabled={form.state === 'loading'}
             />
             <button
-              className="flex items-center justify-center absolute right-2 top-2 px-4 font-medium h-10 bg-gray-700 text-gray-100 rounded-lg w-28"
+              className="flex items-center justify-center w-full md:w-28 mt-3 md:mt-0 md:absolute right-2 top-2 px-4 font-medium h-10 bg-gray-700 text-gray-100 rounded-lg "
               type="submit"
               disabled={form.state === 'loading'}
             >
