@@ -15,7 +15,7 @@ export default function ProjectCard({
       <a
         target="_blank"
         rel="noopener noreferrer"
-        className="relative w-full bg-white dark:bg-gray-800 shadow-md rounded-3xl p-2 cursor-pointer dark:hover:bg-gray-700 transition-all flex flex-row gap-2"
+        className="relative w-full bg-white dark:bg-gray-800 shadow-md rounded-3xl p-4 md:p-2 cursor-pointer dark:hover:bg-gray-700 transition-all flex flex-col md:flex-row gap-2"
       >
         <Image
           className="rounded-2xl"
@@ -27,7 +27,7 @@ export default function ProjectCard({
 
         <div className="flex flex-col w-full">
           <div className="flex flex-row justify-between pt-1 pr-1 mb-1 md:mb-2">
-            <div className="flex gap-1">
+            <div className="flex gap-1 flex-wrap">
               {tags.split(',').map((tag) => (
                 <Chip key={tag} name={tag.trim() as any} />
               ))}
