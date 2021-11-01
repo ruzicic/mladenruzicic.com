@@ -1,13 +1,11 @@
 ---
-title: 'Learn How to Pre-render Pages Using Static Generation with Next.js'
-excerpt: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Praesent elementum facilisis leo vel fringilla est ullamcorper eget. At imperdiet dui accumsan sit amet nulla facilities morbi tempus.'
+title: 'My Gear'
 slug: 'uses'
-date: '2020-10-30T20:35:07.322Z'
+excerpt: Here is a glimpse at some of the hardware, software, apps and other tools I use on a daily basis both at work and in my personal life. I hope you found some useful resources here.
+date: '2021-11-01T18:35:07.322Z'
 ---
 
-<!-- ![Desk Setup](/mladen-ruzicic.jpg) -->
-
-**Last update:** October 2021
+<!-- **Last update:** October 2021 -->
 
 ## Hardware
 - **Work Laptop:** 16" MacBook Pro (2019)
@@ -31,9 +29,3 @@ date: '2020-10-30T20:35:07.322Z'
 - Grammarly
 - 1Password
 - Google Keep
-
-## Desk Setup
-- **Desk:** IKEA BEKANT Desk, white, 160x80
-- **Chair:** IKEA MARKUS
-
-<!-- Some of the links on this page are affiliate links. This means that I may receive a small commission, at no cost to you, if you purchase something through the links provided. -->
