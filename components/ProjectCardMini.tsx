@@ -6,6 +6,7 @@ type Props = {
   src: string
   href: string
 }
+
 export default function ProjectCardMini({ title, src, href }: Props) {
   return (
     <Link href={href}>
