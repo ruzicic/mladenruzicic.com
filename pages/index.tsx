@@ -39,9 +39,9 @@ export default function Home() {
           Recent Projects
         </h3>
         <div className="w-full flex gap-3 md:gap-6 flex-col md:flex-row">
-          <ProjectCardMini src="/static/images/shop.png" title="Shop.app" href="https://shop.app"/>
-          <ProjectCardMini src="/static/images/panciona.png" title="Panciona" href="https://panciona.com"/>
-          <ProjectCardMini src="/static/images/hegias.png" title="HEGIAS CMS" href="https://hegias.com"/>
+          <ProjectCardMini src="/static/images/shop.svg" title="Shop.app" href="https://shop.app"/>
+          <ProjectCardMini src="/static/images/hegias.svg" title="HEGIAS CMS" href="https://hegias.com"/>
+          <ProjectCardMini src="/static/images/panciona.svg" title="Panciona" href="https://panciona.com"/>
         </div>
         <Link href="/blog">
           <a className="flex mt-8 text-gray-600 dark:text-gray-400 leading-7 rounded-lg hover:text-gray-800 dark:hover:text-gray-200 transition-all h-6">
