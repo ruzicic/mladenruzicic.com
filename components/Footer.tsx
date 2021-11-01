@@ -25,6 +25,11 @@ export default function Footer() {
               About
             </a>
           </Link>
+          <Link href="/projects">
+            <a className="text-gray-500 hover:text-gray-600 transition">
+              Projects
+            </a>
+          </Link>
           <Link href="/uses">
             <a className="text-gray-500 hover:text-gray-600 transition">
               Uses
@@ -45,6 +50,11 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col space-y-4">
+          <Link href="/">
+            <a className="text-gray-500 hover:text-gray-600 transition">
+              mladenruzicic.com
+            </a>
+          </Link>
         </div>
       </div>
     </footer>

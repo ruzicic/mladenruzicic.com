@@ -6,7 +6,7 @@ import ShopifyLogo from 'components/ShopifyLogo'
 import BlogPostCard from 'components/BlogPostCard'
 import React from 'react'
 import NewsletterBanner from 'components/NewsletterBanner'
-import WorkCard from 'components/WorkCard'
+import ProjectCardMini from 'components/ProjectCardMini'
 
 export default function Home() {
   return (
@@ -36,33 +36,16 @@ export default function Home() {
           </div>
         </div>
         <h3 className="font-bold text-2xl md:text-4xl tracking-tight mb-6 text-black dark:text-white">
-          Recent Work
+          Recent Projects
         </h3>
         <div className="w-full flex gap-3 md:gap-6 flex-col md:flex-row">
-          <WorkCard src="/static/images/shop-app-logo.png" title="Shop.app" href="https://shop.app"/>
-          <WorkCard src="/static/images/panciona-logo.png" title="Panciona" href="https://panciona.com"/>
-          <WorkCard src="/static/images/hegias-logo.png" title="HEGIAS VR" href="https://hegias.com"/>
+          <ProjectCardMini src="/static/images/Shop.app-logo.png" title="Shop.app" href="https://shop.app"/>
+          <ProjectCardMini src="/static/images/Panciona-logo.png" title="Panciona" href="https://panciona.com"/>
+          <ProjectCardMini src="/static/images/Hegias-logo.png" title="HEGIAS CMS" href="https://hegias.com"/>
         </div>
-        {/* <div className="flex gap-6 flex-col md:flex-row">
-          <BlogPostCard
-            title="Everything I Know About Style Guides, Design Systems, and Component Libraries"
-            slug="style-guides-component-libraries-design-systems"
-            gradient="from-[#D8B4FE] to-[#818CF8]"
-          />
-          <BlogPostCard
-            title="Past, Present, and Future of React State Management"
-            slug="react-state-management"
-            gradient="from-[#FDE68A] via-[#FCA5A5] to-[#FECACA]"
-          />
-          <BlogPostCard
-            title="Which Back End Should I Use As A Front-End Developer?"
-            slug="backend"
-            gradient="from-[#6EE7B7] via-[#3B82F6] to-[#9333EA]"
-          />
-        </div> */}
-        {/* <Link href="/blog">
+        <Link href="/blog">
           <a className="flex mt-8 text-gray-600 dark:text-gray-400 leading-7 rounded-lg hover:text-gray-800 dark:hover:text-gray-200 transition-all h-6">
-            See more work
+            See all projects
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -78,7 +61,7 @@ export default function Home() {
               />
             </svg>
           </a>
-        </Link> */}
+        </Link>
         {/* <h3 className="font-bold text-2xl md:text-4xl tracking-tight mb-4 mt-16 text-black dark:text-white">
           Digital Garden
         </h3>
@@ -109,7 +92,6 @@ export default function Home() {
           </svg>
         </a> */}
         <span className="h-16" />
-        {/* <Subscribe /> */}
         <NewsletterBanner />
       </div>
     </Container>

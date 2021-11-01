@@ -5,8 +5,6 @@ excerpt: Here is a glimpse at some of the hardware, software, apps and other too
 date: '2021-11-01T18:35:07.322Z'
 ---
 
-<!-- **Last update:** October 2021 -->
-
 ## Hardware
 - **Work Laptop:** 16" MacBook Pro (2019)
 - **Personal Laptop:** 15" MacBook Pro (2017)
