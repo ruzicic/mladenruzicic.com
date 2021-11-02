@@ -3,7 +3,6 @@ import Link from 'next/link'
 
 import Container from 'components/Container'
 import ShopifyLogo from 'components/ShopifyLogo'
-import BlogPostCard from 'components/BlogPostCard'
 import React from 'react'
 import NewsletterBanner from 'components/NewsletterBanner'
 import ProjectCardMini from 'components/ProjectCardMini'
@@ -43,7 +42,7 @@ export default function Home() {
           <ProjectCardMini src="/static/images/hegias.svg" title="HEGIAS CMS" href="https://hegias.com"/>
           <ProjectCardMini src="/static/images/panciona.svg" title="Panciona" href="https://panciona.com"/>
         </div>
-        <Link href="/blog">
+        <Link href="/projects">
           <a className="flex mt-8 text-gray-600 dark:text-gray-400 leading-7 rounded-lg hover:text-gray-800 dark:hover:text-gray-200 transition-all h-6">
             See all projects
             <svg
