@@ -98,7 +98,7 @@ export default function Document() {
           content="mstile-310x310.png"
         />
 
-        {/* <link href="/static/favicons/favicon.ico" rel="shortcut icon" /> */}
+        <link href="/static/favicons/favicon.png" rel="shortcut icon" />
         {/* <meta content="14d2e73487fa6c71" name="yandex-verification" />
         <meta
           content="eZSdmzAXlLkKhNJzfgwDqWORghxnJ8qR9_CHdAh5-xw"
