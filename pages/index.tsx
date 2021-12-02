@@ -29,8 +29,8 @@ export default function Home() {
               alt="Mladen Ruzicic"
               height={176}
               width={176}
-              src="/mladen-ruzicic.jpg"
-              className="rounded-full filter grayscale"
+              src="/mladen-ruzicic.png"
+              className="rounded-full"
             />
           </div>
         </div>
