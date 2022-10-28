@@ -21,7 +21,8 @@ export default function Home() {
               <span className="font-semibold">Shopify</span>
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-16">
-              Based in Switzerland. Infinitely curious and passionate about software. Crypto enthusiast. Girl dad.
+              Based in Switzerland. Infinitely curious and passionate about
+              software. Crypto enthusiast. Girl dad.
             </p>
           </div>
           <div className="w-[80px] sm:w-[176px] relative mb-8 sm:mb-0 mr-auto">
@@ -38,9 +39,21 @@ export default function Home() {
           Recent Projects
         </h3>
         <div className="w-full flex gap-3 md:gap-6 flex-col md:flex-row">
-          <ProjectCardMini src="/static/images/shop.svg" title="Shop.app" href="https://shop.app"/>
-          <ProjectCardMini src="/static/images/hegias.svg" title="HEGIAS CMS" href="https://hegias.com"/>
-          <ProjectCardMini src="/static/images/panciona.svg" title="Panciona" href="https://panciona.com"/>
+          <ProjectCardMini
+            src="/static/images/shop.svg"
+            title="Shop.app"
+            href="https://shop.app"
+          />
+          <ProjectCardMini
+            src="/static/images/hegias.svg"
+            title="HEGIAS CMS"
+            href="https://hegias.com"
+          />
+          <ProjectCardMini
+            src="/static/images/panciona.svg"
+            title="Panciona"
+            href="https://panciona.com"
+          />
         </div>
         <Link href="/projects">
           <a className="flex mt-8 text-gray-600 dark:text-gray-400 leading-7 rounded-lg hover:text-gray-800 dark:hover:text-gray-200 transition-all h-6">
@@ -90,8 +103,8 @@ export default function Home() {
             />
           </svg>
         </a> */}
-        <span className="h-16" />
-        <NewsletterBanner />
+        {/* <span className="h-16" /> */}
+        {/* <NewsletterBanner /> */}
       </div>
     </Container>
   )
