@@ -6,10 +6,10 @@ date: '2021-11-01T18:35:07.322Z'
 ---
 
 ## Hardware
-- **Work Laptop:** 16" MacBook Pro (2019)
-- **Personal Laptop:** 15" MacBook Pro (2017)
+- **Work Laptop:** 14" MacBook Pro M1 (2021)
+- **Personal Laptop:** 16" MacBook Pro (2019)
 - **Screen:** DELL U2415, 24"
-- **Keyboard:** [DROP CTRL MECHANICAL KEYBOARD](https://drop.com/buy/drop-ctrl-mechanical-keyboard)
+- **Keyboard:** [Logitech MX Keys Mini for Mac](https://www.logitech.com/en-ch/products/keyboards/mx-keys-mini-for-mac.html)
 - **Mouse:** Logitech MX Master 3
 - **Dock:** [Anker PowerExpand 8-in-1](https://www.anker.com/es/products/variant/powerexpand-8in1-usbc-pd-media-hub/A83800A1)
 - **Headphones:** AirPods 3rd gen
