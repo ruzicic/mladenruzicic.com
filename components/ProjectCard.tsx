@@ -1,4 +1,4 @@
-import Image from "next/legacy/image"
+import Image from "next/image"
 import Link from 'next/link'
 import { Project } from 'pages/projects'
 import Chip from './Chip'
@@ -23,7 +23,10 @@ export default function ProjectCard({
         alt={name}
         width={128}
         height={128}
-      />
+        style={{
+          maxWidth: "100%",
+          height: "auto"
+        }} />
 
       <div className="flex flex-col w-full">
         <div className="flex flex-row justify-between pt-1 pr-1 mb-1 md:mb-2">
@@ -56,5 +59,5 @@ export default function ProjectCard({
         </div>
       </div>
     </Link>
-  )
+  );
 }

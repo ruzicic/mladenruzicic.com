@@ -1,4 +1,4 @@
-import Image from "next/legacy/image"
+import Image from "next/image"
 import Link from 'next/link'
 
 import Container from 'components/Container'
@@ -32,7 +32,10 @@ export default function Home() {
               width={176}
               src="/mladen-ruzicic.png"
               className="rounded-full"
-            />
+              style={{
+                maxWidth: "100%",
+                height: "auto"
+              }} />
           </div>
         </div>
         <h3 className="font-bold text-2xl md:text-4xl tracking-tight mb-6 text-black dark:text-white">
@@ -108,5 +111,5 @@ export default function Home() {
         {/* <NewsletterBanner /> */}
       </div>
     </Container>
-  )
+  );
 }
