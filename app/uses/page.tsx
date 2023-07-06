@@ -44,12 +44,6 @@ export default function Uses() {
 
         <h2>Software</h2>
         <ul>
-          <li>
-            <em>Editor:</em> VS Code with Default Dark+ theme
-          </li>
-          <li>
-            <em>Terminal:</em> iTerm2 with zsh and OhMyZshell
-          </li>
           <li>1Password</li>
           <li>Grammarly</li>
           <li>Notion</li>
