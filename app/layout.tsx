@@ -45,15 +45,12 @@ export default function RootLayout({
       lang="en"
       className={ibmPlexSansFont.className}
     >
-      <body className="bg-white dark:bg-black text-white dark:text-black">
+      <body className="bg-gray-50 dark:bg-gray-900 text-white dark:text-black">
         <Providers>
           <>
             <Navbar />
 
-            <main
-              id="skip"
-              className="flex flex-col justify-center px-8 bg-gray-50 dark:bg-gray-900"
-            >
+            <main id="skip" className="flex flex-col justify-center px-8  ">
               {children}
               <Footer />
             </main>

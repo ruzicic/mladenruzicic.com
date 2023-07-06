@@ -1,4 +1,9 @@
 import Timeline from 'app/components/Timeline'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'About',
+}
 
 export default function About() {
   return (

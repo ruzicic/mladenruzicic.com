@@ -28,37 +28,40 @@ export default function Navbar() {
           Skip to content
         </a>
 
-        <div className="ml-[-0.60rem]">
+        <div className="flex ml-[-0.60rem]">
           <MobileMenu />
 
-          {Object.entries(navItems).map(([path, { name }]) => {
-            const isActive = path === pathname
+          <ul className="hidden sm:flex">
+            {Object.entries(navItems).map(([path, { name }]) => {
+              const isActive = path === pathname
 
-            //   isActive
-            //   ? 'font-semibold text-gray-800 dark:text-gray-200'
-            //   : 'font-normal text-gray-600 dark:text-gray-400',
-            // 'hidden md:inline-block p-1 sm:px-3 sm:py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-all',
+              //   isActive
+              //   ? 'font-semibold text-gray-800 dark:text-gray-200'
+              //   : 'font-normal text-gray-600 dark:text-gray-400',
+              // 'hidden md:inline-block p-1 sm:px-3 sm:py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-all',
 
-            return (
-              <Link
-                key={path}
-                href={path}
-                className={clsx(
-                  'transition-all hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle',
-                  {
-                    'text-neutral-500': !isActive,
-                  }
-                )}
-              >
-                <span className="relative py-1 px-2">
-                  {name}
-                  {path === pathname ? (
-                    <div className="absolute h-[1px] top-7 mx-2 inset-0 bg-neutral-200 dark:bg-neutral-800 z-[-1] dark:bg-gradient-to-r from-transparent to-neutral-900" />
-                  ) : null}
-                </span>
-              </Link>
-            )
-          })}
+              return (
+                <li key={path}>
+                  <Link
+                    href={path}
+                    className={clsx(
+                      'transition-all hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle',
+                      {
+                        'text-neutral-500': !isActive,
+                      }
+                    )}
+                  >
+                    <span className="relative py-1 px-2">
+                      {name}
+                      {path === pathname ? (
+                        <div className="absolute h-[1px] top-7 mx-2 inset-0 bg-neutral-200 dark:bg-neutral-800 z-[-1] dark:bg-gradient-to-r from-transparent to-neutral-900" />
+                      ) : null}
+                    </span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
         </div>
         <ThemeSwitcher />
       </nav>
