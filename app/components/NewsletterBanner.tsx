@@ -1,3 +1,4 @@
+'use client'
 import { trackGoal } from 'fathom-client'
 import { useRef, useState } from 'react'
 
@@ -9,37 +10,40 @@ type Form = {
 
 export default function NewsletterBanner() {
   const [form, setForm] = useState<Form>({ state: 'initial' })
-  const inputEl = useRef<any>(null)
+  const nameInputEl = useRef<any>(null)
+  const emailInputEl = useRef<any>(null)
 
   const subscribe = async (e: any) => {
     e.preventDefault()
     setForm({ state: 'loading' })
 
-    const res = await fetch('/api/subscribe', {
-      body: JSON.stringify({
-        email: inputEl.current.value,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-    })
+    // const res = await fetch('/api/subscribe', {
+    //   body: JSON.stringify({
+    //     email: inputEl.current.value,
+    //   }),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   method: 'POST',
+    // })
 
-    const { error } = await res.json()
-    if (error) {
-      setForm({
-        state: 'error',
-        message: error,
-      })
-      return
-    }
+    // const { error } = await res.json()
+    // if (error) {
+    //   setForm({
+    //     state: 'error',
+    //     message: error,
+    //   })
+    //   return
+    // }
 
-    trackGoal('SWSM6DKP', 0)
-    inputEl.current.value = ''
+    // trackGoal('SWSM6DKP', 0)
+
     setForm({
       state: 'success',
-      message: `Hooray! You're now on the list.`,
+      message: `Hooray! You're in ${nameInputEl.current.value}. Please check your inbox now to confirm your email address.`,
     })
+    nameInputEl.current.value = ''
+    emailInputEl.current.value = ''
   }
 
   return (
@@ -47,22 +51,35 @@ export default function NewsletterBanner() {
       <section className="w-full rounded-2xl bg-gradient-to-r from-[#FDE68A] via-[#FCA5A5] to-[#FECACA] p-1">
         <div className="p-5 md:p-7 h-full rounded-2xl bg-white dark:bg-black flex flex-col">
           <h3 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Join the newsletter
+            Join my newsletter
           </h3>
-          <p className="my-1 text-gray-800 dark:text-gray-200">For weekly notes and moments</p>
-          <form className="relative my-4" onSubmit={subscribe}>
+          <p className="my-1 text-gray-800 dark:text-gray-200">
+            Sharing valuable insights, innovative ideas, and resources to help
+            you improve your software development skills and advance your
+            career.
+          </p>
+          <form className="relative my-4 flex gap-2" onSubmit={subscribe}>
             <input
-              ref={inputEl}
+              ref={nameInputEl}
+              type="text"
+              aria-label="First name"
+              placeholder="First Name"
+              autoComplete="given-name"
+              className="w-full border border-gray-200 dark:border-gray-600   rounded-xl p-4 focus:outline-black bg-banner dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              disabled={form.state === 'loading'}
+            />
+            <input
+              ref={emailInputEl}
               aria-label="Email for newsletter"
               placeholder="you@example.com"
               type="email"
               autoComplete="email"
               required
-              className="w-full  rounded-xl p-4 focus:outline-black bg-banner dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              className="w-full border border-gray-200 dark:border-gray-600 rounded-xl p-4 focus:outline-black bg-banner dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               disabled={form.state === 'loading'}
             />
             <button
-              className="flex items-center justify-center w-full md:w-28 mt-3 md:mt-0 md:absolute right-2 top-2 px-4 font-medium h-10 bg-gray-700 text-gray-100 rounded-lg "
+              className="flex items-center justify-center w-full md:w-28 p-4 font-medium  bg-gray-700 text-gray-100 rounded-xl"
               type="submit"
               disabled={form.state === 'loading'}
             >

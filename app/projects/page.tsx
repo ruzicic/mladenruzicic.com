@@ -8,6 +8,22 @@ export const metadata: Metadata = {
 
 const projects = [
   {
+    name: 'studenti.rs',
+    href: 'https://studenti.rs',
+    icon: '/static/images/shop.svg',
+    description: 'Redesign my old website',
+    tags: ['wordpress', 'php', 'tailwind css'],
+    year: 2023,
+  },
+  {
+    name: 'Shop Minis Platform',
+    href: 'https://shop.app/minis',
+    icon: '/static/images/shop.svg',
+    description: 'React Native SDK with powerful retail components',
+    tags: ['typescript', 'react', 'nodejs', 'github actions'],
+    year: 2023,
+  },
+  {
     name: 'Shop.app',
     href: 'https://shop.app',
     icon: '/static/images/shop.svg',
@@ -34,17 +50,27 @@ const projects = [
   },
   {
     name: 'WolkAbout IoT Platform',
-    href: 'https://demo.wolkabout.com/#/auth/register',
+    href: '',
     icon: '/static/images/wolkabout.svg',
-    description: 'Built modular Angular application from ground up',
+    description:
+      'Built modular Angular application from ground up (removed in 2022)',
+    tags: ['angular', 'typescript', 'rxjs', 'monorepo'],
+    year: 2020,
+  },
+  {
+    name: 'WolkAbout SDK',
+    href: '',
+    icon: '/static/images/wolkabout.svg',
+    description:
+      'Built modular Angular application from ground up (removed in 2022)',
     tags: ['angular', 'typescript', 'rxjs', 'monorepo'],
     year: 2020,
   },
   {
     name: 'WolkAbout Website',
-    href: 'https://wolkabout.com',
+    href: '',
     icon: '/static/images/wolkabout.svg',
-    description: 'Teamlead on the company website project',
+    description: 'Teamlead on the company website project (removed in 2022)',
     tags: ['jamstack'],
     year: 2019,
   },

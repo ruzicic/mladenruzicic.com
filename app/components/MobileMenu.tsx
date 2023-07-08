@@ -24,7 +24,7 @@ export default function MobileMenu() {
   }, [])
 
   return (
-    <div className="visible sm:hidden">
+    <div className="visible md:hidden">
       <button
         className={[styles.burger, 'visible md:hidden'].join(' ')}
         aria-label="Toggle menu"
@@ -38,12 +38,12 @@ export default function MobileMenu() {
         <ul
           className={[
             styles.menu,
-            'flex flex-col absolute bg-gray-100 dark:bg-gray-900',
+            'flex flex-col absolute left-14 sm:left-16 w-[calc(100%-6rem)] bg-white',
             styles.menuRendered,
           ].join(' ')}
         >
           <li
-            className="border-b border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 text-sm font-semibold"
+            className="border-b border-gray-300 text-gray-900 text-sm font-semibold"
             style={{ transitionDelay: '150ms' }}
           >
             <Link href="/" className="flex w-auto pb-4">
@@ -51,7 +51,7 @@ export default function MobileMenu() {
             </Link>
           </li>
           <li
-            className="border-b border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 text-sm font-semibold"
+            className="border-b border-gray-300  text-gray-900 text-sm font-semibold"
             style={{ transitionDelay: '175ms' }}
           >
             <Link href="/about" className="flex w-auto pb-4">
@@ -59,7 +59,7 @@ export default function MobileMenu() {
             </Link>
           </li>
           <li
-            className="border-b border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 text-sm font-semibold"
+            className="border-b border-gray-300  text-gray-900 text-sm font-semibold"
             style={{ transitionDelay: '175ms' }}
           >
             <Link href="/projects" className="flex w-auto pb-4">
@@ -67,7 +67,7 @@ export default function MobileMenu() {
             </Link>
           </li>
           <li
-            className="border-b border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 text-sm font-semibold"
+            className="border-b border-gray-300  text-gray-900 text-sm font-semibold"
             style={{ transitionDelay: '200ms' }}
           >
             <Link href="/uses" className="flex w-auto pb-4">
@@ -83,7 +83,7 @@ export default function MobileMenu() {
 function MenuIcon(props: JSX.IntrinsicElements['svg']) {
   return (
     <svg
-      className="h-5 w-5 absolute text-gray-900 dark:text-gray-100"
+      className="h-5 w-5 absolute text-gray-900 "
       width="20"
       height="20"
       viewBox="0 0 20 20"
@@ -111,7 +111,7 @@ function MenuIcon(props: JSX.IntrinsicElements['svg']) {
 function CrossIcon(props: JSX.IntrinsicElements['svg']) {
   return (
     <svg
-      className="h-5 w-5 absolute text-gray-900 dark:text-gray-100"
+      className="h-5 w-5 absolute text-gray-900 "
       viewBox="0 0 24 24"
       width="24"
       height="24"

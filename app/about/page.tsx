@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 export default function About() {
   return (
     <div className="flex flex-col justify-center items-start max-w-2xl mx-auto mb-16">
-      <h1 className="font-bold text-3xl md:text-5xl tracking-tight mb-4 text-black dark:text-white">
+      <h1 className="font-bold text-3xl md:text-5xl tracking-tight mb-4 text-black">
         About Me
       </h1>
-      <div className="mb-8 prose leading-6 text-gray-600 dark:text-gray-400">
+      <div className="mb-8 prose leading-6 text-gray-600">
         <p>
           Hello there. I&apos;m Mladen. I&apos;m a developer with industry
           experience building real-time web applications. I am currently
