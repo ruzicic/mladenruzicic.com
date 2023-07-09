@@ -6,7 +6,7 @@ const Divider = () => {
 
 export const Year = ({ children }: any) => {
   return (
-    <h3 className="text-lg md:text-xl font-bold mb-4 tracking-tight text-gray-900 dark:text-gray-100">
+    <h3 className="uppercase font-sans tracking-widest font-regular mb-2">
       {children}
     </h3>
   )
@@ -41,9 +41,10 @@ const Step = (props: any) => {
 export default function Timeline() {
   return (
     <>
-      <h3 className="font-bold text-2xl md:text-4xl tracking-tight mb-4 mt-8 text-black dark:text-white">
+      <h2 className="font-normal text-xl md:text-3xl tracking-tight mb-4 md:mb-6 text-black">
         Timeline
-      </h3>
+      </h2>
+
       <Year>2021</Year>
       <ul>
         <Step title="Launched mladenruzicic.com 🚀">

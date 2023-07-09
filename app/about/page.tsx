@@ -1,5 +1,6 @@
 import Timeline from 'app/components/Timeline'
 import { Metadata } from 'next'
+import PageContent from './page.mdx'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -8,7 +9,9 @@ export const metadata: Metadata = {
 export default function About() {
   return (
     <div className="flex flex-col justify-center items-start max-w-2xl mx-auto mb-16">
-      <h1 className="font-bold text-3xl md:text-5xl tracking-tight mb-4 text-black">
+      <PageContent />
+
+      {/* <h1 className="font-normal text-2xl md:text-5xl tracking-tight mb-4 md:mb-6 text-black">
         About Me
       </h1>
       <div className="mb-8 prose leading-6 text-gray-600">
@@ -63,7 +66,8 @@ export default function About() {
           Today, I live in Switzerland with my wife and 2-year-old daughter. 👨‍👩‍👧
         </p>
       </div>
-      <Timeline />
+
+      <Timeline /> */}
     </div>
   )
 }
