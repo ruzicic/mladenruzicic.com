@@ -32,3 +32,29 @@ input[type='email'] {
   -moz-appearance: none;
   appearance: none;
 }
+
+/* Responsive Masonry: https://codepen.io/iamsaief/pen/jObaoKo */
+.masonry-wrapper > article {
+  @apply flex justify-center items-center rounded-xl overflow-hidden shadow-lg p-4 lg:p-8;
+}
+.masonry-wrapper > article > img,
+.masonry-wrapper > article > div {
+  @apply w-full h-full object-cover;
+}
+
+.masonry-wrapper {
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-auto-rows: 300px;
+  grid-auto-flow: dense;
+}
+.masonry-wrapper .wide {
+  @apply col-span-1 row-span-1 md:col-span-2;
+}
+.masonry-wrapper .tall {
+  @apply row-span-1 md:row-span-2;
+}
+.masonry-wrapper .big {
+  @apply col-span-1 row-span-1 lg:col-span-2 lg:row-span-2;
+}

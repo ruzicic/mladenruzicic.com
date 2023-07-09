@@ -2,9 +2,29 @@ import Image from 'next/image'
 import React from 'react'
 import NewsletterBanner from 'app/components/NewsletterBanner'
 import heroImage from 'public/static/images/hero.webp'
-import juliAvatar from 'public/static/images/juliana.jpeg'
 import { Button } from './components/Button'
 import { Icons } from './components/icons'
+import { Testimonials } from './components/Testimonials'
+import { TestimonialsSummary } from './components/TestimonialsSummary'
+import { DISCOVERY_SESSION_URL } from 'lib/constants'
+
+const MENTORSHIP_NEXT_STEPS = [
+  {
+    index: '01',
+    title: "Let's connect!",
+    description: "It's on the house. Get started with a Discovery Session.",
+  },
+  {
+    index: '02',
+    title: 'Get matched',
+    description: "I'll follow up with a proposal based on our conversation.",
+  },
+  {
+    index: '03',
+    title: 'Start working',
+    description: 'If all looks good, payment is requested, and we get to work!',
+  },
+]
 
 export default function Home() {
   return (
@@ -42,7 +62,8 @@ export default function Home() {
       </section>
       <AboutMeSection />
       <CTASection />
-      <MentorCTASection />
+      <MentoringSection />
+      <Testimonials />
 
       {/* <NewsletterBanner /> */}
     </div>
@@ -50,7 +71,7 @@ export default function Home() {
 }
 
 const AboutMeSection = () => (
-  <section className="w-full my-12 lg:my-20 grid grid-cols-1 lg:grid-cols-2 gap-4">
+  <section className="w-full my-4 sm:my-8 lg:my-20 grid grid-cols-1 lg:grid-cols-2 gap-4">
     <div>
       <p className="uppercase font-sans tracking-widest font-light">ABOUT ME</p>
     </div>
@@ -97,9 +118,9 @@ const AboutMeSection = () => (
 )
 
 const CTASection = () => (
-  <section className="w-full flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 lg:mb-16 gap-10 bg-accent text-primary rounded-lg lg:rounded-2xl p-4 md:p-6 lg:p-8 xl:p-16">
+  <section className="w-full flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 lg:mb-16 gap-6 lg:gap-10 bg-accent text-primary rounded-lg lg:rounded-2xl p-4 md:p-6 lg:p-8 xl:p-16">
     <div className="w-full">
-      <div className="flex mb-20 lg:mb-40">
+      <div className="flex mb-4 md:mb-20 lg:mb-40">
         <Icons.logo className="h-10 w-10 lg:h-20 lg:w-20 text-primary" />
       </div>
 
@@ -112,31 +133,13 @@ const CTASection = () => (
       </p>
     </div>
 
-    <Button href="/contact" variant="outline">
+    <Button href={DISCOVERY_SESSION_URL} target="_blank" variant="outline">
       <span className="whitespace-nowrap">Get in Touch</span>
     </Button>
   </section>
 )
 
-const MENTORSHIP_NEXT_STEPS = [
-  {
-    index: '01',
-    title: "Let's connect!",
-    description: "It's on the house. Get started with a Discovery Session.",
-  },
-  {
-    index: '02',
-    title: 'Get matched',
-    description: "I'll follow up with a proposal based on our conversation.",
-  },
-  {
-    index: '03',
-    title: 'Start working',
-    description: 'If all looks good, payment is requested, and we get to work!',
-  },
-]
-
-const MentorCTASection = () => (
+const MentoringSection = () => (
   <section className="mb-8 md:mb-16">
     <p className="uppercase font-sans tracking-widest font-light mb-4">
       MENTORING
@@ -159,14 +162,21 @@ const MentorCTASection = () => (
           your goals.
         </p>
 
-        {/* <Testimonial /> */}
-
-        <Button href="/contact" variant="default" className="mt-4">
-          <span className="whitespace-nowrap">Apply Now</span>
-        </Button>
+        <div className="flex flex-col 2xl:flex-row items-start 2xl:items-center gap-2 mt-4">
+          <Button
+            href={DISCOVERY_SESSION_URL}
+            target="_blank"
+            variant="default"
+          >
+            <span className="whitespace-nowrap">
+              Schedule a Discovery Session
+            </span>
+          </Button>
+          <TestimonialsSummary />
+        </div>
       </div>
 
-      <ul className="flex flex-col gap-4">
+      <ul className="flex flex-col gap-4 my-8 md:my-0">
         {MENTORSHIP_NEXT_STEPS.map(({ index, title, description }) => (
           <li
             key={index}

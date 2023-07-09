@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import styles from 'styles/mobile-menu.module.css'
+import { Button } from './Button'
+import { DISCOVERY_SESSION_URL } from 'lib/constants'
 
 export default function MobileMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -38,7 +40,7 @@ export default function MobileMenu() {
         <ul
           className={[
             styles.menu,
-            'flex flex-col absolute left-14 sm:left-16 w-[calc(100%-6rem)] bg-white',
+            'flex flex-col absolute left-0 w-full px-4 sm:px-8 bg-white',
             styles.menuRendered,
           ].join(' ')}
         >
@@ -46,33 +48,34 @@ export default function MobileMenu() {
             className="border-b border-gray-300 text-gray-900 text-sm font-semibold"
             style={{ transitionDelay: '150ms' }}
           >
-            <Link href="/" className="flex w-auto pb-4">
+            <Button href="/" variant="link">
               Home
-            </Link>
+            </Button>
           </li>
           <li
             className="border-b border-gray-300  text-gray-900 text-sm font-semibold"
             style={{ transitionDelay: '175ms' }}
           >
-            <Link href="/about" className="flex w-auto pb-4">
+            <Button href="/about" variant="link">
               About
-            </Link>
+            </Button>
           </li>
           <li
             className="border-b border-gray-300  text-gray-900 text-sm font-semibold"
             style={{ transitionDelay: '175ms' }}
           >
-            <Link href="/projects" className="flex w-auto pb-4">
+            <Button href="/projects" variant="link">
               Projects
-            </Link>
+            </Button>
           </li>
-          <li
-            className="border-b border-gray-300  text-gray-900 text-sm font-semibold"
-            style={{ transitionDelay: '200ms' }}
-          >
-            <Link href="/uses" className="flex w-auto pb-4">
-              Uses
-            </Link>
+          <li className="pl-4" style={{ transitionDelay: '200ms' }}>
+            <Button
+              target="_blank"
+              href={DISCOVERY_SESSION_URL}
+              variant="default"
+            >
+              Schedule a Discovery Session
+            </Button>
           </li>
         </ul>
       ) : null}

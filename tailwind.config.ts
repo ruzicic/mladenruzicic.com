@@ -18,6 +18,9 @@ module.exports = {
       backgroundImage: {
         noise: "url('/static/images/background-noise.png')",
       },
+      screens: {
+        '2xl': '1200px',
+      },
     },
   },
   future: {

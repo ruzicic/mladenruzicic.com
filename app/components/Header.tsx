@@ -8,6 +8,7 @@ import { Button } from './Button'
 import { Icons } from './icons'
 import { useState } from 'react'
 import { Variants, motion } from 'framer-motion'
+import { DISCOVERY_SESSION_URL } from 'lib/constants'
 
 const navItems = {
   '/about': {
@@ -26,7 +27,7 @@ export default function Navbar() {
     setCurrentLogoVariant((currentLogoVariant + 1) % logoVariants.length)
 
   return (
-    <header className="flex flex-row flex-none items-center justify-between pt-12 pb-4 mx-12 lg:mx-16 xl:mx-20 border-b-2 border-gray-100">
+    <header className="flex flex-row flex-none items-center justify-between pt-4 sm:pt-8 lg:pt-12 pb-4 mx-4 sm:mx-8 lg:mx-16 xl:mx-20 border-b-2 border-gray-100">
       <div className="flex flex-nowrap gap-2 items-center">
         <Link href="/" className="flex flex-nowrap items-center gap-4">
           <Button
@@ -68,8 +69,11 @@ export default function Navbar() {
               </li>
             )
           })}
+
           <li>
-            <Button href="#">Get in Touch</Button>
+            <Button target="_blank" href={DISCOVERY_SESSION_URL}>
+              Get in Touch
+            </Button>
           </li>
         </ul>
 

@@ -41,12 +41,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={ibmPlexSansFont.className}>
-      <body className="p-4 sm:p-6 md:p-8 lg:p-16 xl:p-20">
+      <body className="p-0 sm:p-4 md:p-8 lg:p-16 xl:p-20">
         <NoisyGradientBackground />
         <Providers>
           <main className="bg-white flex flex-col w-full ml-auto mr-auto max-w-7xl">
             <Header />
-            <div className="mx-12 lg:mx-16 xl:mx-20 mt-8 lg:mt-16 pb-16">
+            <div className="mx-4 sm:mx-8 lg:mx-16 xl:mx-20 mt-8 lg:mt-16 pb-16">
               {children}
             </div>
             <Footer />
