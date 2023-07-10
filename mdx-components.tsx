@@ -1,5 +1,5 @@
-import { Button } from 'app/components/Button'
-import type { MDXComponents } from 'mdx/types'
+import { Button } from "app/components/Button"
+import type { MDXComponents } from "mdx/types"
 
 // This file allows you to provide custom React components
 // to be used in MDX files. You can import and use any
@@ -36,7 +36,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     ul: ({ children }) => (
       <ul
         className="mb-4"
-        style={{ listStyleType: 'disc', paddingLeft: '2rem' }}
+        style={{ listStyleType: "disc", paddingLeft: "2rem" }}
       >
         {children}
       </ul>

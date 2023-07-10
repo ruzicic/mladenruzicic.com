@@ -1,21 +1,22 @@
-'use client'
-import { trackGoal } from 'fathom-client'
-import { useRef, useState } from 'react'
+"use client"
 
-type FormState = 'initial' | 'loading' | 'success' | 'error'
+import { useRef, useState } from "react"
+import { trackGoal } from "fathom-client"
+
+type FormState = "initial" | "loading" | "success" | "error"
 type Form = {
   state: FormState
   message?: string
 }
 
 export default function NewsletterBanner() {
-  const [form, setForm] = useState<Form>({ state: 'initial' })
+  const [form, setForm] = useState<Form>({ state: "initial" })
   const nameInputEl = useRef<any>(null)
   const emailInputEl = useRef<any>(null)
 
   const subscribe = async (e: any) => {
     e.preventDefault()
-    setForm({ state: 'loading' })
+    setForm({ state: "loading" })
 
     // const res = await fetch('/api/subscribe', {
     //   body: JSON.stringify({
@@ -39,18 +40,18 @@ export default function NewsletterBanner() {
     // trackGoal('SWSM6DKP', 0)
 
     setForm({
-      state: 'success',
+      state: "success",
       message: `Hooray! You're in ${nameInputEl.current.value}. Please check your inbox now to confirm your email address.`,
     })
-    nameInputEl.current.value = ''
-    emailInputEl.current.value = ''
+    nameInputEl.current.value = ""
+    emailInputEl.current.value = ""
   }
 
   return (
     <>
       <section className="w-full rounded-2xl bg-gradient-to-r from-[#FDE68A] via-[#FCA5A5] to-[#FECACA] p-1">
-        <div className="p-5 md:p-7 h-full rounded-2xl bg-white dark:bg-black flex flex-col">
-          <h3 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <div className="flex h-full flex-col rounded-2xl bg-white p-5 dark:bg-black md:p-7">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 md:text-2xl">
             Join my newsletter
           </h3>
           <p className="my-1 text-gray-800 dark:text-gray-200">
@@ -65,8 +66,8 @@ export default function NewsletterBanner() {
               aria-label="First name"
               placeholder="First Name"
               autoComplete="given-name"
-              className="w-full border border-gray-200 dark:border-gray-600   rounded-xl p-4 focus:outline-black bg-banner dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              disabled={form.state === 'loading'}
+              className="w-full rounded-xl border   border-gray-200 p-4 text-gray-900 focus:outline-black"
+              disabled={form.state === "loading"}
             />
             <input
               ref={emailInputEl}
@@ -75,20 +76,20 @@ export default function NewsletterBanner() {
               type="email"
               autoComplete="email"
               required
-              className="w-full border border-gray-200 dark:border-gray-600 rounded-xl p-4 focus:outline-black bg-banner dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              disabled={form.state === 'loading'}
+              className="w-full rounded-xl border border-gray-200 p-4 text-gray-900 focus:outline-black"
+              disabled={form.state === "loading"}
             />
             <button
-              className="flex items-center justify-center w-full md:w-28 p-4 font-medium  bg-gray-700 text-gray-100 rounded-xl"
+              className="flex w-full items-center justify-center rounded-xl bg-gray-700 p-4  font-medium text-gray-100 md:w-28"
               type="submit"
-              disabled={form.state === 'loading'}
+              disabled={form.state === "loading"}
             >
-              {form.state === 'loading' ? <LoadingSpinner /> : 'Subscribe'}
+              {form.state === "loading" ? <LoadingSpinner /> : "Subscribe"}
             </button>
           </form>
-          {form.state === 'error' ? (
+          {form.state === "error" ? (
             <ErrorMessage>{form.message}</ErrorMessage>
-          ) : form.state === 'success' ? (
+          ) : form.state === "success" ? (
             <SuccessMessage>{form.message}</SuccessMessage>
           ) : null}
         </div>
@@ -140,7 +141,7 @@ function SuccessMessage({ children }: any) {
 function LoadingSpinner() {
   return (
     <svg
-      className="animate-spin h-5 w-5 text-gray-100"
+      className="h-5 w-5 animate-spin text-gray-100"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"

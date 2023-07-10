@@ -1,9 +1,10 @@
-import Image from 'next/image'
-import Link from 'next/link'
-import { Project } from 'app/work/page'
-import Chip from './Chip'
-import { Icons } from './icons'
-import { Button } from './Button'
+import Image from "next/image"
+import Link from "next/link"
+import { Project } from "app/work/page"
+
+import { Button } from "./Button"
+import Chip from "./Chip"
+import { Icons } from "./icons"
 
 export default function ProjectCard({
   name,
@@ -13,7 +14,7 @@ export default function ProjectCard({
   tags,
 }: Project) {
   return (
-    <article className="relative w-full bg-white p-4 md:p-4 flex flex-col md:flex-row gap-4 lg:gap-8 border-b-[1px] border-gray-300 pb-4">
+    <article className="relative flex w-full flex-col gap-4 border-b-[1px] border-gray-300 bg-white p-4 md:flex-row md:p-4 lg:gap-8">
       <Image
         className="rounded-2xl"
         src={icon}
@@ -21,18 +22,18 @@ export default function ProjectCard({
         width={100}
         height={100}
         style={{
-          maxWidth: '100%',
-          height: 'auto',
+          maxWidth: "100%",
+          height: "auto",
         }}
       />
 
-      <div className="flex flex-col w-full">
+      <div className="flex w-full flex-col">
         <div className="flex flex-col">
-          <h4 className="text-xl mb-1">{name}</h4>
+          <h4 className="mb-1 text-xl">{name}</h4>
           <p className="text-lg font-light text-gray-500">{description}</p>
         </div>
 
-        <ul className="flex flex-wrap space-x-4 my-4">
+        <ul className="my-4 flex flex-wrap space-x-4">
           {links.map((link) => (
             <li key={link.url}>
               <Button href={link.url} variant="link" size="auto">
@@ -42,7 +43,7 @@ export default function ProjectCard({
             </li>
           ))}
         </ul>
-        <div className="flex flex-row justify-between pt-1 pr-1 mb-1 md:mb-2">
+        <div className="mb-1 flex flex-row justify-between pr-1 pt-1 md:mb-2">
           <ul className="flex flex-wrap gap-1.5" aria-label="Technologies used">
             {tags.map((tag) => (
               <li key={tag}>

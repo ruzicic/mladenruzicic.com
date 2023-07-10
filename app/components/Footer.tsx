@@ -1,25 +1,25 @@
-import { Icons } from './icons'
-import { Button } from './Button'
+import { Button } from "./Button"
+import { Icons } from "./icons"
 
 const SOCIALS = [
   {
-    name: 'Twitter',
-    url: 'https://twitter.com/ruzicic',
+    name: "Twitter",
+    url: "https://twitter.com/ruzicic",
     icon: () => <Icons.twitter className="h-6 w-6" />,
   },
   {
-    name: 'GitHub',
-    url: 'https://github.com/ruzicic',
+    name: "GitHub",
+    url: "https://github.com/ruzicic",
     icon: () => <Icons.github className="h-6 w-6" />,
   },
   {
-    name: 'Instagram',
-    url: 'https://www.instagram.com/ruzicic187/',
+    name: "Instagram",
+    url: "https://www.instagram.com/ruzicic187/",
     icon: () => <Icons.instagram className="h-6 w-6" />,
   },
   {
-    name: 'Linkedin',
-    url: 'https://www.linkedin.com/in/ruzicic/',
+    name: "Linkedin",
+    url: "https://www.linkedin.com/in/ruzicic/",
     icon: () => <Icons.linkedin className="h-6 w-6" />,
   },
 ]
@@ -27,10 +27,10 @@ const SOCIALS = [
 export default function Footer() {
   const currentYear = new Date().getFullYear()
   return (
-    <footer className="flex flex-col mx-12 lg:mx-16 xl:mx-20">
-      <div className="mb-12 pt-6 border-t-2 border-gray-100 flex flex-col-reverse items-center justify-between md:flex-row">
+    <footer className="mx-12 flex flex-col lg:mx-16 xl:mx-20">
+      <div className="mb-12 flex flex-col-reverse items-center justify-between border-t-2 border-gray-100 pt-6 md:flex-row">
         <div>
-          <p className="text-gray-600 font-light text-md">
+          <p className="font-light text-gray-600">
             © {currentYear} Mladen Ruzicic
           </p>
         </div>

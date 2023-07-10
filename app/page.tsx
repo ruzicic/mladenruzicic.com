@@ -1,30 +1,31 @@
-import Image from 'next/image'
-import React from 'react'
-import NewsletterBanner from 'app/components/NewsletterBanner'
-import heroImage from 'public/static/images/hero.webp'
-import { Button } from './components/Button'
-import { Icons } from './components/icons'
-import { Testimonials } from './components/Testimonials'
-import { TestimonialsSummary } from './components/TestimonialsSummary'
-import { DISCOVERY_SESSION_URL, MENTORSHIP_NEXT_STEPS } from 'lib/constants'
+import React from "react"
+import Image from "next/image"
+import NewsletterBanner from "app/components/NewsletterBanner"
+import { DISCOVERY_SESSION_URL, MENTORSHIP_NEXT_STEPS } from "lib/constants"
+import heroImage from "public/static/images/hero.webp"
+
+import { Button } from "./components/Button"
+import { Icons } from "./components/icons"
+import { Testimonials } from "./components/Testimonials"
+import { TestimonialsSummary } from "./components/TestimonialsSummary"
 
 export default function Home() {
   return (
     <div>
-      <section className="flex flex-col lg:flex-row w-full justify-between items-start lg:items-end gap-4  mb-8 lg:mb-16 lg:mt-8 xl:mt-16 xl:mb-24 xl:px-8">
-        <h1 className="font-normal text-3xl md:text-6xl tracking-tight bg-gradient-to-b from-black to-gray-400 bg-clip-text text-transparent whitespace-nowrap">
+      <section className="mb-8 flex w-full flex-col items-start justify-between gap-4 lg:mb-16  lg:mt-8 lg:flex-row lg:items-end xl:mb-24 xl:mt-16 xl:px-8">
+        <h1 className="whitespace-nowrap bg-gradient-to-b from-black to-gray-400 bg-clip-text text-3xl font-normal tracking-tight text-transparent md:text-6xl">
           Hello,
           <br className="hidden lg:block" /> I&apos;m Mladen.
         </h1>
 
-        <h2 className="font-light text-xl md:text-2xl bg-gradient-to-b from-gray-600 to-gray-400 bg-clip-text text-transparent max-w-lg">
+        <h2 className="max-w-lg bg-gradient-to-b from-gray-600 to-gray-400 bg-clip-text text-xl font-light text-transparent md:text-2xl">
           I&apos;m a software developer, mentor, and entrepreneur. Twelve years
           of creating engaging web experiences that connect with customers.
         </h2>
       </section>
 
       <section>
-        <div className="w-full relative">
+        <div className="relative w-full">
           <Image
             priority
             alt="Photo of Mladen Ruzicic with family"
@@ -32,11 +33,11 @@ export default function Home() {
             className="rounded-t-xl"
           />
 
-          <div className="bg-noise bg-auto bg-repeat absolute w-full h-full opacity-60 top-0 left-0 right-0 bottom-0"></div>
+          <div className="absolute inset-0 h-full w-full bg-noise bg-auto bg-repeat opacity-60"></div>
         </div>
 
-        <div className="w-full bg-[#F2FE93] text-black rounded-b-xl py-4 mb-16">
-          <p className="text-center font-mono text-sm px-4">
+        <div className="mb-16 w-full rounded-b-xl bg-[#F2FE93] py-4 text-black">
+          <p className="px-4 text-center font-mono text-sm">
             None would be possible
             <wbr /> without the biggest support.
           </p>
@@ -53,13 +54,13 @@ export default function Home() {
 }
 
 const AboutMeSection = () => (
-  <section className="w-full my-4 sm:my-8 lg:my-20 grid grid-cols-1 lg:grid-cols-2 gap-4">
+  <section className="my-4 grid w-full grid-cols-1 gap-4 sm:my-8 lg:my-20 lg:grid-cols-2">
     <div>
-      <p className="uppercase font-sans tracking-widest font-light">ABOUT ME</p>
+      <p className="font-sans font-light uppercase tracking-widest">ABOUT ME</p>
     </div>
 
-    <div className="flex flex-col gap-4 text-lg font-light items-start">
-      <h3 className="font-normal text-2xl md:text-5xl tracking-tight mb-4 md:mb-6 bg-gradient-to-b from-black to-gray-400 bg-clip-text text-transparent">
+    <div className="flex flex-col items-start gap-4 text-lg font-light">
+      <h3 className="mb-4 bg-gradient-to-b from-black to-gray-400 bg-clip-text text-2xl font-normal tracking-tight text-transparent md:mb-6 md:text-5xl">
         I build products.
       </h3>
 
@@ -90,7 +91,7 @@ const AboutMeSection = () => (
         href="/about"
         variant="link"
         size="auto"
-        className="flex flex-nowrap items-center mt-4"
+        className="mt-4 flex flex-nowrap items-center"
       >
         <span className="mr-2">Read More</span>
         <Icons.externalLink className="h-3 w-3 fill-current" />
@@ -100,16 +101,16 @@ const AboutMeSection = () => (
 )
 
 const CTASection = () => (
-  <section className="w-full flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 lg:mb-16 gap-6 lg:gap-10 bg-accent text-primary rounded-lg lg:rounded-2xl p-4 md:p-6 lg:p-8 xl:p-16">
+  <section className="mb-8 flex w-full flex-col items-start justify-between gap-6 rounded-lg bg-accent p-4 text-primary md:p-6 lg:mb-16 lg:flex-row lg:items-end lg:gap-10 lg:rounded-2xl lg:p-8 xl:p-16">
     <div className="w-full">
-      <div className="flex mb-4 md:mb-20 lg:mb-40">
-        <Icons.logo className="h-10 w-10 lg:h-20 lg:w-20 text-primary" />
+      <div className="mb-4 flex md:mb-20 lg:mb-40">
+        <Icons.logo className="h-10 w-10 text-primary lg:h-20 lg:w-20" />
       </div>
 
-      <p className="uppercase font-sans tracking-widest font-light mb-4">
+      <p className="mb-4 font-sans font-light uppercase tracking-widest">
         CONTACT ME
       </p>
-      <p className="font-normal text-2xl md:text-5xl lg:text-6xl tracking-tight text-primary ">
+      <p className="text-2xl font-normal tracking-tight text-primary md:text-5xl lg:text-6xl ">
         Let’s create your next
         <br className="hidden md:block" /> big project together.
       </p>
@@ -123,13 +124,13 @@ const CTASection = () => (
 
 const MentoringSection = () => (
   <section className="mb-8 md:mb-16">
-    <p className="uppercase font-sans tracking-widest font-light mb-4">
+    <p className="mb-4 font-sans font-light uppercase tracking-widest">
       MENTORING
     </p>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 lg:gap-20">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-10 lg:gap-20">
       <div className="flex flex-col items-start gap-4 text-lg font-light">
-        <h3 className="font-normal text-2xl md:text-5xl lg:text-6xl tracking-tight bg-gradient-to-b from-black to-gray-400 bg-clip-text text-transparent">
+        <h3 className="bg-gradient-to-b from-black to-gray-400 bg-clip-text text-2xl font-normal tracking-tight text-transparent md:text-5xl lg:text-6xl">
           Expert mentorship is one click away.
         </h3>
         <p>
@@ -144,7 +145,7 @@ const MentoringSection = () => (
           your goals.
         </p>
 
-        <div className="flex flex-col 2xl:flex-row items-start 2xl:items-center gap-2 mt-4">
+        <div className="mt-4 flex flex-col items-start gap-2 2xl:flex-row 2xl:items-center">
           <Button
             href={DISCOVERY_SESSION_URL}
             target="_blank"
@@ -158,15 +159,15 @@ const MentoringSection = () => (
         </div>
       </div>
 
-      <ul className="flex flex-col my-8 md:my-0">
+      <ul className="my-8 flex flex-col md:my-0">
         {MENTORSHIP_NEXT_STEPS.map(({ index, title, description }) => (
           <li
             key={index}
             className="flex gap-8 border-b-[1px] border-gray-300 pb-4"
           >
-            <span className="font-mono text-md">{index}</span>
+            <span className="font-mono">{index}</span>
             <div className="flex flex-col">
-              <p className="text-xl mb-1">{title}</p>
+              <p className="mb-1 text-xl">{title}</p>
               <p className="text-lg font-light text-gray-500">{description}</p>
             </div>
           </li>

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "npm run build && next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format:write": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache",
+    "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache"
   },
   "dependencies": {
     "@mdx-js/loader": "^2.3.0",
@@ -31,6 +33,7 @@
     "tailwind-merge": "^1.13.2"
   },
   "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.0.2",
     "@tailwindcss/typography": "^0.5.9",
     "@types/node": "18.16",
     "@types/react": "^18.2.14",
@@ -38,13 +41,13 @@
     "eslint": "^8.44.0",
     "eslint-config-next": "^13.4.8",
     "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-tailwindcss": "^3.13.0",
     "postcss": "^8.4.24",
+    "prettier": "^3.0.0",
+    "pretty-quick": "^3.1.3",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.1.6"
-  },
-  "prettier": {
-    "singleQuote": true,
-    "semi": false
   },
   "engines": {
     "node": ">=18.16"

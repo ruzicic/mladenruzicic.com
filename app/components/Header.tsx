@@ -1,26 +1,27 @@
-'use client'
+"use client"
 
-import clsx from 'clsx'
-import { usePathname } from 'next/navigation'
-import Link from 'next/link'
-import MobileMenu from './MobileMenu'
-import { Button } from './Button'
-import { Icons } from './icons'
-import { useState } from 'react'
-import { Variants, motion } from 'framer-motion'
-import { DISCOVERY_SESSION_URL, ROUTES } from 'lib/constants'
+import { useState } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import clsx from "clsx"
+import { motion, Variants } from "framer-motion"
+import { DISCOVERY_SESSION_URL, ROUTES } from "lib/constants"
 
-const logoVariants = ['mladen ruzicic', 'mladen ružičić', 'младен ружичић']
+import { Button } from "./Button"
+import { Icons } from "./icons"
+import MobileMenu from "./MobileMenu"
+
+const logoVariants = ["mladen ruzicic", "mladen ružičić", "младен ружичић"]
 
 export default function Navbar() {
-  let pathname = usePathname() || '/'
+  let pathname = usePathname() || "/"
   const [currentLogoVariant, setCurrentLogoVariant] = useState(0)
   const nextLogoVariant = () =>
     setCurrentLogoVariant((currentLogoVariant + 1) % logoVariants.length)
 
   return (
-    <header className="flex flex-row flex-none items-center justify-between pt-4 sm:pt-8 lg:pt-12 pb-4 mx-4 sm:mx-8 lg:mx-16 xl:mx-20 border-b-2 border-gray-100">
-      <div className="flex flex-nowrap gap-2 items-center">
+    <header className="mx-4 flex flex-none flex-row items-center justify-between border-b-2 border-gray-100 py-4 sm:mx-8 sm:pt-8 lg:mx-16 lg:pt-12 xl:mx-20">
+      <div className="flex flex-nowrap items-center gap-2">
         <Link href="/" className="flex flex-nowrap items-center gap-4">
           <Button
             variant="link"
@@ -28,14 +29,14 @@ export default function Navbar() {
             renderAs="button"
             onClick={nextLogoVariant}
           >
-            <Icons.logo className="h-8 w-8 transition-all ease-in-out duration-150 hover:scale-110 active:scale-90 active:opacity-scale-90" />
+            <Icons.logo className=" h-8 w-8 transition-all duration-150 ease-in-out hover:scale-110 active:scale-90" />
           </Button>
           <AnimatedText text={logoVariants[currentLogoVariant]} />
         </Link>
       </div>
 
       <nav>
-        <ul className="hidden md:flex items-center gap-4">
+        <ul className="hidden items-center gap-4 md:flex">
           {Object.entries(ROUTES).map(([path, { name }]) => {
             const isActive = path === pathname
 
@@ -44,9 +45,9 @@ export default function Navbar() {
                 <Link
                   href={path}
                   className={clsx(
-                    'transition-all hover:text-neutral-800 flex align-middle underline-offset-8',
+                    "flex align-middle underline-offset-8 transition-all hover:text-neutral-800",
                     {
-                      'text-neutral-500': !isActive,
+                      "text-neutral-500": !isActive,
                       underline: isActive,
                     }
                   )}
@@ -54,7 +55,7 @@ export default function Navbar() {
                   <span className="relative px-2">
                     {name}
                     {path === pathname ? (
-                      <div className="absolute h-[1px] top-7 mx-2 inset-0 bg-neutral-200 z-[-1] from-transparent to-neutral-900" />
+                      <div className="absolute inset-0 top-7 z-[-1] mx-2 h-[1px] bg-neutral-200 from-transparent to-neutral-900" />
                     ) : null}
                   </span>
                 </Link>
@@ -83,7 +84,7 @@ const AnimatedText = ({ text }: { text: string }) => {
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 20, opacity: 0.5 }}
       transition={{
-        type: 'spring',
+        type: "spring",
         duration: 0.2,
       }}
       className="text-xl tracking-wide"

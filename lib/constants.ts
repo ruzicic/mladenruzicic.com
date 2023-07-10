@@ -1,29 +1,29 @@
 export const DISCOVERY_SESSION_URL =
-  'https://calendly.com/ruzicic/discovery-session'
+  "https://calendly.com/ruzicic/discovery-session"
 
 export const ROUTES = {
-  '/about': {
-    name: 'About',
+  "/about": {
+    name: "About",
   },
-  '/work': {
-    name: 'Work',
+  "/work": {
+    name: "Work",
   },
 }
 
 export const MENTORSHIP_NEXT_STEPS = [
   {
-    index: '01',
+    index: "01",
     title: "Let's connect!",
     description: "It's on the house. Get started with a Discovery Session.",
   },
   {
-    index: '02',
-    title: 'Get matched',
+    index: "02",
+    title: "Get matched",
     description: "I'll follow up with a proposal based on our conversation.",
   },
   {
-    index: '03',
-    title: 'Start working',
-    description: 'If all looks good, payment is requested, and we get to work!',
+    index: "03",
+    title: "Start working",
+    description: "If all looks good, payment is requested, and we get to work!",
   },
 ]

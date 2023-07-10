@@ -1,10 +1,11 @@
-'use client'
+"use client"
 
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import styles from 'styles/mobile-menu.module.css'
-import { Button } from './Button'
-import { DISCOVERY_SESSION_URL, ROUTES } from 'lib/constants'
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { DISCOVERY_SESSION_URL, ROUTES } from "lib/constants"
+import styles from "styles/mobile-menu.module.css"
+
+import { Button } from "./Button"
 
 export default function MobileMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -12,23 +13,23 @@ export default function MobileMenu() {
   function toggleMenu() {
     if (isMenuOpen) {
       setIsMenuOpen(false)
-      document.body.style.overflow = ''
+      document.body.style.overflow = ""
     } else {
       setIsMenuOpen(true)
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = "hidden"
     }
   }
 
   useEffect(() => {
     return function cleanup() {
-      document.body.style.overflow = ''
+      document.body.style.overflow = ""
     }
   }, [])
 
   return (
     <div className="visible md:hidden">
       <button
-        className={[styles.burger, 'visible md:hidden'].join(' ')}
+        className={[styles.burger, "visible md:hidden"].join(" ")}
         aria-label="Toggle menu"
         type="button"
         onClick={toggleMenu}
@@ -40,16 +41,16 @@ export default function MobileMenu() {
         <ul
           className={[
             styles.menu,
-            'flex flex-col absolute left-0 w-full px-4 sm:px-8 bg-white',
+            "flex flex-col absolute left-0 w-full px-4 sm:px-8 bg-white",
             styles.menuRendered,
-          ].join(' ')}
+          ].join(" ")}
         >
           {Object.entries(ROUTES).map(([path, { name }]) => {
             return (
               <li
                 key={path}
-                className="border-b border-gray-300 text-gray-900 text-sm font-semibold"
-                style={{ transitionDelay: '150ms' }}
+                className="border-b border-gray-300 text-sm font-semibold text-gray-900"
+                style={{ transitionDelay: "150ms" }}
               >
                 <Button href={path} variant="link">
                   {name}
@@ -57,7 +58,7 @@ export default function MobileMenu() {
               </li>
             )
           })}
-          <li className="pl-4" style={{ transitionDelay: '200ms' }}>
+          <li className="pl-4" style={{ transitionDelay: "200ms" }}>
             <Button
               target="_blank"
               href={DISCOVERY_SESSION_URL}
@@ -72,10 +73,10 @@ export default function MobileMenu() {
   )
 }
 
-function MenuIcon(props: JSX.IntrinsicElements['svg']) {
+function MenuIcon(props: JSX.IntrinsicElements["svg"]) {
   return (
     <svg
-      className="h-5 w-5 absolute text-gray-900 "
+      className="absolute h-5 w-5 text-gray-900 "
       width="20"
       height="20"
       viewBox="0 0 20 20"
@@ -100,10 +101,10 @@ function MenuIcon(props: JSX.IntrinsicElements['svg']) {
   )
 }
 
-function CrossIcon(props: JSX.IntrinsicElements['svg']) {
+function CrossIcon(props: JSX.IntrinsicElements["svg"]) {
   return (
     <svg
-      className="h-5 w-5 absolute text-gray-900 "
+      className="absolute h-5 w-5 text-gray-900 "
       viewBox="0 0 24 24"
       width="24"
       height="24"

@@ -1,8 +1,9 @@
-'use client'
+"use client"
 
-import { TESTIMONIALS } from './Testimonials'
-import Image from 'next/image'
-import { Icons } from './icons'
+import Image from "next/image"
+
+import { Icons } from "./icons"
+import { TESTIMONIALS } from "./Testimonials"
 
 export const TestimonialsSummary = () => {
   const fiveTestimonialsWithAvatar = TESTIMONIALS.filter(({ avatar }) =>
@@ -18,8 +19,8 @@ export const TestimonialsSummary = () => {
             height={40}
             width={40}
             alt={customer}
-            src={avatar ?? ''}
-            className="border-2 border-white rounded-full"
+            src={avatar ?? ""}
+            className="rounded-full border-2 border-white"
           />
         ))}
       </div>
@@ -29,12 +30,12 @@ export const TestimonialsSummary = () => {
           {[...Array(5)].map((_, index) => (
             <Icons.star
               key={index}
-              className="w-6 h-6 text-yellow-400 fill-current"
+              className="h-6 w-6 fill-current text-yellow-400"
             />
           ))}
         </div>
 
-        <div className="font-normal text-sm tracking-tight">
+        <div className="text-sm font-normal tracking-tight">
           5.0 from 30+ mentees
         </div>
       </div>
