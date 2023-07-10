@@ -176,7 +176,7 @@ const MentoringSection = () => (
         </div>
       </div>
 
-      <ul className="flex flex-col gap-4 my-8 md:my-0">
+      <ul className="flex flex-col my-8 md:my-0">
         {MENTORSHIP_NEXT_STEPS.map(({ index, title, description }) => (
           <li
             key={index}

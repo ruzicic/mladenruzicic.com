@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import styles from 'styles/mobile-menu.module.css'
 import { Button } from './Button'
-import { DISCOVERY_SESSION_URL } from 'lib/constants'
+import { DISCOVERY_SESSION_URL, ROUTES } from 'lib/constants'
 
 export default function MobileMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -44,30 +44,19 @@ export default function MobileMenu() {
             styles.menuRendered,
           ].join(' ')}
         >
-          <li
-            className="border-b border-gray-300 text-gray-900 text-sm font-semibold"
-            style={{ transitionDelay: '150ms' }}
-          >
-            <Button href="/" variant="link">
-              Home
-            </Button>
-          </li>
-          <li
-            className="border-b border-gray-300  text-gray-900 text-sm font-semibold"
-            style={{ transitionDelay: '175ms' }}
-          >
-            <Button href="/about" variant="link">
-              About
-            </Button>
-          </li>
-          <li
-            className="border-b border-gray-300  text-gray-900 text-sm font-semibold"
-            style={{ transitionDelay: '175ms' }}
-          >
-            <Button href="/projects" variant="link">
-              Projects
-            </Button>
-          </li>
+          {Object.entries(ROUTES).map(([path, { name }]) => {
+            return (
+              <li
+                key={path}
+                className="border-b border-gray-300 text-gray-900 text-sm font-semibold"
+                style={{ transitionDelay: '150ms' }}
+              >
+                <Button href={path} variant="link">
+                  {name}
+                </Button>
+              </li>
+            )
+          })}
           <li className="pl-4" style={{ transitionDelay: '200ms' }}>
             <Button
               target="_blank"

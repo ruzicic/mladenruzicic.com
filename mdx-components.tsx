@@ -21,7 +21,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       </h3>
     ),
     p: ({ children }) => (
-      <div className="mb-2 md:mb-4 md:text-lg">{children}</div>
+      <div className="mb-2 md:mb-4 md:text-lg text-gray-500">{children}</div>
     ),
     blockquote: ({ children }) => (
       <blockquote className=" bg-accent p-4 rounded-xl">{children}</blockquote>
@@ -37,12 +37,12 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </ul>
     ),
-    li: ({ children }) => <li className="text-lg">{children}</li>,
+    li: ({ children }) => <li className="text-lg text-gray-500">{children}</li>,
     a: ({ children, href }) => (
       <a
         href={href}
         target="_blank"
-        className="font-bold text-primary md:text-lg underline-offset-4 hover:underline"
+        className="font-bold text-gray-700 md:text-lg underline-offset-4 hover:underline"
       >
         {children}
       </a>

@@ -8,16 +8,8 @@ import { Button } from './Button'
 import { Icons } from './icons'
 import { useState } from 'react'
 import { Variants, motion } from 'framer-motion'
-import { DISCOVERY_SESSION_URL } from 'lib/constants'
+import { DISCOVERY_SESSION_URL, ROUTES } from 'lib/constants'
 
-const navItems = {
-  '/about': {
-    name: 'About',
-  },
-  '/projects': {
-    name: 'Projects',
-  },
-}
 const logoVariants = ['mladen ruzicic', 'mladen ružičić', 'младен ружичић']
 
 export default function Navbar() {
@@ -36,7 +28,7 @@ export default function Navbar() {
             renderAs="button"
             onClick={nextLogoVariant}
           >
-            <Icons.logo className="h-8 w-8" />
+            <Icons.logo className="h-8 w-8 transition-all ease-in-out duration-150 hover:scale-110 active:scale-90 active:opacity-scale-90" />
           </Button>
           <AnimatedText text={logoVariants[currentLogoVariant]} />
         </Link>
@@ -44,7 +36,7 @@ export default function Navbar() {
 
       <nav>
         <ul className="hidden md:flex items-center gap-4">
-          {Object.entries(navItems).map(([path, { name }]) => {
+          {Object.entries(ROUTES).map(([path, { name }]) => {
             const isActive = path === pathname
 
             return (

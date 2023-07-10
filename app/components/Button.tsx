@@ -13,7 +13,7 @@ const buttonVariants = cva(
       },
       size: {
         default: 'px-5 py-3',
-        small: 'px-3 py-2',
+        small: 'px-4 h-8',
         icon: 'h-10 w-10 p-2',
         auto: '',
       },
@@ -40,6 +40,10 @@ export const Button = ({
   ...props
 }: ButtonProps) => {
   const Component = renderAs
+
+  if (Boolean(props.onClick) && renderAs === Link) {
+    throw new Error('Did you forget to add `renderAs="button"` prop to Button')
+  }
 
   return (
     <Component

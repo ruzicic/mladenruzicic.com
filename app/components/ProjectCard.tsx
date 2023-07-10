@@ -1,35 +1,19 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { Project } from 'app/projects/page'
+import { Project } from 'app/work/page'
 import Chip from './Chip'
-
-const LinkCard = ({ href, children }: { href: string; children: any }) => (
-  <Link
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="relative w-full bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 md:p-4 cursor-pointer dark:hover:bg-gray-700 transition-all flex flex-col md:flex-row gap-4"
-  >
-    {children}
-  </Link>
-)
-
-const PlainCard = ({ children }: { children: any }) => (
-  <div className="relative w-full bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 md:p-4 transition-all flex flex-col md:flex-row gap-4">
-    {children}
-  </div>
-)
+import { Icons } from './icons'
+import { Button } from './Button'
 
 export default function ProjectCard({
   name,
   icon,
   description,
-  href,
+  links,
   tags,
 }: Project) {
-  const ProjectCardContainer = href ? LinkCard : PlainCard
   return (
-    <ProjectCardContainer href={href}>
+    <article className="relative w-full bg-white p-4 md:p-4 flex flex-col md:flex-row gap-4 lg:gap-8 border-b-[1px] border-gray-300 pb-4">
       <Image
         className="rounded-2xl"
         src={icon}
@@ -43,6 +27,21 @@ export default function ProjectCard({
       />
 
       <div className="flex flex-col w-full">
+        <div className="flex flex-col">
+          <h4 className="text-xl mb-1">{name}</h4>
+          <p className="text-lg font-light text-gray-500">{description}</p>
+        </div>
+
+        <ul className="flex flex-wrap space-x-4 my-4">
+          {links.map((link) => (
+            <li key={link.url}>
+              <Button href={link.url} variant="link" size="auto">
+                <span className="mr-1">{link.title}</span>
+                <Icons.externalLink className="h-4 w-4 text-gray-500" />
+              </Button>
+            </li>
+          ))}
+        </ul>
         <div className="flex flex-row justify-between pt-1 pr-1 mb-1 md:mb-2">
           <ul className="flex flex-wrap gap-1.5" aria-label="Technologies used">
             {tags.map((tag) => (
@@ -51,33 +50,8 @@ export default function ProjectCard({
               </li>
             ))}
           </ul>
-
-          {href && <ExternalLinkIcon />}
-        </div>
-        <div>
-          <h4 className="text-lg md:text-lg font-medium w-full text-gray-900 dark:text-gray-100 tracking-tight ">
-            {name}
-          </h4>
-          <p className="text-gray-300 text-sm">{description}</p>
         </div>
       </div>
-    </ProjectCardContainer>
+    </article>
   )
 }
-
-const ExternalLinkIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6 text-gray-300"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-    />
-  </svg>
-)
