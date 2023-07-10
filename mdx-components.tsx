@@ -10,10 +10,14 @@ import type { MDXComponents } from 'mdx/types'
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     h1: ({ children }) => (
-      <h1 className="font-normal text-2xl md:text-5xl mb-4 ">{children}</h1>
+      <h1 className="font-normal text-2xl md:text-5xl mb-4 bg-gradient-to-b from-black to-gray-400 bg-clip-text text-transparent">
+        {children}
+      </h1>
     ),
     h2: ({ children }) => (
-      <h2 className="font-normal text-xl md:text-3xl mt-4 mb-4 ">{children}</h2>
+      <h2 className="font-normal text-xl md:text-3xl mt-4 mb-4 bg-gradient-to-b ">
+        {children}
+      </h2>
     ),
     h3: ({ children }) => (
       <h3 className="font-normal text-lg md:text-2xl  mt-4 md:mt-6 mb-2 md:mb-4">

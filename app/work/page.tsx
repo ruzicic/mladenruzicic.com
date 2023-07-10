@@ -158,7 +158,7 @@ const projectsByYear = projects.reduce(
 export default function Work() {
   return (
     <div className="w-full flex flex-col justify-center items-start max-w-2xl mx-auto mb-16">
-      <h1 className="font-normal text-2xl md:text-5xl tracking-tight mb-4 md:mb-6 text-black">
+      <h1 className="font-normal text-2xl md:text-5xl tracking-tight mb-4 md:mb-6 bg-gradient-to-b from-black to-gray-400 bg-clip-text text-transparent">
         Work
       </h1>
 

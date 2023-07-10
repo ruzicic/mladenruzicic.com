@@ -6,31 +6,13 @@ import { Button } from './components/Button'
 import { Icons } from './components/icons'
 import { Testimonials } from './components/Testimonials'
 import { TestimonialsSummary } from './components/TestimonialsSummary'
-import { DISCOVERY_SESSION_URL } from 'lib/constants'
-
-const MENTORSHIP_NEXT_STEPS = [
-  {
-    index: '01',
-    title: "Let's connect!",
-    description: "It's on the house. Get started with a Discovery Session.",
-  },
-  {
-    index: '02',
-    title: 'Get matched',
-    description: "I'll follow up with a proposal based on our conversation.",
-  },
-  {
-    index: '03',
-    title: 'Start working',
-    description: 'If all looks good, payment is requested, and we get to work!',
-  },
-]
+import { DISCOVERY_SESSION_URL, MENTORSHIP_NEXT_STEPS } from 'lib/constants'
 
 export default function Home() {
   return (
     <div>
       <section className="flex flex-col lg:flex-row w-full justify-between items-start lg:items-end gap-4  mb-8 lg:mb-16 lg:mt-8 xl:mt-16 xl:mb-24 xl:px-8">
-        <h1 className="font-normal text-3xl md:text-6xl tracking-tight bg-gradient-to-b from-black to-gray-600 bg-clip-text text-transparent whitespace-nowrap">
+        <h1 className="font-normal text-3xl md:text-6xl tracking-tight bg-gradient-to-b from-black to-gray-400 bg-clip-text text-transparent whitespace-nowrap">
           Hello,
           <br className="hidden lg:block" /> I&apos;m Mladen.
         </h1>
@@ -77,7 +59,7 @@ const AboutMeSection = () => (
     </div>
 
     <div className="flex flex-col gap-4 text-lg font-light items-start">
-      <h3 className="font-normal text-2xl md:text-5xl tracking-tight mb-4 md:mb-6 text-black">
+      <h3 className="font-normal text-2xl md:text-5xl tracking-tight mb-4 md:mb-6 bg-gradient-to-b from-black to-gray-400 bg-clip-text text-transparent">
         I build products.
       </h3>
 
@@ -147,9 +129,9 @@ const MentoringSection = () => (
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 lg:gap-20">
       <div className="flex flex-col items-start gap-4 text-lg font-light">
-        <p className="font-normal text-2xl md:text-5xl lg:text-6xl tracking-tight text-primary ">
+        <h3 className="font-normal text-2xl md:text-5xl lg:text-6xl tracking-tight bg-gradient-to-b from-black to-gray-400 bg-clip-text text-transparent">
           Expert mentorship is one click away.
-        </p>
+        </h3>
         <p>
           Master your craft with a strong mentor at your side. Take the next
           step in your career on your terms for a flat monthly price. Each
