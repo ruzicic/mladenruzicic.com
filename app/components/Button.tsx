@@ -39,11 +39,21 @@ export const Button = ({
   className,
   ...props
 }: ButtonProps) => {
+  // if `renderAs` is provided, use it
+  // if `href` is provided, use `Link` component
+  // if `onClick` is provided, use `button` element
+  // otherwise, throw an error
   const Component = renderAs
-
-  if (Boolean(props.onClick) && renderAs === Link) {
-    throw new Error('Did you forget to add `renderAs="button"` prop to Button')
-  }
+    ? renderAs
+    : props.href
+    ? Link
+    : props.onClick
+    ? "button"
+    : (() => {
+        throw new Error(
+          "Button component must have either `renderAs`, `href`, or `onClick` prop"
+        )
+      })()
 
   return (
     <Component

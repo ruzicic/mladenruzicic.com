@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
+import { useCallback, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { DISCOVERY_SESSION_URL, ROUTES } from "lib/constants"
 import styles from "styles/mobile-menu.module.css"
 
@@ -9,8 +9,9 @@ import { Button } from "./Button"
 
 export default function MobileMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const router = useRouter()
 
-  function toggleMenu() {
+  const toggleMenu = useCallback(() => {
     if (isMenuOpen) {
       setIsMenuOpen(false)
       document.body.style.overflow = ""
@@ -18,7 +19,15 @@ export default function MobileMenu() {
       setIsMenuOpen(true)
       document.body.style.overflow = "hidden"
     }
-  }
+  }, [isMenuOpen])
+
+  const handleMenuItemClick = useCallback(
+    (path: string) => {
+      setIsMenuOpen(false)
+      router.push(path)
+    },
+    [router]
+  )
 
   useEffect(() => {
     return function cleanup() {
@@ -52,7 +61,11 @@ export default function MobileMenu() {
                 className="border-b border-gray-300 text-sm font-semibold text-gray-900"
                 style={{ transitionDelay: "150ms" }}
               >
-                <Button href={path} variant="link">
+                <Button
+                  renderAs="button"
+                  onClick={() => handleMenuItemClick(path)}
+                  variant="link"
+                >
                   {name}
                 </Button>
               </li>
