@@ -1,7 +1,6 @@
 import { Button } from "./Button"
 import { Icons } from "./icons"
 import NewsletterBanner from "./NewsletterBanner"
-import { NextStepsBanner } from "./NextStepsBanner"
 
 const SOCIALS = [
   {
@@ -31,9 +30,8 @@ export default function Footer() {
 
   return (
     <footer className="mx-4 flex flex-col sm:mx-8 lg:mx-16 xl:mx-20">
-      <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="-mx-4 mb-8 sm:-mx-8 lg:-mx-16 xl:-mx-20">
         <NewsletterBanner />
-        <NextStepsBanner />
       </div>
 
       <div className="mb-12 flex flex-col-reverse items-center justify-between gap-4 border-t-2 border-gray-100 pt-6 md:flex-row">
