@@ -1,6 +1,5 @@
 import React from "react"
 import Image from "next/image"
-import NewsletterBanner from "app/components/NewsletterBanner"
 import { DISCOVERY_SESSION_URL, MENTORSHIP_NEXT_STEPS } from "lib/constants"
 import heroImage from "public/static/images/hero.webp"
 
@@ -46,8 +45,6 @@ export default function Home() {
       <CTASection />
       <MentoringSection />
       <Testimonials />
-
-      {/* <NewsletterBanner /> */}
     </div>
   )
 }

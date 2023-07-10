@@ -29,6 +29,7 @@ export type ButtonProps = React.AnchorHTMLAttributes<HTMLAnchorElement> &
   VariantProps<typeof buttonVariants> & {
     renderAs?: React.ElementType
     href?: string
+    disabled?: boolean
   }
 
 export const Button = ({

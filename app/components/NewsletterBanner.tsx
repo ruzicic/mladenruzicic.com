@@ -3,6 +3,8 @@
 import { useRef, useState } from "react"
 import { trackGoal } from "fathom-client"
 
+import { Button } from "./Button"
+
 type FormState = "initial" | "loading" | "success" | "error"
 type Form = {
   state: FormState
@@ -48,59 +50,57 @@ export default function NewsletterBanner() {
   }
 
   return (
-    <>
-      <section className="w-full rounded-2xl bg-gradient-to-r from-[#FDE68A] via-[#FCA5A5] to-[#FECACA] p-1">
-        <div className="flex h-full flex-col rounded-2xl bg-white p-5 dark:bg-black md:p-7">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 md:text-2xl">
-            Join my newsletter
-          </h3>
-          <p className="my-1 text-gray-800 dark:text-gray-200">
-            Sharing valuable insights, innovative ideas, and resources to help
-            you improve your software development skills and advance your
-            career.
-          </p>
-          <form className="relative my-4 flex gap-2" onSubmit={subscribe}>
-            <input
-              ref={nameInputEl}
-              type="text"
-              aria-label="First name"
-              placeholder="First Name"
-              autoComplete="given-name"
-              className="w-full rounded-xl border   border-gray-200 p-4 text-gray-900 focus:outline-black"
-              disabled={form.state === "loading"}
-            />
-            <input
-              ref={emailInputEl}
-              aria-label="Email for newsletter"
-              placeholder="you@example.com"
-              type="email"
-              autoComplete="email"
-              required
-              className="w-full rounded-xl border border-gray-200 p-4 text-gray-900 focus:outline-black"
-              disabled={form.state === "loading"}
-            />
-            <button
-              className="flex w-full items-center justify-center rounded-xl bg-gray-700 p-4  font-medium text-gray-100 md:w-28"
-              type="submit"
-              disabled={form.state === "loading"}
-            >
-              {form.state === "loading" ? <LoadingSpinner /> : "Subscribe"}
-            </button>
-          </form>
-          {form.state === "error" ? (
-            <ErrorMessage>{form.message}</ErrorMessage>
-          ) : form.state === "success" ? (
-            <SuccessMessage>{form.message}</SuccessMessage>
-          ) : null}
-        </div>
-      </section>
-    </>
+    <section className="w-full rounded-2xl bg-gradient-to-r from-[#FDE68A] via-[#FCA5A5] to-[#FECACA] p-1">
+      <div className="flex h-full flex-col rounded-2xl bg-white p-5  md:p-7">
+        <h6 className="text-xl font-light md:text-2xl">Join my newsletter</h6>
+
+        <p className="my-1 text-gray-500">
+          Sharing valuable insights, innovative ideas, and resources to help you
+          improve your software development skills and advance your career in
+          tech.
+        </p>
+        <form className="relative my-4 flex gap-2" onSubmit={subscribe}>
+          <input
+            ref={nameInputEl}
+            type="text"
+            aria-label="First name"
+            placeholder="First Name"
+            autoComplete="given-name"
+            className="w-full rounded-full border   border-gray-800 p-4 text-gray-900 focus:outline-black"
+            disabled={form.state === "loading"}
+          />
+          <input
+            ref={emailInputEl}
+            aria-label="Email for newsletter"
+            placeholder="you@example.com"
+            type="email"
+            autoComplete="email"
+            required
+            className="w-full rounded-full border border-gray-800 p-4 text-gray-900 focus:outline-black"
+            disabled={form.state === "loading"}
+          />
+          <Button
+            type="submit"
+            disabled={form.state === "loading"}
+            renderAs="button"
+          >
+            {form.state === "loading" ? <LoadingSpinner /> : "Subscribe"}
+          </Button>
+        </form>
+
+        {form.state === "error" ? (
+          <ErrorMessage>{form.message}</ErrorMessage>
+        ) : form.state === "success" ? (
+          <SuccessMessage>{form.message}</SuccessMessage>
+        ) : null}
+      </div>
+    </section>
   )
 }
 
 function ErrorMessage({ children }: any) {
   return (
-    <p className="flex items-center text-sm font-bold text-red-800 dark:text-red-400">
+    <p className="flex items-center text-sm font-bold text-red-800 ">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
@@ -120,7 +120,7 @@ function ErrorMessage({ children }: any) {
 
 function SuccessMessage({ children }: any) {
   return (
-    <p className="flex items-center text-sm font-bold text-green-700 dark:text-green-400">
+    <p className="flex items-center text-sm font-bold text-green-700 ">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"

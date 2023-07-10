@@ -1,5 +1,7 @@
 import { Button } from "./Button"
 import { Icons } from "./icons"
+import NewsletterBanner from "./NewsletterBanner"
+import { NextStepsBanner } from "./NextStepsBanner"
 
 const SOCIALS = [
   {
@@ -26,9 +28,15 @@ const SOCIALS = [
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+
   return (
-    <footer className="mx-12 flex flex-col lg:mx-16 xl:mx-20">
-      <div className="mb-12 flex flex-col-reverse items-center justify-between border-t-2 border-gray-100 pt-6 md:flex-row">
+    <footer className="mx-4 flex flex-col sm:mx-8 lg:mx-16 xl:mx-20">
+      <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <NewsletterBanner />
+        <NextStepsBanner />
+      </div>
+
+      <div className="mb-12 flex flex-col-reverse items-center justify-between gap-4 border-t-2 border-gray-100 pt-6 md:flex-row">
         <div>
           <p className="font-light text-gray-600">
             © {currentYear} Mladen Ruzicic
