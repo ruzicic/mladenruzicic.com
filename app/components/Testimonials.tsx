@@ -93,10 +93,15 @@ export const Testimonials = () => {
       {TESTIMONIALS.map((testimonial) => (
         <article
           key={testimonial.text}
-          className={`${testimonial.size} text-xl ${testimonial.className}`}
+          className={`${testimonial.size} flex items-center justify-center overflow-hidden rounded-xl p-8 shadow-lg ${testimonial.className}`}
         >
-          <div className="flex flex-col justify-between">
-            <div className="line-clamp-6 font-light lg:line-clamp-none">
+          {/* important for section>article>div: w-full h-full object-cover */}
+          <div className="flex h-full w-full flex-col justify-between object-cover">
+            <div
+              className={`line-clamp-6 font-light lg:line-clamp-none ${
+                testimonial.size === "big" ? "lg:text-2xl" : "lg:text-xl"
+              }`}
+            >
               {testimonial.text}
             </div>
             <div className="flex items-center space-x-2">

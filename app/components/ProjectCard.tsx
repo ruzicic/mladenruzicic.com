@@ -36,7 +36,12 @@ export default function ProjectCard({
         <ul className="my-4 flex flex-wrap space-x-4">
           {links.map((link) => (
             <li key={link.url}>
-              <Button href={link.url} variant="link" size="auto">
+              <Button
+                href={link.url}
+                variant="link"
+                size="auto"
+                target="_blank"
+              >
                 <span className="mr-1">{link.title}</span>
                 <Icons.externalLink className="h-4 w-4 text-gray-500" />
               </Button>

@@ -38,8 +38,7 @@ export default function Home() {
 
         <div className="mb-16 w-full rounded-b-xl bg-[#F2FE93] py-4 text-black">
           <p className="px-4 text-center font-mono text-sm">
-            None would be possible
-            <wbr /> without the biggest support.
+            None would be possible without the biggest support.
           </p>
         </div>
       </section>
@@ -159,7 +158,7 @@ const MentoringSection = () => (
         </div>
       </div>
 
-      <ul className="my-8 flex flex-col md:my-0">
+      <ul className="my-8 flex flex-col space-y-4 md:my-0">
         {MENTORSHIP_NEXT_STEPS.map(({ index, title, description }) => (
           <li
             key={index}

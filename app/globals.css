@@ -34,14 +34,7 @@ input[type="email"] {
 }
 
 /* Responsive Masonry: https://codepen.io/iamsaief/pen/jObaoKo */
-.masonry-wrapper > article {
-  @apply flex justify-center items-center rounded-xl overflow-hidden shadow-lg p-4 lg:p-8;
-}
 .masonry-wrapper > article > img,
-.masonry-wrapper > article > div {
-  @apply w-full h-full object-cover;
-}
-
 .masonry-wrapper {
   display: grid;
   grid-gap: 10px;
