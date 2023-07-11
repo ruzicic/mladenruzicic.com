@@ -21,6 +21,7 @@ export default function ProjectCard({
         alt={name}
         width={100}
         height={100}
+        placeholder="empty"
         style={{
           maxWidth: "100%",
           height: "auto",

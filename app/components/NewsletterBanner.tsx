@@ -1,9 +1,12 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { FormEventHandler, useCallback, useRef, useState } from "react"
 import { trackGoal } from "fathom-client"
 
 import { Button } from "./Button"
+
+// Fire a custom event to track newsletter subs in Fathom Analytics
+const FATHOM_NEWSLETTER_SUB_ID = "YQXZJQZL"
 
 type FormState = "initial" | "loading" | "success" | "error"
 type Form = {
@@ -16,38 +19,60 @@ export default function NewsletterBanner() {
   const nameInputEl = useRef<any>(null)
   const emailInputEl = useRef<any>(null)
 
-  const subscribe = async (e: any) => {
-    e.preventDefault()
+  const onSubmit: FormEventHandler = useCallback(async (event) => {
+    event.preventDefault()
     setForm({ state: "loading" })
 
-    // const res = await fetch('/api/subscribe', {
-    //   body: JSON.stringify({
-    //     email: inputEl.current.value,
-    //   }),
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   method: 'POST',
-    // })
+    const target = event.target as HTMLFormElement
+    const data = new FormData(target)
+    const email = data.get("email")
+    const name = data.get("name")
 
-    // const { error } = await res.json()
-    // if (error) {
-    //   setForm({
-    //     state: 'error',
-    //     message: error,
-    //   })
-    //   return
-    // }
-
-    // trackGoal('SWSM6DKP', 0)
-
-    setForm({
-      state: "success",
-      message: `Hooray! You're in ${nameInputEl.current.value}. Please check your inbox now to confirm your email address.`,
+    const body = JSON.stringify({
+      name,
+      email,
     })
-    nameInputEl.current.value = ""
-    emailInputEl.current.value = ""
-  }
+
+    const headers = new Headers({
+      "Content-Type": "application/json; charset=utf-8",
+    })
+
+    console.log("Sending this: ", { body })
+
+    try {
+      const response = await fetch(`/api/subscribe`, {
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        headers,
+        body,
+      })
+      const { error } = await response.json()
+      if (error) {
+        setForm({
+          state: "error",
+          message: error?.message ?? "Something went wrong. Please try again.",
+        })
+        return
+      }
+
+      if (process.env.NODE_ENV === "production") {
+        trackGoal(FATHOM_NEWSLETTER_SUB_ID, 0)
+      }
+
+      setForm({
+        state: "success",
+        message: `Hooray! You're in ${nameInputEl.current.value}. Please check your inbox now to confirm your email address.`,
+      })
+      nameInputEl.current.value = ""
+      emailInputEl.current.value = ""
+    } catch (error) {
+      setForm({
+        state: "error",
+        message: "Something went wrong. Please try again.",
+      })
+    }
+  }, [])
 
   return (
     <section className="flex h-full w-full flex-col bg-accent p-8 md:p-6 lg:p-8 xl:p-16">
@@ -66,11 +91,12 @@ export default function NewsletterBanner() {
       </p>
       <form
         className="relative my-4 grid max-w-xl grid-cols-1 gap-4 md:grid-cols-3"
-        onSubmit={subscribe}
+        onSubmit={onSubmit}
       >
         <input
           ref={nameInputEl}
           type="text"
+          name="name"
           aria-label="First name"
           placeholder="First Name"
           autoComplete="given-name"
@@ -82,6 +108,7 @@ export default function NewsletterBanner() {
           aria-label="Email for newsletter"
           placeholder="you@example.com"
           type="email"
+          name="email"
           autoComplete="email"
           required
           className="rounded-full border border-gray-800 bg-accent px-5 py-3 text-gray-900 placeholder:text-gray-600 focus:outline-black"
