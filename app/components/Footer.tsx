@@ -1,68 +1,61 @@
-import Link from 'next/link'
+import { Button } from "./Button"
+import { Icons } from "./icons"
+import NewsletterBanner from "./NewsletterBanner"
 
-const ExternalLink = ({ href, children }: any) => (
-  <a
-    className="text-gray-500 hover:text-gray-600 transition"
-    target="_blank"
-    rel="noopener noreferrer"
-    href={href}
-  >
-    {children}
-  </a>
-)
+const SOCIALS = [
+  {
+    name: "Twitter",
+    url: "https://twitter.com/ruzicic",
+    icon: () => <Icons.twitter className="h-6 w-6" />,
+  },
+  {
+    name: "GitHub",
+    url: "https://github.com/ruzicic",
+    icon: () => <Icons.github className="h-6 w-6" />,
+  },
+  {
+    name: "Instagram",
+    url: "https://www.instagram.com/ruzicic187/",
+    icon: () => <Icons.instagram className="h-6 w-6" />,
+  },
+  {
+    name: "Linkedin",
+    url: "https://www.linkedin.com/in/ruzicic/",
+    icon: () => <Icons.linkedin className="h-6 w-6" />,
+  },
+]
 
 export default function Footer() {
-  return (
-    <footer className="flex flex-col justify-center items-start max-w-2xl mx-auto w-full mb-8">
-      <hr className="w-full border-1 border-gray-200 dark:border-gray-800 mb-8" />
-      <div className="w-full max-w-2xl grid grid-cols-1 gap-4 pb-16 sm:grid-cols-3">
-        <div className="flex flex-col space-y-4">
-          <Link
-            href="/"
-            className="text-gray-500 hover:text-gray-600 transition"
-          >
-            Home
-          </Link>
-          <Link
-            href="/about"
-            className="text-gray-500 hover:text-gray-600 transition"
-          >
-            About
-          </Link>
-          <Link
-            href="/projects"
-            className="text-gray-500 hover:text-gray-600 transition"
-          >
-            Projects
-          </Link>
-          <Link
-            href="/uses"
-            className="text-gray-500 hover:text-gray-600 transition"
-          >
-            Uses
-          </Link>
-        </div>
-        <div className="flex flex-col space-y-4">
-          <ExternalLink href="https://twitter.com/ruzicic">
-            Twitter
-          </ExternalLink>
-          <ExternalLink href="https://github.com/ruzicic">GitHub</ExternalLink>
-          <ExternalLink href="https://www.instagram.com/ruzicic187/">
-            Instagram
-          </ExternalLink>
-          <ExternalLink href="https://www.linkedin.com/in/ruzicic/">
-            Linkedin
-          </ExternalLink>
-        </div>
+  const currentYear = new Date().getFullYear()
 
-        <div className="flex flex-col space-y-4">
-          <Link
-            href="/"
-            className="text-gray-500 hover:text-gray-600 transition"
-          >
-            mladenruzicic.com
-          </Link>
+  return (
+    <footer className="mx-4 flex flex-col sm:mx-8 lg:mx-16 xl:mx-20">
+      <div className="-mx-4 mb-8 sm:-mx-8 lg:-mx-16 xl:-mx-20">
+        <NewsletterBanner />
+      </div>
+
+      <div className="mb-12 flex flex-col-reverse items-center justify-between gap-4 border-t-2 border-gray-100 pt-6 md:flex-row">
+        <div>
+          <p className="font-light text-gray-600">
+            © {currentYear} Mladen Ruzicic
+          </p>
         </div>
+        <ul className="flex flex-row gap-2 ">
+          {SOCIALS.map((social) => (
+            <li key={social.name}>
+              <Button
+                href={social.url}
+                target="_blank"
+                rel="noopener"
+                variant="link"
+                size="icon"
+                className="opacity-50 hover:opacity-100"
+              >
+                {social.icon()}
+              </Button>
+            </li>
+          ))}
+        </ul>
       </div>
     </footer>
   )

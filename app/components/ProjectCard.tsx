@@ -1,64 +1,64 @@
-import Image from 'next/image'
-import Link from 'next/link'
-import { Project } from 'app/projects/page'
-import Chip from './Chip'
+import Image from "next/image"
+import Link from "next/link"
+import { Project } from "app/work/page"
+
+import { Button } from "./Button"
+import Chip from "./Chip"
+import { Icons } from "./icons"
 
 export default function ProjectCard({
   name,
   icon,
   description,
-  href,
+  links,
   tags,
 }: Project) {
   return (
-    <Link
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="relative w-full bg-white dark:bg-gray-800 shadow-md rounded-3xl p-4 md:p-2 cursor-pointer dark:hover:bg-gray-700 transition-all flex flex-col md:flex-row gap-2"
-    >
+    <article className="relative flex w-full flex-col gap-4 border-b-[1px] border-gray-300 bg-white p-4 md:flex-row md:p-4 lg:gap-8">
       <Image
         className="rounded-2xl"
         src={icon}
         alt={name}
-        width={128}
-        height={128}
+        width={100}
+        height={100}
+        placeholder="empty"
         style={{
-          maxWidth: '100%',
-          height: 'auto',
+          maxWidth: "100%",
+          height: "auto",
         }}
       />
 
-      <div className="flex flex-col w-full">
-        <div className="flex flex-row justify-between pt-1 pr-1 mb-1 md:mb-2">
-          <div className="flex gap-1 flex-wrap">
-            {tags.map((tag) => (
-              <Chip key={tag} name={tag.trim() as any} />
-            ))}
-          </div>
-
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-300"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-            />
-          </svg>
+      <div className="flex w-full flex-col">
+        <div className="flex flex-col">
+          <h4 className="mb-1 text-xl">{name}</h4>
+          <p className="text-lg font-light text-gray-500">{description}</p>
         </div>
-        <div>
-          <h4 className="text-lg md:text-lg font-medium w-full text-gray-900 dark:text-gray-100 tracking-tight ">
-            {name}
-          </h4>
-          <p className="text-gray-300 text-sm">{description}</p>
+
+        <ul className="my-4 flex flex-wrap space-x-4">
+          {links.map((link) => (
+            <li key={link.url}>
+              <Button
+                href={link.url}
+                variant="link"
+                size="auto"
+                target="_blank"
+              >
+                <span className="mr-1">{link.title}</span>
+                <Icons.externalLink className="h-4 w-4 text-gray-500" />
+              </Button>
+            </li>
+          ))}
+        </ul>
+        <div className="mb-1 flex flex-row justify-between pr-1 pt-1 md:mb-2">
+          <ul className="flex flex-wrap gap-1.5" aria-label="Technologies used">
+            {tags.map((tag) => (
+              <li key={tag}>
+                <Chip key={tag} name={tag.trim() as any} />
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
-    </Link>
+    </article>
   )
 }

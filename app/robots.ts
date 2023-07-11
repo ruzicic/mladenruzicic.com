@@ -2,10 +2,10 @@ export default function robots() {
   return {
     rules: [
       {
-        userAgent: '*',
+        userAgent: "*",
       },
     ],
-    sitemap: 'https://mladenruzicic.com/sitemap.xml',
-    host: 'https://mladenruzicic.com',
+    sitemap: "https://mladenruzicic.com/sitemap.xml",
+    host: "https://mladenruzicic.com",
   }
 }

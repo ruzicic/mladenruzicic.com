@@ -3,6 +3,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    mdxRs: true,
+  },
   async redirects() {
     return [
       {
@@ -14,4 +17,6 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig //withContentlayer(nextConfig)
+const withMDX = require('@next/mdx')()
+
+module.exports = withMDX(nextConfig) //withContentlayer(nextConfig)

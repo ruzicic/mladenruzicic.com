@@ -1,88 +1,140 @@
-import { trackGoal } from 'fathom-client'
-import { useRef, useState } from 'react'
+"use client"
 
-type FormState = 'initial' | 'loading' | 'success' | 'error'
+import { FormEventHandler, useCallback, useRef, useState } from "react"
+import { trackGoal } from "fathom-client"
+
+import { Button } from "./Button"
+
+// Fire a custom event to track newsletter subs in Fathom Analytics
+const FATHOM_NEWSLETTER_SUB_ID = "YQXZJQZL"
+
+type FormState = "initial" | "loading" | "success" | "error"
 type Form = {
   state: FormState
   message?: string
 }
 
 export default function NewsletterBanner() {
-  const [form, setForm] = useState<Form>({ state: 'initial' })
-  const inputEl = useRef<any>(null)
+  const [form, setForm] = useState<Form>({ state: "initial" })
+  const nameInputEl = useRef<any>(null)
+  const emailInputEl = useRef<any>(null)
 
-  const subscribe = async (e: any) => {
-    e.preventDefault()
-    setForm({ state: 'loading' })
+  const onSubmit: FormEventHandler = useCallback(async (event) => {
+    event.preventDefault()
+    setForm({ state: "loading" })
 
-    const res = await fetch('/api/subscribe', {
-      body: JSON.stringify({
-        email: inputEl.current.value,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
+    const target = event.target as HTMLFormElement
+    const data = new FormData(target)
+    const email = data.get("email")
+    const name = data.get("name")
+
+    const body = JSON.stringify({
+      name,
+      email,
     })
 
-    const { error } = await res.json()
-    if (error) {
-      setForm({
-        state: 'error',
-        message: error,
+    const headers = new Headers({
+      "Content-Type": "application/json; charset=utf-8",
+    })
+
+    console.log("Sending this: ", { body })
+
+    try {
+      const response = await fetch(`/api/subscribe`, {
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        headers,
+        body,
       })
-      return
-    }
+      const { error } = await response.json()
+      if (error) {
+        setForm({
+          state: "error",
+          message: error?.message ?? "Something went wrong. Please try again.",
+        })
+        return
+      }
 
-    trackGoal('SWSM6DKP', 0)
-    inputEl.current.value = ''
-    setForm({
-      state: 'success',
-      message: `Hooray! You're now on the list.`,
-    })
-  }
+      if (process.env.NODE_ENV === "production") {
+        trackGoal(FATHOM_NEWSLETTER_SUB_ID, 0)
+      }
+
+      setForm({
+        state: "success",
+        message: `Hooray! You're in ${nameInputEl.current.value}. Please check your inbox now to confirm your email address.`,
+      })
+      nameInputEl.current.value = ""
+      emailInputEl.current.value = ""
+    } catch (error) {
+      setForm({
+        state: "error",
+        message: "Something went wrong. Please try again.",
+      })
+    }
+  }, [])
 
   return (
-    <>
-      <section className="w-full rounded-2xl bg-gradient-to-r from-[#FDE68A] via-[#FCA5A5] to-[#FECACA] p-1">
-        <div className="p-5 md:p-7 h-full rounded-2xl bg-white dark:bg-black flex flex-col">
-          <h3 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Join the newsletter
-          </h3>
-          <p className="my-1 text-gray-800 dark:text-gray-200">For weekly notes and moments</p>
-          <form className="relative my-4" onSubmit={subscribe}>
-            <input
-              ref={inputEl}
-              aria-label="Email for newsletter"
-              placeholder="you@example.com"
-              type="email"
-              autoComplete="email"
-              required
-              className="w-full  rounded-xl p-4 focus:outline-black bg-banner dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              disabled={form.state === 'loading'}
-            />
-            <button
-              className="flex items-center justify-center w-full md:w-28 mt-3 md:mt-0 md:absolute right-2 top-2 px-4 font-medium h-10 bg-gray-700 text-gray-100 rounded-lg "
-              type="submit"
-              disabled={form.state === 'loading'}
-            >
-              {form.state === 'loading' ? <LoadingSpinner /> : 'Subscribe'}
-            </button>
-          </form>
-          {form.state === 'error' ? (
-            <ErrorMessage>{form.message}</ErrorMessage>
-          ) : form.state === 'success' ? (
-            <SuccessMessage>{form.message}</SuccessMessage>
-          ) : null}
-        </div>
-      </section>
-    </>
+    <section className="flex h-full w-full flex-col bg-accent p-8 md:p-6 lg:p-8 xl:p-16">
+      <h6 className="my-4 text-3xl font-normal tracking-tight text-primary md:text-5xl lg:text-6xl">
+        A newsletter that sparks joy
+      </h6>
+
+      <p className="my-1 max-w-4xl text-lg text-gray-800">
+        Valuable insights, innovative ideas, and resources to help you improve
+        your software development skills and advance your career. Expect to
+        receive some business, marketing, and personal growth content.
+      </p>
+      <p className="my-1 max-w-4xl text-lg text-gray-800">
+        Come with me on a journey toward success that will definitely inspire
+        you!
+      </p>
+      <form
+        className="relative my-4 grid max-w-xl grid-cols-1 gap-4 md:grid-cols-3"
+        onSubmit={onSubmit}
+      >
+        <input
+          ref={nameInputEl}
+          type="text"
+          name="name"
+          aria-label="First name"
+          placeholder="First Name"
+          autoComplete="given-name"
+          className="rounded-full border border-gray-800   bg-accent px-5 py-3 text-gray-900 placeholder:text-gray-600 focus:outline-black"
+          disabled={form.state === "loading"}
+        />
+        <input
+          ref={emailInputEl}
+          aria-label="Email for newsletter"
+          placeholder="you@example.com"
+          type="email"
+          name="email"
+          autoComplete="email"
+          required
+          className="rounded-full border border-gray-800 bg-accent px-5 py-3 text-gray-900 placeholder:text-gray-600 focus:outline-black"
+          disabled={form.state === "loading"}
+        />
+        <Button
+          type="submit"
+          disabled={form.state === "loading"}
+          renderAs="button"
+        >
+          {form.state === "loading" ? <LoadingSpinner /> : "Subscribe"}
+        </Button>
+      </form>
+
+      {form.state === "error" ? (
+        <ErrorMessage>{form.message}</ErrorMessage>
+      ) : form.state === "success" ? (
+        <SuccessMessage>{form.message}</SuccessMessage>
+      ) : null}
+    </section>
   )
 }
 
 function ErrorMessage({ children }: any) {
   return (
-    <p className="flex items-center text-sm font-bold text-red-800 dark:text-red-400">
+    <p className="flex items-center text-sm font-bold text-red-800 ">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
@@ -102,7 +154,7 @@ function ErrorMessage({ children }: any) {
 
 function SuccessMessage({ children }: any) {
   return (
-    <p className="flex items-center text-sm font-bold text-green-700 dark:text-green-400">
+    <p className="flex items-center text-sm font-bold text-green-700 ">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
@@ -123,7 +175,7 @@ function SuccessMessage({ children }: any) {
 function LoadingSpinner() {
   return (
     <svg
-      className="animate-spin h-5 w-5 text-gray-100"
+      className="h-5 w-5 animate-spin text-gray-100"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
