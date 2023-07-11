@@ -65,6 +65,7 @@ export default function MobileMenu() {
                   renderAs="button"
                   onClick={() => handleMenuItemClick(path)}
                   variant="link"
+                  aria-label={`Go to ${name}`}
                 >
                   {name}
                 </Button>

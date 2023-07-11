@@ -28,6 +28,7 @@ export default function Navbar() {
             size="icon"
             renderAs="button"
             onClick={nextLogoVariant}
+            aria-label="Mladen Ruzicic Logo"
           >
             <Icons.logo className=" h-8 w-8 transition-all duration-150 ease-in-out hover:scale-110 active:scale-90" />
           </Button>

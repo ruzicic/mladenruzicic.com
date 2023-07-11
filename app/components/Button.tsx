@@ -56,6 +56,14 @@ export const Button = ({
         )
       })()
 
+  // enforce aria-label if `renderAs` is `button`
+  if (renderAs === "button" && !props["aria-label"]) {
+    console.warn("https://dequeuniversity.com/rules/axe/4.7/button-name")
+    throw new Error(
+      "Button component with `renderAs` set to `button` must have `aria-label` prop"
+    )
+  }
+
   return (
     <Component
       className={cn(buttonVariants({ variant, size, className }))}

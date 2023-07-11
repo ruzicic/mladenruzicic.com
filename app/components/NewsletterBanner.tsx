@@ -76,9 +76,9 @@ export default function NewsletterBanner() {
 
   return (
     <section className="flex h-full w-full flex-col bg-accent p-8 md:p-6 lg:p-8 xl:p-16">
-      <h6 className="my-4 text-3xl font-normal tracking-tight text-primary md:text-5xl lg:text-6xl">
-        A newsletter that sparks joy
-      </h6>
+      <p className="my-4 text-3xl font-normal tracking-tight text-primary md:text-5xl lg:text-6xl">
+        Subscribe to my Newsletter
+      </p>
 
       <p className="my-1 max-w-4xl text-lg text-gray-800">
         Valuable insights, innovative ideas, and resources to help you improve
@@ -86,8 +86,7 @@ export default function NewsletterBanner() {
         receive some business, marketing, and personal growth content.
       </p>
       <p className="my-1 max-w-4xl text-lg text-gray-800">
-        Come with me on a journey toward success that will definitely inspire
-        you!
+        No spam, unsubscribe at any time.
       </p>
       <form
         className="relative my-4 grid max-w-xl grid-cols-1 gap-4 md:grid-cols-3"
@@ -118,6 +117,7 @@ export default function NewsletterBanner() {
           type="submit"
           disabled={form.state === "loading"}
           renderAs="button"
+          aria-label="Subscribe to newsletter"
         >
           {form.state === "loading" ? <LoadingSpinner /> : "Subscribe"}
         </Button>
