@@ -15,11 +15,11 @@ export const metadata: Metadata = {
     default: "Mladen Ruzicic",
     template: "%s | Mladen Ruzicic",
   },
-  description: "Senior Frontend Developer at Shopify",
+  description: "Software developer, mentor, and entrepreneur",
   openGraph: {
     title: "Mladen Ruzicic",
-    description: "Senior Frontend Developer at Shopify",
-    url: "https://mladenruzicic.com/",
+    description: "Software developer, mentor, and entrepreneur",
+    url: "https://mladenruzicic.com/opengraph-image.png",
     type: "website",
     locale: "en_US",
     siteName: "Mladen Ruzicic",
@@ -27,6 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     title: "Mladen Ruzicic",
     card: "summary_large_image",
+    images: ["https://mladenruzicic.com/opengraph-image.png"],
   },
 }
 
