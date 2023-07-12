@@ -3,8 +3,6 @@ import localFont from "next/font/local"
 import FathomAnalytics from "app/components/FathomAnalytics"
 import Footer from "app/components/Footer"
 
-import { Providers } from "./providers"
-
 import "./globals.css"
 
 import Header from "./components/Header"
@@ -68,16 +66,14 @@ export default function RootLayout({
     <html lang="en" className={ibmPlexSansFont.className}>
       <body className="p-0 sm:p-4 md:p-8 lg:p-16 xl:p-20">
         <NoisyGradientBackground />
-        <Providers>
-          <main className="mx-auto flex w-full max-w-7xl flex-col bg-white">
-            <Header />
-            <div className="mx-4 mt-8 pb-16 sm:mx-8 lg:mx-16 lg:mt-16 xl:mx-20">
-              {children}
-            </div>
-            <Footer />
-            <FathomAnalytics />
-          </main>
-        </Providers>
+        <main className="mx-auto flex w-full max-w-7xl flex-col bg-white">
+          <Header />
+          <div className="mx-4 mt-8 pb-16 sm:mx-8 lg:mx-16 lg:mt-16 xl:mx-20">
+            {children}
+          </div>
+          <Footer />
+          <FathomAnalytics />
+        </main>
       </body>
     </html>
   )
