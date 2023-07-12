@@ -9,25 +9,47 @@ import "./globals.css"
 
 import Header from "./components/Header"
 
+const title = "Mladen Ruzicic"
+const description = "Software developer, mentor, and entrepreneur"
+const imageUrl = "https://mladenruzicic.com/static/images/opengraph-image.png"
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://mladenruzicic.com/"),
   title: {
-    default: "Mladen Ruzicic",
-    template: "%s | Mladen Ruzicic",
+    default: title,
+    template: `%s | ${title}`,
   },
-  description: "Software developer, mentor, and entrepreneur",
+  description,
   openGraph: {
-    title: "Mladen Ruzicic",
-    description: "Software developer, mentor, and entrepreneur",
-    url: "https://mladenruzicic.com/opengraph-image.png",
+    title,
+    description,
+    url: imageUrl,
     type: "website",
     locale: "en_US",
-    siteName: "Mladen Ruzicic",
+    siteName: title,
+    images: [
+      {
+        alt: `${title} - ${description}`,
+        url: imageUrl,
+        width: 1920,
+        height: 1080,
+      },
+    ],
   },
   twitter: {
-    title: "Mladen Ruzicic",
+    title,
     card: "summary_large_image",
-    images: ["https://mladenruzicic.com/opengraph-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 }
 
