@@ -1,4 +1,4 @@
-import React from "react"
+import React, { Suspense } from "react"
 import Image from "next/image"
 import { DISCOVERY_SESSION_URL, MENTORSHIP_NEXT_STEPS } from "lib/constants"
 import heroImage from "public/static/images/hero.webp"

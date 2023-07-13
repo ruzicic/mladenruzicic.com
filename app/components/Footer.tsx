@@ -1,3 +1,5 @@
+import { Suspense } from "react"
+
 import { Button } from "./Button"
 import { Icons } from "./icons"
 import NewsletterBanner from "./NewsletterBanner"
@@ -30,9 +32,11 @@ export default function Footer() {
 
   return (
     <footer className="mx-4 flex flex-col sm:mx-8 lg:mx-16 xl:mx-20">
-      <div className="-mx-4 mb-8 sm:-mx-8 lg:-mx-16 xl:-mx-20">
-        <NewsletterBanner />
-      </div>
+      <Suspense fallback={null}>
+        <div className="-mx-4 mb-8 sm:-mx-8 lg:-mx-16 xl:-mx-20">
+          <NewsletterBanner />
+        </div>
+      </Suspense>
 
       <div className="mb-12 flex flex-col-reverse items-center justify-between gap-4 border-t-2 border-gray-100 pt-6 md:flex-row">
         <div>

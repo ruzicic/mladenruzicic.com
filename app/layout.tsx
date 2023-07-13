@@ -5,6 +5,8 @@ import Footer from "app/components/Footer"
 
 import "./globals.css"
 
+import { Suspense } from "react"
+
 import Header from "./components/Header"
 
 const title = "Mladen Ruzicic"
@@ -68,11 +70,15 @@ export default function RootLayout({
         <NoisyGradientBackground />
         <main className="mx-auto flex w-full max-w-7xl flex-col bg-white">
           <Header />
+
           <div className="mx-4 mt-8 pb-16 sm:mx-8 lg:mx-16 lg:mt-16 xl:mx-20">
             {children}
           </div>
           <Footer />
-          <FathomAnalytics />
+
+          <Suspense fallback={null}>
+            <FathomAnalytics />
+          </Suspense>
         </main>
       </body>
     </html>

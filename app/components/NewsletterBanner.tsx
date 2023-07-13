@@ -37,8 +37,6 @@ export default function NewsletterBanner() {
       "Content-Type": "application/json; charset=utf-8",
     })
 
-    console.log("Sending this: ", { body })
-
     try {
       const response = await fetch(`/api/subscribe`, {
         method: "POST",
