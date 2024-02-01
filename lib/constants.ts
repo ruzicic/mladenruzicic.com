@@ -1,5 +1,5 @@
 export const DISCOVERY_SESSION_URL =
-  "https://calendly.com/ruzicic/discovery-session"
+  "https://calendar.app.google/dETpNdfdug4LF81j7"
 
 export const ROUTES = {
   "/about": {
