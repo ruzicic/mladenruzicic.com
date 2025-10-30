@@ -1,4 +1,3 @@
-import { Button } from "app/components/Button"
 import type { MDXComponents } from "mdx/types"
 
 // This file allows you to provide custom React components

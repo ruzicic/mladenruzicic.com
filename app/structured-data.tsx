@@ -6,14 +6,15 @@ export const structuredData = {
   image: "https://mladenruzicic.com/mladen-ruzicic.png",
   sameAs: [
     "https://github.com/mladenruzicic",
-    "https://linkedin.com/in/mladenruzicic"
+    "https://linkedin.com/in/mladenruzicic",
   ],
   jobTitle: "Software Developer",
   worksFor: {
     "@type": "Organization",
-    name: "Freelance"
+    name: "Freelance",
   },
-  description: "Software developer, mentor, and entrepreneur with twelve years of experience creating engaging web experiences.",
+  description:
+    "Software developer, mentor, and entrepreneur with twelve years of experience creating engaging web experiences.",
   knowsAbout: [
     "Web Development",
     "React",
@@ -22,11 +23,11 @@ export const structuredData = {
     "JavaScript",
     "Software Engineering",
     "Mentoring",
-    "Entrepreneurship"
+    "Entrepreneurship",
   ],
   address: {
     "@type": "PostalAddress",
     addressLocality: "Belgrade",
-    addressCountry: "Serbia"
-  }
+    addressCountry: "Serbia",
+  },
 }

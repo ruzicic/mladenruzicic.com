@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import localFont from "next/font/local"
 import FathomAnalytics from "app/components/FathomAnalytics"
 import Footer from "app/components/Footer"
+
 import { structuredData } from "./structured-data"
 
 import "./globals.css"

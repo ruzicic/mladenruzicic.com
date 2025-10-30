@@ -64,7 +64,7 @@ export default function NewsletterBanner() {
       })
       nameInputEl.current.value = ""
       emailInputEl.current.value = ""
-    } catch (error) {
+    } catch (_error) {
       setForm({
         state: "error",
         message: "Something went wrong. Please try again.",
