@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import localFont from "next/font/local"
 import FathomAnalytics from "app/components/FathomAnalytics"
 import Footer from "app/components/Footer"
+import { structuredData } from "./structured-data"
 
 import "./globals.css"
 
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
     template: `%s | ${title}`,
   },
   description,
+  manifest: "/manifest.json",
   openGraph: {
     title,
     description,
@@ -66,6 +68,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={ibmPlexSansFont.className}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      </head>
       <body className="p-0 sm:p-4 md:p-8 lg:p-16 xl:p-20">
         <NoisyGradientBackground />
         <main className="mx-auto flex w-full max-w-7xl flex-col bg-white">
