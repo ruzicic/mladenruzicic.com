@@ -47,14 +47,14 @@ export const Button = ({
   const Component = renderAs
     ? renderAs
     : props.href
-    ? Link
-    : props.onClick
-    ? "button"
-    : (() => {
-        throw new Error(
-          "Button component must have either `renderAs`, `href`, or `onClick` prop"
-        )
-      })()
+      ? Link
+      : props.onClick
+        ? "button"
+        : (() => {
+            throw new Error(
+              "Button component must have either `renderAs`, `href`, or `onClick` prop"
+            )
+          })()
 
   // enforce aria-label if `renderAs` is `button`
   if (renderAs === "button" && !props["aria-label"]) {
