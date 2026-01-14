@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import localFont from "next/font/local"
+import { Inter } from "next/font/google"
 import FathomAnalytics from "app/components/FathomAnalytics"
 import Footer from "app/components/Footer"
 
@@ -53,10 +53,10 @@ export const metadata: Metadata = {
   },
 }
 
-const ibmPlexSansFont = localFont({
-  src: "./fonts/ibm-plex-sans-var.woff2",
+const inter = Inter({
+  subsets: ["latin"],
   display: "swap",
-  preload: true,
+  variable: "--font-inter",
 })
 
 export default function RootLayout({
@@ -65,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={ibmPlexSansFont.className}>
+    <html lang="en" className={inter.className}>
       <body className="p-0 sm:p-4 md:p-8 lg:p-16 xl:p-20">
         <NoisyGradientBackground />
         <main className="mx-auto flex w-full max-w-7xl flex-col bg-white">

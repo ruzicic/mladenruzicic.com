@@ -2,11 +2,14 @@ export const DISCOVERY_SESSION_URL =
   "https://calendar.app.google/dETpNdfdug4LF81j7"
 
 export const ROUTES = {
+  "/work": {
+    name: "Work",
+  },
   "/about": {
     name: "About",
   },
-  "/work": {
-    name: "Work",
+  "/mentoring": {
+    name: "Mentoring",
   },
 }
 
