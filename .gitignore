@@ -37,4 +37,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-.contentlayer
+# v3 planning material — intentionally untracked (private metrics, live-site screenshots)
+docs/
+
+# agent worktrees
+.claude/worktrees/

@@ -1,105 +1,97 @@
-import type { Metadata } from "next"
-import localFont from "next/font/local"
-import FathomAnalytics from "app/components/FathomAnalytics"
-import Footer from "app/components/Footer"
+import { Suspense, type ReactNode } from "react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
-import { structuredData } from "./structured-data"
+import { HOME } from "@/content/pages/home"
+import { SITE } from "@/content/site"
+import { jsonLdScript, personJsonLd } from "@/lib/seo/jsonld"
+
+import FathomAnalytics from "./components/FathomAnalytics"
+import { Container, SkipLink } from "./components/primitives"
+import { NavPending } from "./components/primitives/NavPending"
+import { TransitionLink } from "./components/primitives/TransitionLink"
+import { fontVariables } from "./fonts"
 
 import "./globals.css"
 
-import { Suspense } from "react"
+export { baseMetadata as metadata } from "@/lib/seo/metadata"
 
-import Header from "./components/Header"
+const NAV = [
+  { href: "/work", label: "Work" },
+  { href: "/mentoring", label: "Mentoring" },
+  { href: "/about", label: "About" },
+] as const
 
-const title = "Mladen Ruzicic"
-const description = "Software developer, mentor, and entrepreneur"
-const imageUrl = "https://mladenruzicic.com/static/images/opengraph-image.png"
-
-export const metadata: Metadata = {
-  metadataBase: new URL("https://mladenruzicic.com/"),
-  title: {
-    default: title,
-    template: `%s | ${title}`,
-  },
-  description,
-  manifest: "/manifest.json",
-  openGraph: {
-    title,
-    description,
-    url: imageUrl,
-    type: "website",
-    locale: "en_US",
-    siteName: title,
-    images: [
-      {
-        alt: `${title} - ${description}`,
-        url: imageUrl,
-        width: 1920,
-        height: 1080,
-      },
-    ],
-  },
-  twitter: {
-    title,
-    card: "summary_large_image",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-}
-
-const ibmPlexSansFont = localFont({
-  src: "./fonts/ibm-plex-sans-var.woff2",
-  display: "swap",
-  preload: true,
-})
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={ibmPlexSansFont.className}>
-      <head>
+    <html lang="en" className={fontVariables}>
+      <body>
+        <SkipLink />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={jsonLdScript(personJsonLd())}
         />
-      </head>
-      <body className="p-0 sm:p-4 md:p-8 lg:p-16 xl:p-20">
-        <NoisyGradientBackground />
-        <main className="mx-auto flex w-full max-w-7xl flex-col bg-white">
-          <Header />
 
-          <div className="mx-4 mt-8 pb-16 sm:mx-8 lg:mx-16 lg:mt-16 xl:mx-20">
-            {children}
-          </div>
-          <Footer />
+        {/* TEMPORARY shell. Owned by the site-shell agent:
+            app/components/site/** replaces this header and footer. */}
+        <header className="border-b border-line-soft">
+          <Container className="flex items-center justify-between gap-6 py-5">
+            <TransitionLink
+              href="/"
+              className="font-display text-[22px] leading-none tracking-[-0.04em]"
+            >
+              MR
+              <NavPending />
+            </TransitionLink>
+            <nav
+              aria-label="Primary"
+              className="flex items-center gap-7 font-mono text-[12px] uppercase tracking-[0.06em]"
+            >
+              {NAV.map((item) => (
+                <TransitionLink key={item.href} href={item.href}>
+                  {item.label}
+                  <NavPending />
+                </TransitionLink>
+              ))}
+            </nav>
+          </Container>
+        </header>
 
-          <Suspense fallback={null}>
-            <FathomAnalytics />
-          </Suspense>
-        </main>
+        {children}
+
+        <footer className="border-t border-line-soft">
+          <Container className="flex flex-wrap items-center justify-between gap-4 py-10 font-mono text-[12px] uppercase tracking-[0.06em] text-muted">
+            <p className="m-0">{HOME.footer.copyright}</p>
+            <ul className="m-0 flex list-none flex-wrap gap-6 p-0">
+              <li>
+                <a href={SITE.links.github} rel="noreferrer noopener">
+                  GitHub
+                </a>
+              </li>
+              <li>
+                <a href={SITE.links.linkedin} rel="noreferrer noopener">
+                  LinkedIn
+                </a>
+              </li>
+              <li>
+                <a href={SITE.links.mentorcruise} rel="noreferrer noopener">
+                  MentorCruise
+                </a>
+              </li>
+              <li>
+                <TransitionLink href="/uses">Uses</TransitionLink>
+              </li>
+              <li>
+                <a href={SITE.links.cv}>CV</a>
+              </li>
+            </ul>
+          </Container>
+        </footer>
+
+        <Suspense fallback={null}>
+          <FathomAnalytics />
+        </Suspense>
+        <SpeedInsights sampleRate={0.3} />
       </body>
     </html>
   )
 }
-
-const NoisyGradientBackground = () => (
-  <div className="fixed inset-0 -z-10 h-full w-full bg-[#cae9e3]">
-    <div className="blur-3xl">
-      <div className="absolute h-[100rem] w-[50rem] rotate-45 rounded-full bg-[#cae9e3]"></div>
-      <div className="absolute ml-auto h-[60rem] w-[60rem] rounded-full bg-[#b5cde6]"></div>
-    </div>
-    <div className="absolute inset-0 h-full w-full bg-noise bg-auto bg-repeat opacity-30"></div>
-  </div>
-)

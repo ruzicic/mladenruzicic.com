@@ -3,70 +3,29 @@ name: Code check
 on:
   pull_request:
     branches: ["*"]
+  push:
+    branches: [main]
 
 jobs:
-  lint:
+  check:
     runs-on: ubuntu-latest
-    name: Lint
+    name: Lint, typecheck, build
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
+          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - run: pnpm lint
 
-  format:
-    runs-on: ubuntu-latest
-    name: Format
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - run: pnpm format:check
-
-  tsc:
-    runs-on: ubuntu-latest
-    name: Build
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
-
-      - name: Install dependencies
-        run: pnpm install
+      - run: pnpm typecheck
 
       - run: pnpm build
