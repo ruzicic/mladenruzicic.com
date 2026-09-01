@@ -37,6 +37,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+
 # v3 planning material — intentionally untracked (private metrics, live-site screenshots)
 docs/
 
