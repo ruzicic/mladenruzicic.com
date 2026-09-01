@@ -1,0 +1,311 @@
+/* ---------------------------------------------------------------------------
+   pages.css — global CSS owned by the work-system / secondary-pages agent.
+
+   Everything that could not be expressed as a Tailwind utility lives here:
+   the tuned typographic scale for `Prose`, the `/work` filter transition
+   classes, the testimonial column layout and the shader-stub drift keyframes.
+
+   INTEGRATION: imported by every page that needs it
+   (`app/work/page.tsx`, `app/work/[slug]/page.tsx`, `app/mentoring/page.tsx`,
+   `app/about/page.tsx`, `app/uses/page.tsx`, `app/not-found.tsx`) via
+   `import "../styles/pages.css"`. Next dedupes it. If you would rather have one
+   import, hoist `import "./styles/pages.css"` into `app/layout.tsx` right after
+   `./globals.css` and delete the per-page imports.
+
+   All values come from the tokens in `app/globals.css`. No new hexes.
+   --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   CASCADE FIX — link colour utilities.
+
+   `app/globals.css` declares `a { color: inherit }` and `a:hover { color:
+   var(--color-accent) }` OUTSIDE any cascade layer. Tailwind 4 emits its
+   utilities inside `@layer utilities`, and unlayered author CSS beats every
+   author layer — so `text-accent`, `text-bg` etc. lose on any `<a>`. The
+   visible symptom: `Button variant="primary"` renders near-white text on the
+   yellow fill (a real contrast failure), and every accent link renders grey.
+
+   The proper fix is one line in `app/globals.css` — wrap that reset in
+   `@layer base { … }` — which this agent does not own. Until then these rules
+   restore the intent with enough specificity to win, hover states included.
+   Delete this block the moment globals.css is layered.
+   --------------------------------------------------------------------------- */
+a.text-bg,
+a.hover\:text-bg:hover {
+  color: var(--color-bg);
+}
+
+a.text-fg {
+  color: var(--color-fg);
+}
+
+a.text-dim {
+  color: var(--color-dim);
+}
+
+a.text-dim-2 {
+  color: var(--color-dim-2);
+}
+
+a.text-muted {
+  color: var(--color-muted);
+}
+
+a.text-accent,
+a.hover\:text-accent:hover {
+  color: var(--color-accent);
+}
+
+/* ---------------------------------------------------------------------------
+   Shader stub drift. Replaced (with its element) when the real Paper Shaders
+   land; harmless if it outlives them.
+   --------------------------------------------------------------------------- */
+@keyframes shader-drift {
+  0%,
+  100% {
+    background-position:
+      0% 0%,
+      100% 0%,
+      50% 100%;
+  }
+  50% {
+    background-position:
+      6% 4%,
+      94% 8%,
+      44% 96%;
+  }
+}
+
+.shader-drift {
+  background-size: 160% 160%;
+  animation-name: shader-drift;
+  animation-timing-function: var(--ease-reveal);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+/* ---------------------------------------------------------------------------
+   Prose — the compiled MDX body of a case study, /about and /uses.
+   `@tailwindcss/typography` supplies the rhythm; this retunes it to the tokens:
+   68ch measure, pretty wrapping, headings in the sans face at 600 with mono
+   numerals, hairline rules, accent links.
+   --------------------------------------------------------------------------- */
+.prose-tuned {
+  --tw-prose-body: var(--color-dim);
+  --tw-prose-headings: var(--color-fg);
+  --tw-prose-lead: var(--color-dim);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--color-fg);
+  --tw-prose-counters: var(--color-muted);
+  --tw-prose-bullets: var(--color-accent);
+  --tw-prose-hr: var(--color-line-soft);
+  --tw-prose-quotes: var(--color-fg);
+  --tw-prose-quote-borders: var(--color-accent);
+  --tw-prose-captions: var(--color-muted);
+  --tw-prose-code: var(--color-fg);
+  --tw-prose-pre-code: var(--color-dim);
+  --tw-prose-pre-bg: var(--color-surface);
+  --tw-prose-th-borders: var(--color-line);
+  --tw-prose-td-borders: var(--color-line-soft);
+
+  max-width: 68ch;
+  font-size: 17px;
+  line-height: 1.65;
+  text-wrap: pretty;
+  font-variant-numeric: tabular-nums;
+}
+
+.prose-tuned :is(h2, h3, h4) {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.prose-tuned h2 {
+  font-size: 22px;
+  line-height: 1.25;
+  margin-top: 2.4em;
+  margin-bottom: 0.7em;
+  padding-top: 0.9em;
+  border-top: 1px solid var(--color-line-soft);
+}
+
+.prose-tuned > :first-child {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+
+.prose-tuned h3 {
+  font-size: 18px;
+  line-height: 1.35;
+  margin-top: 1.9em;
+  margin-bottom: 0.5em;
+}
+
+.prose-tuned p,
+.prose-tuned li {
+  text-wrap: pretty;
+}
+
+.prose-tuned ul > li::marker {
+  color: var(--color-accent);
+}
+
+.prose-tuned ol > li::marker {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--color-muted);
+}
+
+.prose-tuned a {
+  text-decoration: underline;
+  text-decoration-color: color-mix(
+    in srgb,
+    var(--color-accent) 45%,
+    transparent
+  );
+  text-underline-offset: 3px;
+}
+
+.prose-tuned a:hover {
+  text-decoration-color: var(--color-accent);
+}
+
+.prose-tuned code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-xs);
+  padding: 0.15em 0.4em;
+}
+
+.prose-tuned code::before,
+.prose-tuned code::after {
+  content: none;
+}
+
+.prose-tuned blockquote {
+  font-style: normal;
+  padding-left: 1.1em;
+}
+
+.prose-tuned blockquote p::before,
+.prose-tuned blockquote p::after {
+  content: none;
+}
+
+/* ---------------------------------------------------------------------------
+   /work — card art tile and filter transitions.
+   --------------------------------------------------------------------------- */
+
+/* The whole card is one link; the art tile lifts on hover/focus, but every
+   fact on the card is legible without either. */
+.work-card {
+  display: block;
+  position: relative;
+}
+
+.work-card__art {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: 0 40px 80px -48px rgb(0 0 0 / 0.85);
+  transition:
+    transform var(--duration-base) var(--ease-reveal),
+    box-shadow var(--duration-base) var(--ease-reveal);
+}
+
+.work-card:hover .work-card__art,
+.work-card:focus-visible .work-card__art {
+  transform: translateY(-4px);
+  box-shadow: 0 48px 90px -44px rgb(0 0 0 / 0.9);
+}
+
+.work-card__art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--color-line);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-card__art {
+    transition: none;
+  }
+  .work-card:hover .work-card__art,
+  .work-card:focus-visible .work-card__art {
+    transform: none;
+  }
+}
+
+/* Filter-driven list updates. `WorkExplorer` runs the state change inside
+   `startTransition` within a `<ViewTransition>`, so entering and exiting cards
+   animate and surviving cards slide to their new position. */
+@keyframes work-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+}
+
+@keyframes work-card-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.985);
+  }
+}
+
+::view-transition-new(.vt-card) {
+  animation: work-card-in var(--duration-base) var(--ease-reveal) both;
+}
+
+::view-transition-old(.vt-card) {
+  animation: work-card-out var(--duration-fast) var(--ease-reveal) both;
+}
+
+::view-transition-group(.vt-card) {
+  animation-duration: var(--duration-base);
+  animation-timing-function: var(--ease-geometry);
+}
+
+/* ---------------------------------------------------------------------------
+   Testimonials — a masonry-ish column layout that keeps reading order.
+   --------------------------------------------------------------------------- */
+.testimonial-columns {
+  columns: 1;
+  column-gap: 20px;
+}
+
+@media (min-width: 720px) {
+  .testimonial-columns {
+    columns: 2;
+  }
+}
+
+@media (min-width: 1080px) {
+  .testimonial-columns {
+    columns: 3;
+  }
+}
+
+.testimonial-columns > li {
+  break-inside: avoid;
+  margin-bottom: 20px;
+  display: inline-block;
+  width: 100%;
+}
+
+/* ---------------------------------------------------------------------------
+   Wide content never scrolls the page sideways.
+   --------------------------------------------------------------------------- */
+.scroll-x {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}

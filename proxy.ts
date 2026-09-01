@@ -5,6 +5,9 @@ import { NextResponse, type NextRequest } from "next/server"
  * `text/html`, serve the markdown mirror from `app/md/[...path]` instead of the
  * page. Node runtime (the default in Next 16) — do NOT add a `runtime` export.
  *
+ * `Vary: Accept` goes on both branches, so a CDN never hands the markdown to a
+ * browser or the HTML to an agent.
+ *
  * See docs/v3-redesign-plan.md §6.
  */
 
@@ -12,18 +15,28 @@ const MIRRORED = new Set(["/about", "/uses", "/mentoring", "/work"])
 
 export function proxy(request: NextRequest) {
   const accept = request.headers.get("accept") ?? ""
-  if (!prefersMarkdown(accept)) return NextResponse.next()
 
   const { pathname } = request.nextUrl
   const mirrored = MIRRORED.has(pathname) || pathname.startsWith("/work/")
-  if (!mirrored) return NextResponse.next()
+
+  if (!mirrored || !prefersMarkdown(accept)) {
+    const pass = NextResponse.next()
+    if (mirrored) pass.headers.set("Vary", "Accept")
+    return pass
+  }
 
   const url = request.nextUrl.clone()
   url.pathname = `/md${pathname}`
-  return NextResponse.rewrite(url)
+  const response = NextResponse.rewrite(url)
+  response.headers.set("Vary", "Accept")
+  return response
 }
 
-/** True when `text/markdown` outranks `text/html` in the Accept header. */
+/**
+ * True when `text/markdown` outranks `text/html` in the Accept header.
+ * Quality values are honoured, so `Accept: text/markdown;q=0.9, text/html` keeps
+ * serving HTML — the agent has to actually ask for markdown first.
+ */
 function prefersMarkdown(accept: string): boolean {
   let markdown = -1
   let html = -1
