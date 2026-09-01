@@ -1,0 +1,103 @@
+/* ---------------------------------------------------------------------------
+   Hero — docs/v3-redesign-plan.md §5.1.
+
+   INTEGRATOR: import this once, after `./globals.css`, in `app/layout.tsx`:
+
+       import "./styles/hero.css"
+
+   Everything here is CSS-only on purpose. The scroll recede is a scroll-driven
+   animation rather than a JS scroll handler (§5.7 "CSS-first"), so it never
+   flashes on hydration and costs no main-thread work. The JS side of the hero
+   only reads `scrollY` inside the WebGL frame loop, and only while the hero is
+   intersecting.
+   --------------------------------------------------------------------------- */
+
+/* The pulsing rule next to the "Scroll" cue. */
+.hero-scroll-line {
+  display: inline-block;
+  width: 32px;
+  height: 1px;
+  background: var(--color-accent);
+  animation: hero-pulse 2.4s var(--ease-reveal) infinite;
+}
+
+@keyframes hero-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scaleX(0.5);
+    transform-origin: left center;
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll recede. The hero section is exactly one viewport tall, so `view()`'s
+   `exit` range runs from "hero fully in view" to "hero fully gone" — the same
+   0 → 1 the reference scene fed to `setProgress()`.
+
+   The blur is capped at 8px (the reference used 14px): a filter on a live
+   WebGL canvas is the single most expensive thing on this screen, and past
+   ~8px the extra radius is invisible behind the vignette.
+   --------------------------------------------------------------------------- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-hero-canvas] {
+      animation: hero-recede linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+
+    [data-hero-canvas][data-hero-phase="still"] {
+      animation: none;
+    }
+
+    #hero-content {
+      animation: hero-lift linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 90%;
+    }
+  }
+}
+
+@keyframes hero-recede {
+  from {
+    opacity: 1;
+    filter: blur(0px);
+  }
+  to {
+    opacity: 0.15;
+    filter: blur(8px);
+  }
+}
+
+@keyframes hero-lift {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(90px);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion: no bob, no recede, no pulse. The SVG still is static by
+   construction, so there is nothing else to switch off.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .hero-scroll-line {
+    animation: none;
+    opacity: 0.7;
+  }
+
+  [data-hero-canvas],
+  #hero-content {
+    animation: none;
+  }
+}

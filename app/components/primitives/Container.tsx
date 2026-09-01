@@ -1,10 +1,12 @@
-import type { ElementType, ReactNode } from "react"
+import type { ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
 
+import type { PolymorphicTag } from "./polymorphic"
+
 export interface ContainerProps {
   children: ReactNode
-  as?: ElementType
+  as?: PolymorphicTag
   /** Drop the horizontal gutters (for full-bleed rails that pad themselves). */
   bleed?: boolean
   className?: string
