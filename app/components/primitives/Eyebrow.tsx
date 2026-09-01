@@ -1,6 +1,8 @@
-import type { ElementType, ReactNode } from "react"
+import type { ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
+
+import type { PolymorphicTag } from "./polymorphic"
 
 export interface EyebrowProps {
   /**
@@ -10,7 +12,7 @@ export interface EyebrowProps {
   children?: ReactNode
   items?: ReactNode[]
   /** Render as something else (`h2` for section headings). Default `p`. */
-  as?: ElementType
+  as?: PolymorphicTag
   className?: string
   id?: string
 }
