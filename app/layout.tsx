@@ -12,6 +12,7 @@ import { TransitionLink } from "./components/primitives/TransitionLink"
 import { fontVariables } from "./fonts"
 
 import "./globals.css"
+import "./styles/hero.css"
 
 export { baseMetadata as metadata } from "@/lib/seo/metadata"
 
