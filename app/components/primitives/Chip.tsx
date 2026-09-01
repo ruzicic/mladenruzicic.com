@@ -35,9 +35,7 @@ export function Chip({
         variant === "brand" && "border text-fg",
         className
       )}
-      style={
-        variant === "brand" && color ? { borderColor: color } : undefined
-      }
+      style={variant === "brand" && color ? { borderColor: color } : undefined}
     >
       {mark ? (
         <span

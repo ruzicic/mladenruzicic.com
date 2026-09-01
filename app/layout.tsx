@@ -1,9 +1,9 @@
 import { Suspense, type ReactNode } from "react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
+import { jsonLdScript, personJsonLd } from "@/lib/seo/jsonld"
 import { HOME } from "@/content/pages/home"
 import { SITE } from "@/content/site"
-import { jsonLdScript, personJsonLd } from "@/lib/seo/jsonld"
 
 import FathomAnalytics from "./components/FathomAnalytics"
 import { Container, SkipLink } from "./components/primitives"

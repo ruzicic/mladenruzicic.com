@@ -144,7 +144,11 @@ export const WORK_STATUSES = [
 ] as const
 export type WorkStatus = (typeof WORK_STATUSES)[number]
 
-export const CONFIDENCES = ["verified", "needs-verification", "private"] as const
+export const CONFIDENCES = [
+  "verified",
+  "needs-verification",
+  "private",
+] as const
 export type Confidence = (typeof CONFIDENCES)[number]
 
 export const CONFIDENTIALITIES = ["public", "limited", "high"] as const
@@ -174,7 +178,9 @@ export const workFrontmatterSchema = z.object({
   line: z.string().min(1).max(120),
   detail: z.string().min(1),
   url: z.url().optional(),
-  links: z.array(z.object({ label: z.string().min(1), url: z.url() })).optional(),
+  links: z
+    .array(z.object({ label: z.string().min(1), url: z.url() }))
+    .optional(),
   media: z
     .array(
       z.object({

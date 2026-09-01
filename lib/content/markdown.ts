@@ -81,7 +81,12 @@ export function workMarkdown(slug: string): string | undefined {
 /** `/md/work` */
 export function workIndexMarkdown(): string {
   const site = getSite()
-  const lines = [h1("Work"), "", "All case studies, products and experiments.", ""]
+  const lines = [
+    h1("Work"),
+    "",
+    "All case studies, products and experiments.",
+    "",
+  ]
   for (const entry of getWork()) {
     lines.push(
       `## ${entry.title}`,
@@ -153,7 +158,9 @@ export function mentoringMarkdown(): string {
     "",
     "## Feedback",
     "",
-    ...getTestimonials().map((t) => `> ${t.quote}\n> — ${t.author} (${t.source})\n`),
+    ...getTestimonials().map(
+      (t) => `> ${t.quote}\n> — ${t.author} (${t.source})\n`
+    ),
   ]
   return lines.join("\n")
 }
@@ -179,7 +186,8 @@ export function llmsTxt(): string {
     "## Work",
     "",
     ...getWork().map(
-      (entry) => `- [${entry.title}](${site.url}/work/${entry.slug}): ${entry.line}`
+      (entry) =>
+        `- [${entry.title}](${site.url}/work/${entry.slug}): ${entry.line}`
     ),
     "",
     "## Links",

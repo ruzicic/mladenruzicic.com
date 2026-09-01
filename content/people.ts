@@ -1,5 +1,6 @@
-import { parseOrThrow, personSchema, type Person } from "@/lib/content/schema"
 import { z } from "zod"
+
+import { parseOrThrow, personSchema, type Person } from "@/lib/content/schema"
 
 /**
  * SEED — "worked alongside". `linkedin` and `note` are OMITTED rather than

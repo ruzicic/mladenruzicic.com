@@ -13,7 +13,9 @@ let polyfillPromise: Promise<unknown> | null = null
 function ensureAnchorPositioning() {
   if (typeof window === "undefined") return
   if (CSS.supports("anchor-name: --a")) return
-  polyfillPromise ??= import("@oddbird/css-anchor-positioning").catch(() => null)
+  polyfillPromise ??= import("@oddbird/css-anchor-positioning").catch(
+    () => null
+  )
   return polyfillPromise
 }
 

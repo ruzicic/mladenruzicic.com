@@ -1,4 +1,8 @@
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react"
+import type {
+  AnchorHTMLAttributes,
+  ButtonHTMLAttributes,
+  ReactNode,
+} from "react"
 import Link from "next/link"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -67,7 +71,9 @@ export function Button({
   const classes = cn(buttonVariants({ variant, size }), className)
 
   if (typeof props.href === "string") {
-    const { href, ...rest } = props as { href: string } & AnchorHTMLAttributes<HTMLAnchorElement>
+    const { href, ...rest } = props as {
+      href: string
+    } & AnchorHTMLAttributes<HTMLAnchorElement>
     const external = /^https?:\/\//.test(href)
     return (
       <Link

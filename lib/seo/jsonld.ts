@@ -1,7 +1,6 @@
+import type { WorkEntry } from "@/lib/content/schema"
 import { COMPANIES } from "@/content/companies"
 import { SITE } from "@/content/site"
-
-import type { WorkEntry } from "@/lib/content/schema"
 
 /**
  * JSON-LD builders. Values come from `content/`, so there is one source of truth
@@ -27,7 +26,11 @@ export function personJsonLd() {
     },
     worksFor: [
       ...(current ? [{ "@type": "Organization", name: current.name }] : []),
-      { "@type": "Organization", name: "TenderLift", url: "https://tenderlift.ch" },
+      {
+        "@type": "Organization",
+        name: "TenderLift",
+        url: "https://tenderlift.ch",
+      },
     ],
     alumniOf: past.map((c) => ({ "@type": "Organization", name: c.name })),
     sameAs: [SITE.links.linkedin, SITE.links.github, SITE.links.mentorcruise],

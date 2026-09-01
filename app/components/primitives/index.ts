@@ -1,12 +1,7 @@
 export { Button, buttonVariants, type ButtonProps } from "./Button"
 export { Chip, type ChipProps } from "./Chip"
 export { Container, type ContainerProps } from "./Container"
-export {
-  Dialog,
-  useDialog,
-  type DialogProps,
-  type UseDialog,
-} from "./Dialog"
+export { Dialog, useDialog, type DialogProps, type UseDialog } from "./Dialog"
 export {
   Display,
   displayToPlainText,

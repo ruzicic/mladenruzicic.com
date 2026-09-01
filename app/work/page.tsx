@@ -25,7 +25,11 @@ export const metadata: Metadata = pageMetadata({
 export default function WorkIndexPage() {
   const work = getWork()
   const groups = [
-    { id: "featured", label: "Featured", items: work.filter((w) => w.featured) },
+    {
+      id: "featured",
+      label: "Featured",
+      items: work.filter((w) => w.featured),
+    },
     {
       id: "companies",
       label: "Companies",

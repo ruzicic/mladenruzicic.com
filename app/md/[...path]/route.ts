@@ -1,3 +1,4 @@
+import { getWorkSlugs } from "@/lib/content"
 import {
   aboutMarkdown,
   MD_CONTENT_TYPE,
@@ -6,7 +7,6 @@ import {
   workIndexMarkdown,
   workMarkdown,
 } from "@/lib/content/markdown"
-import { getWorkSlugs } from "@/lib/content"
 
 /**
  * Markdown mirrors. Reached two ways:
@@ -45,7 +45,8 @@ export async function GET(
   return new Response(body, {
     headers: {
       "Content-Type": MD_CONTENT_TYPE,
-      "Cache-Control": "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+      "Cache-Control":
+        "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
     },
   })
 }
@@ -55,6 +56,7 @@ function render(route: string): string | undefined {
   if (route === "uses") return usesMarkdown()
   if (route === "mentoring") return mentoringMarkdown()
   if (route === "work") return workIndexMarkdown()
-  if (route.startsWith("work/")) return workMarkdown(route.slice("work/".length))
+  if (route.startsWith("work/"))
+    return workMarkdown(route.slice("work/".length))
   return undefined
 }

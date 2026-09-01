@@ -22,11 +22,11 @@
 
   /* Type */
   --font-display: var(--font-gloock), Georgia, "Times New Roman", serif;
-  --font-serif-italic: var(--font-instrument-serif-italic), Georgia,
-    "Times New Roman", serif;
+  --font-serif-italic:
+    var(--font-instrument-serif-italic), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo,
-    monospace;
+  --font-mono:
+    var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Easings */
   --ease-reveal: cubic-bezier(0.2, 0.7, 0.2, 1);

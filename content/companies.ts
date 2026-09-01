@@ -1,3 +1,5 @@
+import { z } from "zod"
+
 import {
   companySchema,
   heroLogoSchema,
@@ -5,7 +7,6 @@ import {
   type Company,
   type HeroLogo,
 } from "@/lib/content/schema"
-import { z } from "zod"
 
 /**
  * SEED — minimal but valid. The copy agent owns the final prose.

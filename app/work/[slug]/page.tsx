@@ -3,7 +3,11 @@ import { notFound } from "next/navigation"
 import { MDXRemote } from "next-mdx-remote/rsc"
 
 import { getWork, getWorkBySlug, getWorkSlugs } from "@/lib/content"
-import { breadcrumbJsonLd, creativeWorkJsonLd, jsonLdScript } from "@/lib/seo/jsonld"
+import {
+  breadcrumbJsonLd,
+  creativeWorkJsonLd,
+  jsonLdScript,
+} from "@/lib/seo/jsonld"
 import { pageMetadata } from "@/lib/seo/metadata"
 
 import {

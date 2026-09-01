@@ -1,9 +1,10 @@
+import { z } from "zod"
+
 import {
   parseOrThrow,
   testimonialSchema,
   type Testimonial,
 } from "@/lib/content/schema"
-import { z } from "zod"
 
 /**
  * Migrated from the old `app/components/Testimonials.tsx`.

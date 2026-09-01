@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og"
 
-import { SITE } from "@/content/site"
 import { gloock, OG_CONTENT_TYPE, OG_SIZE, OgCard } from "@/lib/seo/og"
+import { SITE } from "@/content/site"
 
 export const size = OG_SIZE
 export const contentType = OG_CONTENT_TYPE

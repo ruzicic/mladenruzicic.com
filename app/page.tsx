@@ -106,7 +106,10 @@ export default function HomePage() {
             ))}
           </div>
           <p className="mt-16 text-right">
-            <TransitionLink href="/work" className="font-display text-[clamp(28px,3vw,44px)]">
+            <TransitionLink
+              href="/work"
+              className="font-display text-[clamp(28px,3vw,44px)]"
+            >
               {home.work.allWorkLabel}
             </TransitionLink>
           </p>
@@ -137,7 +140,9 @@ export default function HomePage() {
                 <p className="mt-1 font-mono text-[12px] uppercase tracking-[0.06em] text-muted">
                   {company.role}
                 </p>
-                <p className="mt-2 max-w-[68ch] text-dim-2">{company.summary}</p>
+                <p className="mt-2 max-w-[68ch] text-dim-2">
+                  {company.summary}
+                </p>
                 {company.workSlug ? (
                   <p className="mt-2">
                     <TransitionLink

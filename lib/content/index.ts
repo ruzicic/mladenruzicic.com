@@ -1,11 +1,11 @@
-import { readFileSync, readdirSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import matter from "gray-matter"
 
 import { COMPANIES, HERO_LOGOS } from "@/content/companies"
-import { PEOPLE } from "@/content/people"
 import { HOME } from "@/content/pages/home"
 import { MENTORING } from "@/content/pages/mentoring"
+import { PEOPLE } from "@/content/people"
 import { SITE } from "@/content/site"
 import { TESTIMONIALS } from "@/content/testimonials"
 

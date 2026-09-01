@@ -71,7 +71,9 @@ export function SectionHeader({
       <Eyebrow as="h2" id={id} className="text-fg">
         {title}
       </Eyebrow>
-      {meta ? <Eyebrow className="justify-end text-right">{meta}</Eyebrow> : null}
+      {meta ? (
+        <Eyebrow className="justify-end text-right">{meta}</Eyebrow>
+      ) : null}
     </div>
   )
 }
