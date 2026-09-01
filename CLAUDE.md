@@ -139,6 +139,12 @@ proxy.ts                   Accept: text/markdown → /md/* rewrite (Node runtime
 - `lib/content/index.ts` reads the filesystem: server-only. Client components
   import types and schemas from `@/lib/content/schema`.
 - ESLint ignores `.claude/**` (agent worktrees) and `content/**/*.mdx`.
+- `dynamicParams` is rejected alongside `cacheComponents`. `/work/[slug]` uses
+  `export const instant = false` instead: every slug is prerendered, but Next
+  still builds a fallback shell whose generated `opengraph-image` metadata
+  module awaits `params`, which trips instant-navigation validation in dev.
+- `next-env.d.ts` flips between `.next/dev/types/*` and `.next/types/*`. The
+  committed version is what `next build` produces; ignore the dev-time diff.
 
 ## TODO — assets and facts the owner must supply
 

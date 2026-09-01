@@ -22,6 +22,15 @@ import {
 
 type Params = { slug: string }
 
+/**
+ * Every slug is prerendered by `generateStaticParams`, but Cache Components
+ * still builds a runtime fallback shell for unknown slugs — and Next's generated
+ * `opengraph-image` metadata module awaits `params` there. That is a blocking
+ * navigation by definition, so opt this segment out of instant validation.
+ * (`dynamicParams` is not allowed alongside `cacheComponents`.)
+ */
+export const instant = false
+
 export function generateStaticParams(): Params[] {
   return getWorkSlugs().map((slug) => ({ slug }))
 }
