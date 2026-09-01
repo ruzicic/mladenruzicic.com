@@ -14,7 +14,9 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "format:write": "prettier --write \"**/*.{ts,tsx,mdx,css}\" --cache",
-    "format:check": "prettier --check \"**/*.{ts,tsx,mdx,css}\" --cache"
+    "format:check": "prettier --check \"**/*.{ts,tsx,mdx,css}\" --cache",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@oddbird/css-anchor-positioning": "0.10.2",
@@ -35,8 +37,10 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@eslint/js": "^9.38.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "4.3.3",
     "@tailwindcss/typography": "^0.5.19",
     "@types/mdx": "^2.0.13",
