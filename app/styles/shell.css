@@ -1,0 +1,221 @@
+/* ---------------------------------------------------------------------------
+   shell.css — the ONLY global stylesheet owned by the site-shell agent.
+   `app/globals.css` (tokens, base, vt-* classes, .grain) belongs to the
+   foundation agent and is never edited from here.
+
+   Imported once, from `app/layout.tsx`, immediately after `./globals.css`.
+   Everything below is either (a) something Tailwind utilities cannot express
+   (view-transition pseudo-elements, `@starting-style`, scroll-driven
+   animations, `auto-fit` track lists) or (b) a state rule that has to survive
+   with JavaScript disabled.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* The design's stronger hairline (rgba(242,240,234,.35)); `--color-line` in
+     globals.css is the 12% one. Kept here so no component hardcodes a hex. */
+  --color-line-strong: rgba(242, 240, 234, 0.35);
+  /* Scroll progress 0→1. Written by the rAF fallback in ScrollHairline. */
+  --mr-scroll: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Persistent chrome — docs/v3-redesign-plan.md §5.3.
+   The header and the mobile pill live in the layout and must never crossfade
+   with the page during a view transition.
+   --------------------------------------------------------------------------- */
+::view-transition-group(site-header),
+::view-transition-old(site-header),
+::view-transition-new(site-header),
+::view-transition-group(site-pill),
+::view-transition-old(site-pill),
+::view-transition-new(site-pill) {
+  animation: none !important;
+  mix-blend-mode: normal;
+}
+
+/* ---------------------------------------------------------------------------
+   Preloader — §5.4.
+   The overlay is server-rendered so hydration is clean; visibility is decided
+   before paint by the inline <script> in <head> (`data-preloader="off"`), by
+   the reduced-motion query, and by the <noscript> guard in the layout.
+   --------------------------------------------------------------------------- */
+[data-testid="preloader"] {
+  opacity: 1;
+  transition: opacity 500ms var(--ease-reveal);
+}
+
+[data-testid="preloader"][data-phase="out"] {
+  opacity: 0;
+}
+
+html[data-preloader="off"] [data-testid="preloader"] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="preloader"] {
+    display: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Right-edge scroll hairline — §5.7.
+   Scroll-driven animation where it exists; the rAF fallback writes --mr-scroll.
+   --------------------------------------------------------------------------- */
+@keyframes mr-scroll-progress {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+[data-scroll-hairline] > span {
+  transform-origin: top center;
+  transform: scaleY(var(--mr-scroll, 0));
+}
+
+@supports (animation-timeline: scroll()) {
+  [data-scroll-hairline] > span {
+    animation: mr-scroll-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-scroll-hairline] {
+    display: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Selected work — the design's two-column row and the project-focus effect.
+   CSS-first: the resting state is fully visible, so nothing is hidden before
+   JavaScript runs. `data-work-focus="on"` is only set once the
+   IntersectionObserver has picked an active row.
+   --------------------------------------------------------------------------- */
+.mr-work-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+  gap: 40px 64px;
+  align-items: center;
+}
+
+[data-project] {
+  transition:
+    opacity 600ms var(--ease-reveal),
+    transform 600ms var(--ease-reveal),
+    filter 600ms var(--ease-reveal);
+}
+
+[data-work-focus="on"] [data-project]:not([data-active]) {
+  opacity: 0.35;
+  transform: scale(0.96);
+  filter: blur(2px);
+}
+
+/* ---------------------------------------------------------------------------
+   Mentoring — sticky column + bubbles.
+   --------------------------------------------------------------------------- */
+.mr-mentoring-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: 56px;
+  align-items: start;
+}
+
+/* ---------------------------------------------------------------------------
+   Work-history rail — §5.7, §5.8.
+   --------------------------------------------------------------------------- */
+[data-rail-scroller] {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  cursor: grab;
+}
+
+[data-rail-scroller]::-webkit-scrollbar {
+  display: none;
+}
+
+[data-rail-scroller][data-dragging="1"] {
+  cursor: grabbing;
+  scroll-behavior: auto;
+  user-select: none;
+}
+
+[data-rail-inner] {
+  transition: height 500ms var(--ease-geometry);
+}
+
+[data-rail-band] {
+  transition:
+    left 500ms var(--ease-geometry),
+    width 500ms var(--ease-geometry),
+    transform 250ms var(--ease-reveal),
+    background-color 300ms var(--ease-reveal),
+    box-shadow 400ms var(--ease-reveal);
+}
+
+@media (hover: hover) {
+  [data-rail-band]:not([data-expanded]):hover {
+    transform: scale(1.03);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Mobile pill sheet — §5.6.
+   The Popover panel morphs out of the 220px pill: 999px → 22px radius.
+   --------------------------------------------------------------------------- */
+.mr-pill-sheet {
+  transition:
+    width 350ms var(--ease-pill),
+    border-radius 350ms var(--ease-pill),
+    opacity 200ms var(--ease-pill),
+    display 350ms allow-discrete,
+    overlay 350ms allow-discrete;
+}
+
+@starting-style {
+  .mr-pill-sheet:popover-open {
+    width: 220px;
+    border-radius: var(--radius-pill);
+    opacity: 0;
+  }
+}
+
+.mr-pill-sheet:not(:popover-open) {
+  width: 220px;
+  border-radius: var(--radius-pill);
+  opacity: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion — §5.3, §9. Everything the shell animates goes quiet.
+   (globals.css already zeroes the ::view-transition-* pseudo-elements.)
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  [data-project],
+  [data-rail-inner],
+  [data-rail-band],
+  .mr-pill-sheet {
+    transition: none !important;
+  }
+
+  [data-work-focus="on"] [data-project]:not([data-active]) {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  [data-rail-band]:not([data-expanded]):hover {
+    transform: none;
+  }
+
+  [data-scroll-hairline] > span {
+    animation: none !important;
+  }
+}
