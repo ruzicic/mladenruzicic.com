@@ -1,37 +1,76 @@
 ---
 slug: "wolkabout"
 title: "WolkAbout / Execom"
-kind: company
-status: completed
+shortTitle: "WolkAbout"
+kind: "company"
+status: "completed"
 featured: false
 company: "wolkabout"
 period:
   from: "2016"
   to: "2019"
-role: "Junior → Senior Frontend Engineer, team lead"
+  approx: true
+role: "Junior → Senior Frontend Engineer, then team lead"
 accent: "#12A3A8"
 tech:
   - "Angular"
   - "TypeScript"
   - "RxJS"
-  - "Nx"
-line: "Junior to senior in three years, on IoT frontends pushing live data."
-detail: "Modular Angular applications for IoT products moving large volumes of live data, plus client work, websites and tooling. Led a remote team of five to six."
-confidentiality: limited
+  - "Nx monorepo"
+  - "Micro frontends"
+  - "WebSockets"
+  - "IoT"
+line: "Junior to senior in three years: Angular frontends for IoT platforms moving large volumes of live data."
+detail: "Joined WolkAbout very early and grew from junior into a senior engineer and team lead. Built modular Angular applications for an IoT platform where thousands of devices stream telemetry continuously, plus the SDK and tooling around it, alongside agency client work at parent company Execom."
+links:
+  - label: "@wolkabout/wolk-rest on npm"
+    url: "https://www.npmjs.com/package/@wolkabout/wolk-rest"
+  - label: "wolkabout.com (Web Archive)"
+    url: "http://web.archive.org/web/20210616143417/https://wolkabout.com/"
+metrics:
+  - value: "5–6"
+    label: "engineers in the remote team I led"
+    confidence: "needs-verification"
+confidentiality: "limited"
 seo:
-  description: "Angular and RxJS frontends for WolkAbout's IoT platform, and agency work at Execom."
+  title: "WolkAbout / Execom — IoT platform frontends"
+  description: "Three years from junior to senior at WolkAbout: modular Angular applications for a real-time IoT platform, an SDK, client work and a remote team."
 ---
 
 ## Summary
 
-WolkAbout built an IoT platform; Execom was the parent agency.
+WolkAbout is where I learned to be an engineer. I joined very early, in genuine startup conditions, and grew from a junior developer into a senior one and a team lead in about three years. The domain — industrial IoT — meant every interface question was also a data question.
 
 ## Role and scope
 
-Grew from junior to senior frontend engineer, then led a remote team of five to
-six for the final six months.
+Frontend engineering on the WolkAbout IoT platform, moving over three years from features to architecture to leading a remote team of five to six people in my final six months. Alongside the product, agency work through the parent company Execom: client projects, websites, internal tooling, and technical interviewing.
+
+## Context
+
+An IoT platform is a real-time data problem with a UI attached. Devices in the field publish telemetry continuously; operators need to see the current state of a fleet, drill into one device, and trust that what is on screen is what is true right now. Startup conditions meant the requirements arrived faster than the architecture could absorb them.
+
+## Problem
+
+The default way to build a dashboard falls over here. Rendering every update is wasteful and janky, and buffering too aggressively means an operator acts on stale state. On top of that, several teams needed to ship into the same application without blocking each other, and features that were genuinely useful to one customer were noise to another.
+
+## Decisions
+
+We treated the incoming data as streams rather than as a sequence of state updates, using RxJS to throttle, batch and back-pressure at the edges of the application instead of inside components. Once the streaming boundary was explicit, component code got simple again.
+
+The application was rebuilt as a modular, micro-frontend structure in an Nx monorepo, so capabilities could be composed per deployment and teams could ship independently. That choice cost extra ceremony up front and bought back most of it within a year.
+
+We shipped a REST client and a shared Angular component library as real published packages, so integrators and internal teams consumed the same tooling we did. Being our own first user kept the API honest.
+
+## Contribution
+
+Built large parts of the platform frontend and its live-data layer. Drove the modular architecture. Built and published the SDK and component library. Delivered client projects and the company website. Ran technical interviews. Led the remote team for the final six months, which was my first experience of being responsible for other people's work rather than just my own.
+
+## Outcome
+
+A modular platform frontend that handled continuous telemetry without falling apart, tooling that outlived my time there on npm, and a team that shipped while I was leading it. WolkAbout later pivoted and the marketing site now exists only in the Web Archive.
 
 ## Learnings
 
-Agency work meant new clients, industries and stacks every few weeks. It built
-adaptability.
+Agency work is an underrated education. A new client, industry and stack every few weeks teaches you how to start from nothing and how little of your last project's opinion transfers.
+
+Growing from junior to senior inside one company means your early mistakes stay in the repository with you. That is a good thing. Very few environments give you a three-year feedback loop on your own decisions.

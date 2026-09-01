@@ -1,23 +1,40 @@
 ---
 slug: "montepop"
-title: "Montepop"
-kind: experiment
-status: archived
+title: "MontePop"
+shortTitle: "MontePop"
+kind: "experiment"
+status: "active"
 featured: false
 period:
-  from: "2021"
-  to: "2022"
-role: "Solo builder"
-accent: "#A8A6A0"
+  from: "2025"
+  to: "now"
+  approx: true
+role: "Founder — product and engineering"
+accent: "#3FB68B"
 tech:
-  - "React"
-line: "A short-lived side project. Archived."
-detail: "Kept here for the record rather than the portfolio."
-confidentiality: public
+  - "Offline-first"
+  - "TypeScript"
+  - "Mobile"
+line: "Offline-first educational games, multilingual by default. MVP in progress."
+detail: "A set of small educational games designed to work with no connection at all and to be genuinely multilingual rather than translated after the fact. Currently working toward an MVP."
+url: "https://montepop.com"
+links:
+  - label: "montepop.com"
+    url: "https://montepop.com"
+confidentiality: "public"
 seo:
-  description: "A short-lived side project, archived."
+  title: "MontePop — offline-first educational games"
+  description: "Multilingual educational games built to work without a connection. An early-stage product currently working toward an MVP."
 ---
 
 ## Summary
 
-Kept here for the record rather than the portfolio.
+MontePop is an early-stage educational games product with two constraints set deliberately at the start: it works fully offline, and it treats multiple languages as a first-class part of the content model rather than a later localisation pass. Both are much cheaper to design in than to retrofit.
+
+## Outcome
+
+In progress toward an MVP. Nothing to claim yet.
+
+## Learnings
+
+Offline-first is an architectural decision disguised as a feature. Deciding it on day one determines the data model, the sync strategy and the failure modes; deciding it in month six means rewriting all three.

@@ -1,45 +1,83 @@
 ---
 slug: "studenti-rs"
 title: "studenti.rs"
-kind: product
-status: active
+shortTitle: "studenti.rs"
+kind: "product"
+status: "active"
 featured: true
 highlightRank: 5
 company: "nemestic"
 period:
   from: "2008"
   to: "now"
-role: "Owner and developer"
+role: "Original developer, later owner and operator"
+location: "Serbia"
 accent: "#E8622C"
 tech:
   - "PHP"
-  - "Laravel"
+  - "WordPress"
   - "Cloudflare"
-line: "Serbian student platform, running since 2008."
-detail: "Built at Nemestic as a student, bought back from the company in 2022, then rebuilt and monetized with PRO subscriptions. Moderation and operations largely automated."
+  - "Hetzner"
+  - "RAG"
+  - "Agents"
+line: "Serbian student platform, running since 2008. Built it as a student, bought it back in 2022."
+detail: "A long-running Serbian student community and document library, originally built for the company I worked at while studying. I bought it back in 2022, rebuilt it, monetised it with PRO subscriptions, and now run its moderation, payments and operations almost entirely on automation."
 url: "https://studenti.rs"
+links:
+  - label: "studenti.rs"
+    url: "https://studenti.rs"
 metrics:
   - value: "250k"
     label: "registered users"
-    confidence: "needs-verification"
+    confidence: "verified"
   - value: "45k"
     label: "documents"
     confidence: "needs-verification"
-confidentiality: public
+  - value: "2008"
+    label: "running continuously since"
+    confidence: "verified"
+confidentiality: "public"
 seo:
-  description: "A Serbian student platform I built in 2008, bought back in 2022 and rebuilt."
+  title: "studenti.rs — a student platform, eighteen years running"
+  description: "A Serbian student community and document library built in 2008, bought back in 2022, rebuilt and monetised, with operations run largely by agents."
 ---
 
 ## Summary
 
-A Serbian student platform for coursework and study material, online since 2008.
+studenti.rs is a Serbian student platform I built in 2008, as a student, for the company I worked at. It kept running. In 2022 I bought it back, rebuilt it, and turned it into a small business I operate almost entirely through automation. It is the longest feedback loop I have on any decision I have ever made.
+
+## Role and scope
+
+Original developer in 2008 at Nemestic. Owner and sole operator since 2022: product, rebuild, infrastructure, moderation policy, monetisation, support and the agent systems that run the day-to-day.
 
 ## Context
 
-I built it at Nemestic while still a student, then bought it back from the
-company years later.
+Students need material — notes, past exams, documents — and a place to ask each other things. The platform accumulated both for well over a decade, along with the search visibility that comes from being the thing that was there first and never went away. That audience is the asset. It is also a moderation liability, because a user-generated document library attracts exactly what you would expect.
+
+## Problem
+
+An old platform carries two debts. The technical one is obvious and boring. The operational one is the real constraint: user-generated content needs review, payments need handling, reports need answering, and a single owner with a full-time job cannot be the queue. Before 2022 the site survived on neglect, which caps what it can be.
 
 ## Decisions
 
-- Rebuild on Laravel rather than patch the original WordPress theme.
-- Automate moderation so one person can operate it.
+Buying it back was the first decision, and the reasoning was simple: the audience and the archive were real and irreplaceable, and the code was not. So the code got replaced.
+
+Monetisation went to PRO subscriptions rather than to more advertising. Ads on a student site pay badly and make the product worse for the people using it most.
+
+Operations were automated rather than staffed. Content approval, triage, scheduling, payments, reimbursements and report handling run through an agent system on infrastructure split between Cloudflare and self-hosted machines at Hetzner. An internal RAG layer with hybrid search gives it the platform's own history to answer from, so decisions are consistent with precedent rather than reinvented each time.
+
+Automation runs on policy, not on vibes. The rules for what is acceptable are written down, the agent applies them, and edge cases escalate to me. Automating a judgment you have not made yourself only produces a faster wrong answer.
+
+## Contribution
+
+Built the original platform in 2008. Bought it, rebuilt it and now run it: architecture, infrastructure, subscriptions, moderation policy, and the operational agents that handle approvals, payments, infrastructure health, dependency updates, bug fixes and analytics.
+
+## Outcome
+
+Eighteen years live, a quarter of a million registered users, tens of thousands of documents, and a subscription product — all operated part-time by one person. Revenue figures stay private.
+
+## Learnings
+
+Longevity is a strategy. A product that simply keeps working for a decade accumulates an audience and a search position that money cannot easily buy.
+
+Operational load, not feature work, is what kills solo products. Every hour of manual review is an hour the product cannot grow, which makes automating operations a product decision rather than an engineering indulgence.

@@ -1,35 +1,67 @@
 ---
 slug: "amada"
 title: "Amada"
-kind: product
-status: completed
+shortTitle: "Amada"
+kind: "product"
+status: "maintained"
 featured: true
 highlightRank: 2
 period:
   from: "2025"
   to: "2025"
-role: "Designer and developer"
+  approx: true
+role: "Design and build, solo"
 accent: "#D9A66B"
 tech:
   - "Astro"
+  - "TypeScript"
   - "Vercel"
-line: "A small, polished site for a friend's short-stay rental."
-detail: "Hospitality, photography-led, fast. Built in a weekend and handed over."
+line: "A small, fast, photography-led site for a friend's Airbnb."
+detail: "A direct-booking site for a short-stay rental, built to load instantly on a phone and to make the photographs do the selling. Small scope, held to the same standard as everything else."
 url: "https://stayamada.com"
-confidentiality: public
+links:
+  - label: "stayamada.com"
+    url: "https://stayamada.com"
+confidentiality: "public"
 seo:
-  description: "A small, photography-led site for a friend's short-stay rental, built in Astro."
+  title: "Amada — a site for a short-stay rental"
+  description: "A fast, photography-led direct-booking site for a friend's Airbnb, built with Astro and held to the same standard as larger work."
 ---
 
 ## Summary
 
-A photography-led one-page site for a friend's short-stay rental.
+A friend rents out a place and needed something better than a listing page: a site of their own, at their own address, that makes the place look the way it looks in person. I designed and built it.
 
 ## Role and scope
 
-Design and build, then handover.
+Solo: content structure, layout, typography, image pipeline, build and deployment. A weekend-sized project in scope, treated with the same care as a larger one, because the standard is the point.
+
+## Context
+
+Guests almost always arrive on a phone, often on a link from a message, often on a poor connection, and they decide in a few seconds. The competition is a well-optimised platform listing. The only advantages an independent site has are speed, better photographs and the absence of clutter.
+
+## Problem
+
+Photography-led sites are usually slow, because photographs are heavy and the temptation is to show all of them at full size. A slow gallery loses the visitor before the first image resolves, which inverts the entire reason for building it.
 
 ## Decisions
 
-- Astro, because the page is content and images with almost no interaction.
-- Images do the selling; the type stays out of the way.
+Static output, no client-side framework, no analytics theatre. Astro renders the pages to HTML and ships effectively no JavaScript, so the first paint is the content.
+
+Images are the product, so they get the engineering: responsive sources, modern formats, explicit dimensions to prevent layout shift, and a deliberate ordering so the strongest photograph is also the first one to load.
+
+Type and spacing carry the tone rather than decoration. For a place people are choosing to sleep in, calm reads as trustworthy and busy reads as a listing.
+
+## Contribution
+
+Everything, from the first layout sketch to the deployed site and the small maintenance that follows.
+
+## Outcome
+
+The site is live and in use. It loads immediately on a phone, works with a mediocre connection, and needs almost nothing from me between seasons.
+
+## Learnings
+
+Small projects are the cleanest place to keep a standard honest. There is no team, no ticket and no reviewer to hide behind, so any shortcut is visibly your own.
+
+Doing a favour well is also a good way to keep a skill sharp. This one took a few days and it is still the fastest thing I have shipped.

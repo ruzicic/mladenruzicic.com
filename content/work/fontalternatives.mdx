@@ -1,32 +1,76 @@
 ---
 slug: "fontalternatives"
 title: "FontAlternatives"
-kind: product
-status: active
+shortTitle: "FontAlternatives"
+kind: "product"
+status: "maintained"
 featured: true
 highlightRank: 4
 period:
   from: "2023"
   to: "now"
-role: "Solo founder"
+  approx: true
+role: "Founder and sole maintainer"
 accent: "#EDEDED"
 tech:
   - "Astro"
+  - "TypeScript"
   - "Cloudflare"
-line: "Find free alternatives to expensive typefaces."
-detail: "A typography tool that grew into steady organic traffic. Sister project to FontSwap."
+  - "PostHog"
+  - "GitHub Actions"
+  - "Claude"
+line: "Find free alternatives to expensive typefaces. A vibe-coded experiment that grew into steady organic traffic."
+detail: "A typography discovery tool that pairs commercial typefaces with credible free substitutes. Built in a weekend as an experiment, it found real search demand and now runs on a loop that turns the searches it cannot answer into the content it is missing."
 url: "https://fontalternatives.com"
-confidentiality: public
+links:
+  - label: "fontalternatives.com"
+    url: "https://fontalternatives.com"
+  - label: "FontSwap (Chrome extension)"
+    url: "https://chromewebstore.google.com/detail/fontswap/mhkkpbhepfoejcjomclfmopgdabbfmkm"
+metrics:
+  - value: "16.4K"
+    label: "monthly visits, all organic"
+    confidence: "needs-verification"
+confidentiality: "public"
 seo:
-  description: "A typography tool for finding free alternatives to expensive commercial typefaces."
+  title: "FontAlternatives — free substitutes for commercial typefaces"
+  description: "A typography discovery tool matching expensive typefaces to credible free alternatives, with an automated loop that fills its own content gaps."
 ---
 
 ## Summary
 
-A directory that maps commercial typefaces to free alternatives with similar
-metrics and feel.
+FontAlternatives answers one question: this typeface costs money or is unavailable to me, what should I use instead? It started as a vibe-coded experiment, found search demand it did not expect, and has since become something I maintain deliberately.
+
+## Role and scope
+
+Solo. Product, data model, the site, the automation around it, and the sister Chrome extension, FontSwap.
+
+## Context
+
+Typeface substitution is a real and recurring problem for designers and developers — licence cost, availability, web performance, a brand font that cannot be used on a given surface — and the existing answers are scattered across forum threads and personal blog posts of varying quality. The queries are specific, high-intent and long-tail: people search for one font by name.
+
+## Problem
+
+A static database of pairings is only as good as its coverage, and coverage is exactly what you cannot know in advance. Every visitor who searches for a typeface that is not in the database is both a failure and, more usefully, a precise piece of information about what is missing.
 
 ## Decisions
 
-- Static-first: the whole catalogue is prerendered.
-- One job per page, so search engines can find each pairing.
+Static site, static data. The whole product is content plus structure, so it renders as HTML and serves from the edge. That keeps it fast, cheap and durable, and long-tail organic traffic rewards exactly those properties.
+
+The gaps became the roadmap. Searches that return nothing are captured as demand signals in PostHog, and the missing pairings are drafted and added through an automated flow built on GitHub Actions and Claude, with review before anything is published. Demand decides what gets written, not my guess about what is interesting — a self-improving content loop, and the clearest example I have of AI doing the boring middle of a job while the judgment stays where it belongs.
+
+The pairings are opinionated. Listing five vaguely similar fonts is not an answer; the value is in saying which one to use and being right about the reasoning.
+
+## Contribution
+
+Built the product, the data model and the automation. Maintain it, review what the pipeline proposes, and write the pairings that need a human eye.
+
+## Outcome
+
+Steady organic traffic with no paid acquisition, no newsletter and no distribution effort beyond existing. It also produced FontSwap, a Chrome extension that applies the same idea directly in the browser.
+
+## Learnings
+
+An experiment that finds demand deserves to be taken seriously, and taking it seriously mostly means adding structure to something that started without any.
+
+The most useful automation is not the part that writes. It is the part that decides what to write about, because that is the loop that compounds while you are not looking.

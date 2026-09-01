@@ -1,82 +1,78 @@
-import { homeSchema, parseOrThrow, type Home } from "@/lib/content/schema"
+import type { Home } from "@/lib/content/schema"
 
-/**
- * SEED — minimal but valid. The copy agent owns the final wording.
- * `{braces}` mark the italic accent word; `[[slug]]` tokens in `lede` render as
- * inline chips.
- */
-export const HOME: Home = parseOrThrow(
-  homeSchema,
-  {
-    hero: {
-      eyebrow: [
-        "Technical product owner",
-        "Founder",
-        "Builder",
-        "Lausanne, CH",
-      ],
-      h1: "I build products, platforms and the {systems} around them.",
-      lede: "Currently product owner for [[zf-scalar]] and founder of [[tenderlift]]. Eighteen years of shipping, from PHP sites as a student to AI-native products.",
-      scrollCue: "Scroll",
-    },
-    work: {
-      eyebrow: "Selected work",
-      countLabel: "of many · most recent first",
-      allWorkLabel: "All work",
-    },
-    history: {
-      eyebrow: "Work history",
-      rangeLabel: "Today → 2008 · drag sideways",
-      employedLabel: "Employed",
-      independentLabel: "Independent",
-      alongsideLabel: "Worked alongside",
-    },
-    mentoring: {
-      eyebrow: "Mentoring",
-      h2: "Mentoring engineers who want to {ship}.",
-      lede: "Thirty-plus mentees on MentorCruise. Code reviews, career decisions, and the habit of finishing things.",
-      pageLink: "How mentoring works",
-      externalLink: "Book on MentorCruise",
-    },
-    footer: {
-      copyright: "© 2026 Mladen Ružičić",
-    },
-    preloader: {
-      finalVerb: "Shipping",
-      // ~30 curated from docs/v3-design/spinner-verbs.json.
-      verbs: [
-        "Architecting",
-        "Assembling",
-        "Bootstrapping",
-        "Brewing",
-        "Calibrating",
-        "Churning",
-        "Clauding",
-        "Cogitating",
-        "Compiling",
-        "Composing",
-        "Computing",
-        "Considering",
-        "Crafting",
-        "Deliberating",
-        "Distilling",
-        "Drafting",
-        "Elucidating",
-        "Forging",
-        "Formulating",
-        "Marinating",
-        "Mulling",
-        "Percolating",
-        "Pondering",
-        "Refining",
-        "Reticulating",
-        "Simmering",
-        "Sketching",
-        "Synthesizing",
-        "Tinkering",
-        "Wrangling",
-      ],
-    },
+export const HOME = {
+  hero: {
+    eyebrow: [
+      "Technical product owner",
+      "Founder",
+      "Builder",
+      "Lausanne, CH",
+    ],
+    // {systems} renders in Instrument Serif Italic.
+    h1: "I build products, platforms and the {systems} around them.",
+    // [[zf-scalar]] and [[tenderlift]] render as inline chips.
+    lede: "Eighteen years of shipping, from PSD-to-WordPress to IoT dashboards, AR/VR pipelines and consumer scale at Shopify. Today I own product for a driver-facing app at [[zf-scalar]] and build [[tenderlift]], a Swiss public-procurement platform, end to end.",
+    scrollCue: "Scroll",
   },
-  "content/pages/home.ts"
-)
+  work: {
+    eyebrow: "Selected work",
+    countLabel: "Five of twenty",
+    allWorkLabel: "All work",
+  },
+  history: {
+    eyebrow: "Work history",
+    rangeLabel: "2008 – 2026",
+    employedLabel: "Employed",
+    independentLabel: "Independent",
+    alongsideLabel: "Worked alongside",
+  },
+  mentoring: {
+    eyebrow: "Mentoring",
+    // {ship} renders in Instrument Serif Italic.
+    h2: "Mentoring engineers who want to {ship}.",
+    lede: "Thirty-plus engineers, mostly mid-level people trying to get to senior, and career switchers who need someone to be honest with them. Work between sessions, code review, real projects. Teaching is the fastest way I know to find out whether I actually understand something.",
+    pageLink: "How mentoring works",
+    externalLink: "MentorCruise",
+  },
+  footer: {
+    copyright: "© 2026 Mladen Ružičić",
+  },
+  preloader: {
+    finalVerb: "Shipping",
+    // Curated from docs/v3-design/spinner-verbs.json (186 Claude Code verbs).
+    // Kept the ones that read as work; dropped Boogieing, Lollygagging,
+    // Razzle-dazzling and friends.
+    verbs: [
+      "Architecting",
+      "Bootstrapping",
+      "Brewing",
+      "Calculating",
+      "Cascading",
+      "Cerebrating",
+      "Clauding",
+      "Coalescing",
+      "Cogitating",
+      "Composing",
+      "Computing",
+      "Considering",
+      "Contemplating",
+      "Crafting",
+      "Crunching",
+      "Crystallizing",
+      "Deciphering",
+      "Deliberating",
+      "Forging",
+      "Generating",
+      "Hashing",
+      "Ideating",
+      "Inferring",
+      "Marinating",
+      "Orchestrating",
+      "Percolating",
+      "Processing",
+      "Reticulating",
+      "Synthesizing",
+      "Wrangling",
+    ],
+  },
+} satisfies Home

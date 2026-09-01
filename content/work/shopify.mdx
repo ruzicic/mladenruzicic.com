@@ -1,35 +1,80 @@
 ---
 slug: "shopify"
 title: "Shopify"
-kind: company
-status: completed
+shortTitle: "Shopify"
+kind: "company"
+status: "completed"
 featured: false
 company: "shopify"
 period:
   from: "2021"
   to: "2023"
+  approx: true
 role: "Senior Software Engineer, Shop Minis"
 accent: "#96BF48"
 tech:
   - "React Native"
+  - "React"
   - "TypeScript"
+  - "Remix"
+  - "Node.js"
   - "GraphQL"
-line: "Shop Minis from zero: mini apps inside Shop.app, plus the SDK around them."
-detail: "Worked on the system embedding mini React Native apps inside Shop.app, the partner SDK, and the ecosystem around it. Forward-deployed with the first partner builders."
-confidentiality: limited
+  - "Buildkite"
+  - "GCP"
+line: "Shop Minis from zero: mini React Native apps inside Shop.app, plus the SDK and partner ecosystem."
+detail: "Worked on Shop Minis from the first prototype: a system for embedding third-party mini apps inside Shop.app, with the SDK, review pipeline and partner tooling that had to exist around it. Forward-deployed with the earliest partner builders, and contributed to Shopify checkout."
+links:
+  - label: "Shop Minis"
+    url: "https://shop.app/minis"
+  - label: "Shop.app"
+    url: "https://shop.app"
+metrics:
+  - value: "30M+"
+    label: "monthly active users on Shop.app"
+    confidence: "needs-verification"
+  - value: "10"
+    label: "first building partners on Shop Minis"
+    confidence: "needs-verification"
+confidentiality: "limited"
 seo:
-  description: "Building Shop Minis at Shopify: mini React Native apps inside Shop.app and the partner SDK."
+  title: "Shopify — Shop Minis from zero"
+  description: "Building Shop Minis at Shopify: embedded React Native mini apps inside Shop.app, the partner SDK, and the ecosystem around submission and review."
 ---
 
 ## Summary
 
-Shop Minis let partners ship small React Native apps inside Shop.app.
+I spent a little over two years at Shopify, most of it on Shop Minis: an exploration that became a mini-app ecosystem embedded inside Shop.app. It started as a prototype with a small team and ended as a platform with an SDK, a submission pipeline and outside developers building on it.
 
 ## Role and scope
 
-Senior engineer on the platform and the partner SDK, forward-deployed with the
-first partner builders.
+Senior software engineer, working from zero on Shop Minis: the runtime for embedding mini React Native apps inside the main Shop application, the SDK and building blocks partners used, and the ecosystem around submission, upload, maintenance and promotion. I worked directly with the first partner builders in a forward-deployed style — their bug reports were my backlog. I also contributed to Shopify checkout, a surface that renders across a very large number of stores, and spent six months interviewing.
+
+## Context
+
+Shopify runs on high agency: work is self-directed and the quality bar is assumed rather than enforced by process. A prototype has to earn its way into the product, and once it is in the product it inherits consumer-scale expectations immediately.
+
+## Problem
+
+A super-app model breaks most of the assumptions a normal app is built on. Third-party code renders inside your surface, so the platform owns their performance problems and their failure modes. Partners need an SDK that is small enough to learn in an afternoon and complete enough to build something real. And every feature has to work on a low-end device on a slow connection, because a meaningful share of commerce happens there.
+
+## Decisions
+
+The SDK was designed around the components partners actually needed to build a shoppable experience, not around exposing the platform's internals. Fewer, higher-level building blocks meant less support surface and fewer ways to render something that looked broken inside Shop.
+
+For the live-streaming work, the safety mechanics were part of the feature definition rather than a follow-up: kill switches, spam controls, moderation and takedown paths shipped with it. At that scale, the question is not whether something will be abused but how quickly it can be turned off.
+
+Performance targets were set against the slowest realistic device and network rather than the average, because the average hides the users you are actually losing.
+
+## Contribution
+
+Built and shipped parts of the Minis runtime and SDK, worked on the partner-facing developer experience end to end, and helped take the system from a prototype to something the first cohort of external builders shipped on. Contributed to checkout. Interviewed candidates for over six months.
+
+## Outcome
+
+Shop Minis went from zero to a working partner ecosystem with the first builders shipping into an app used by a very large monthly audience, and mini apps became visible to a large number of Shop customers. My role ended in the May 2023 layoffs, along with roughly three thousand other people.
 
 ## Learnings
 
-A platform is only real once someone outside your team ships on it.
+Consumer scale is a different discipline, not a bigger version of the same one. Kill switches, staged rollouts and takedown flows are product features with real design cost, and they are cheapest when designed with the thing they protect.
+
+Building a platform means your users are developers, and developer trust is slow to earn and fast to lose. One breaking change in an SDK costs more goodwill than three good releases earn.
