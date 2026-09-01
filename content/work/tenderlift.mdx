@@ -1,0 +1,73 @@
+---
+slug: "tenderlift"
+title: "TenderLift"
+shortTitle: "TenderLift"
+kind: "product"
+status: "active"
+featured: true
+highlightRank: 1
+period:
+  from: "2024"
+  to: "now"
+  approx: true
+role: "Founder — product, engineering and everything else"
+location: "Switzerland"
+accent: "#F5DF4D"
+tech:
+  - "Next.js"
+  - "TypeScript"
+  - "Postgres"
+  - "Cloudflare"
+  - "Claude"
+  - "Agents"
+line: "Swiss public-procurement intelligence for supplier-side SMEs: find, assess and win relevant tenders."
+detail: "TenderLift monitors SIMAP and cantonal procurement notices, ranks them against a company profile, summarises requirements and scores eligibility across Switzerland's official languages. I build and operate all of it: ingestion, matching, product, support and sales."
+url: "https://tenderlift.ch"
+links:
+  - label: "tenderlift.ch"
+    url: "https://tenderlift.ch"
+confidentiality: "public"
+seo:
+  title: "TenderLift — Swiss public-procurement intelligence"
+  description: "A procurement platform for Swiss SMEs: monitors SIMAP and cantonal notices, ranks relevance, summarises requirements and scores eligibility."
+---
+
+## Summary
+
+TenderLift is a Swiss public-procurement intelligence platform for the supplier side of the market. It watches the places tenders are published, decides which ones are worth a specific company's attention, and does the reading that would otherwise take a person a morning. I founded it and run it end to end.
+
+## Role and scope
+
+Everything: market and customer discovery, product, the ingestion and enrichment pipeline, the application, infrastructure, operations, support and sales conversations. This is the project where I cannot hand any part of the problem to someone else, which is precisely why it is the most useful thing I do.
+
+## Context
+
+Swiss public procurement is a large, continuous market that is technically open to everyone and practically opaque. Notices are spread across SIMAP, cantonal portals and below-threshold publications, in German, French and Italian, in formats designed for legal completeness rather than for reading. Large suppliers staff a bid team. An SME has a person who checks portals between other jobs, or does not check them at all.
+
+## Problem
+
+The problem is not access to the notices. It is relevance and effort. Most published tenders are irrelevant to any given company, and the cost of finding that out is reading a long document. Miss the few that matter and you lose the year's pipeline; read all of them and you have hired someone to do nothing else.
+
+## Decisions
+
+Relevance is scored against a structured company profile — what a supplier actually does, where, at what size — rather than against keywords. Keyword alerts are the incumbent solution and they fail in both directions.
+
+Language is a first-class part of the domain, not a translation layer bolted on. A Swiss supplier's market is multilingual by default, so ingestion, matching and summarisation are built to work across languages rather than to normalise everything into one.
+
+AI is used where it creates leverage and nowhere else: summarising requirements, classifying and matching notices, and reasoning about eligibility criteria. The scoring is explainable, because a supplier deciding whether to spend two weeks on a bid needs to see why a tender was ranked highly, not just that it was.
+
+Operations run on the same principle. Long-running agents handle ingestion health, internal reporting, support triage and routine maintenance, with a memory layer so that context survives between runs. The judgment — what to build, which segment to serve, when a score is wrong — stays mine.
+
+## Contribution
+
+Designed and built the ingestion and enrichment pipeline, the matching and scoring system, the application and the operational tooling. Ran the customer discovery that defined the segment, and the sales conversations that keep correcting it.
+
+## Outcome
+
+TenderLift is live and in active development. Its metrics are private for now.
+
+## Learnings
+
+Ugly markets are good markets. Domains with legal language, fragmented sources and no incumbent product are unpleasant enough to keep most builders out, and the pain inside them is real.
+
+Building the product is the easy half. Owning distribution, pricing and the conversation with a sceptical SME is the half that decides whether any of it matters — a lesson earlier projects taught me more expensively.
