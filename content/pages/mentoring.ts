@@ -9,7 +9,7 @@ export const MENTORING = {
   eyebrow: ["Mentoring", "One to one", "Since 2021"],
   // {ship} renders in Instrument Serif Italic, as on the homepage section.
   h1: "Mentoring engineers who want to {ship}.",
-  lede: "I have mentored more than thirty engineers through MentorCruise, mostly mid-level developers pushing toward senior and career switchers who need someone to be straight with them. It is a small, deliberate part of what I do. I take a handful of people at a time, because anything more stops being useful.",
+  lede: "I have mentored more than forty engineers through MentorCruise since 2021, mostly mid-level developers pushing toward senior and career switchers who need someone to be straight with them. The platform ranks me in the top 2% of its 5,500-plus mentors, at a 5/5 rating. It is still a small, deliberate part of what I do: I take a handful of people at a time, because anything more stops being useful.",
   whoFor: [
     "Mid-level engineers who can build features and want to know what separates them from the senior people around them.",
     "Career switchers who have finished the courses and now need real feedback on real code.",

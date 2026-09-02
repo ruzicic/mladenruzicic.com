@@ -25,7 +25,7 @@ export const HOME = {
     eyebrow: "Mentoring",
     // {ship} renders in Instrument Serif Italic.
     h2: "Mentoring engineers who want to {ship}.",
-    lede: "Thirty-plus engineers, mostly mid-level people trying to get to senior, and career switchers who need someone to be honest with them. Work between sessions, code review, real projects. Teaching is the fastest way I know to find out whether I actually understand something.",
+    lede: "Forty-plus engineers, mostly mid-level people trying to get to senior, and career switchers who need someone to be honest with them. Work between sessions, code review, real projects. Teaching is the fastest way I know to find out whether I actually understand something.",
     pageLink: "How mentoring works",
     externalLink: "MentorCruise",
   },
