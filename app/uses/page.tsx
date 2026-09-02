@@ -19,10 +19,11 @@ export const metadata: Metadata = pageMetadata({
   title: page.title,
   description: page.description,
   path: "/uses",
+  type: "website",
 })
 
 export default function UsesPage() {
-  const { title, description, updated, body } = getPage("uses")
+  const { title, description, updated, body, h1, eyebrow } = getPage("uses")
 
   return (
     <PageTransition>
@@ -41,9 +42,9 @@ export default function UsesPage() {
 
         <Container className="py-[72px] md:py-[96px]">
           <header className="max-w-[52ch]">
-            <Eyebrow items={["Uses", "Hardware and software"]} />
+            <Eyebrow items={eyebrow} />
             <Display as="h1" size="section" className="mt-6">
-              {title}
+              {h1}
             </Display>
             <p className="mt-6 mb-0 text-[19px] leading-[1.5] text-dim">
               {description}

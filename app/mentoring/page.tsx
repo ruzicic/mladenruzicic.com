@@ -23,6 +23,7 @@ export const metadata: Metadata = pageMetadata({
   title: mentoring.seo.title,
   description: mentoring.seo.description,
   path: "/mentoring",
+  type: "website",
 })
 
 /**
@@ -57,7 +58,7 @@ export default function MentoringPage() {
           <GrainSurface />
           <div aria-hidden className="scrim-header" />
           <Container className="relative z-[2] py-[80px] md:py-[112px]">
-            <Eyebrow items={["Mentoring", "One to one", "Since 2021"]} />
+            <Eyebrow items={copy.eyebrow} />
             <Display as="h1" size="section" className="mt-6 max-w-[18ch]">
               {copy.h1}
             </Display>
@@ -166,7 +167,7 @@ export default function MentoringPage() {
         <Section label="Start" divider className="py-[72px] md:py-[96px]">
           <div className="flex flex-col items-start gap-7">
             <Display as="h2" size="sub" className="max-w-[20ch]">
-              {"Bring something {specific} and we will start there."}
+              {copy.closing.h2}
             </Display>
             <div className="flex flex-wrap items-center gap-4">
               <Button href={copy.cta.url} size="lg">

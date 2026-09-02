@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import type { Metadata } from "next"
 
-import { getWork } from "@/lib/content"
+import { getWork, getWorkPage } from "@/lib/content"
 import { itemListJsonLd, jsonLdScript } from "@/lib/seo/jsonld"
 import { pageMetadata } from "@/lib/seo/metadata"
 
@@ -22,11 +22,13 @@ import {
   type FilterId,
 } from "../components/work-system"
 
+const copy = getWorkPage()
+
 export const metadata: Metadata = pageMetadata({
-  title: "Work",
-  description:
-    "Case studies and products: companies I have worked for, things I have built on my own, and the experiments worth keeping.",
+  title: copy.seo.title,
+  description: copy.seo.description,
   path: "/work",
+  type: "website",
 })
 
 /**
@@ -76,19 +78,15 @@ export default function WorkIndexPage() {
         <Container className="py-[72px] md:py-[96px]">
           <header className="max-w-[52ch]">
             <Eyebrow
-              items={[
-                "Work",
-                `${work.length} entries`,
-                "featured first, then most recent",
-              ]}
+              items={copy.eyebrow.map((item) =>
+                item.replace("{count}", String(work.length))
+              )}
             />
             <Display as="h1" size="section" className="mt-6">
-              {"Everything I have {shipped} that is mine to show."}
+              {copy.h1}
             </Display>
             <p className="mt-6 mb-0 text-[19px] leading-[1.5] text-dim">
-              Four employers, a handful of products I run on my own, and the
-              experiments that taught me something. Company work is described at
-              the level its confidentiality allows.
+              {copy.lede}
             </p>
           </header>
 
