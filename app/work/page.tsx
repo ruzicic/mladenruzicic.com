@@ -69,7 +69,7 @@ export default function WorkIndexPage() {
 
   return (
     <PageTransition>
-      <main id="main">
+      <div>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={jsonLdScript(itemListJsonLd(work))}
@@ -100,7 +100,7 @@ export default function WorkIndexPage() {
             </Suspense>
           </div>
         </Container>
-      </main>
+      </div>
     </PageTransition>
   )
 }

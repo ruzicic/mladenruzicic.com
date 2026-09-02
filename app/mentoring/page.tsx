@@ -42,7 +42,7 @@ export default function MentoringPage() {
 
   return (
     <PageTransition>
-      <main id="main">
+      <div>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={jsonLdScript([
@@ -181,7 +181,7 @@ export default function MentoringPage() {
             </div>
           </div>
         </Section>
-      </main>
+      </div>
     </PageTransition>
   )
 }

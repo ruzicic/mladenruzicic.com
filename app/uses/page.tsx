@@ -28,7 +28,7 @@ export default function UsesPage() {
 
   return (
     <PageTransition>
-      <main id="main">
+      <div>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={jsonLdScript(
@@ -62,7 +62,7 @@ export default function UsesPage() {
             <MDXRemote source={body} />
           </Prose>
         </Container>
-      </main>
+      </div>
     </PageTransition>
   )
 }

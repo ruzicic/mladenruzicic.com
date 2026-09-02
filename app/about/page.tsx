@@ -55,7 +55,7 @@ export default function AboutPage() {
 
   return (
     <PageTransition>
-      <main id="main">
+      <div>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={jsonLdScript(
@@ -118,7 +118,7 @@ export default function AboutPage() {
             ))}
           </ul>
         </Section>
-      </main>
+      </div>
     </PageTransition>
   )
 }
