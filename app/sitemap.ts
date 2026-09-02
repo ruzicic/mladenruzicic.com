@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next"
 
 import { getPage, getSite, getWork } from "@/lib/content"
-import { BUILD_DATE } from "@/lib/content/markdown"
+import { LAST_UPDATED } from "@/lib/content/markdown"
 
 /**
  * Built from `content/`, so a new case study appears without touching this file.
@@ -21,19 +21,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${site.url}/`,
       changeFrequency: "weekly",
       priority: 1,
-      lastModified: BUILD_DATE,
+      lastModified: LAST_UPDATED,
     },
     {
       url: `${site.url}/work`,
       changeFrequency: "weekly",
       priority: 0.9,
-      lastModified: BUILD_DATE,
+      lastModified: LAST_UPDATED,
     },
     {
       url: `${site.url}/mentoring`,
       changeFrequency: "monthly",
       priority: 0.9,
-      lastModified: BUILD_DATE,
+      lastModified: LAST_UPDATED,
     },
     {
       url: `${site.url}/about`,
@@ -56,7 +56,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         ? "monthly"
         : "yearly",
     priority: entry.featured ? 0.8 : 0.6,
-    lastModified: BUILD_DATE,
+    lastModified: LAST_UPDATED,
   }))
 
   return [...staticRoutes, ...workRoutes]

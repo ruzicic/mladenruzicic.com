@@ -25,8 +25,19 @@ import type { WorkEntry } from "./schema"
 export const MD_CONTENT_TYPE = "text/markdown; charset=utf-8"
 export const TXT_CONTENT_TYPE = "text/plain; charset=utf-8"
 
-/** Build date, used where the content model has no `updated` of its own. */
-export const BUILD_DATE = new Date().toISOString().slice(0, 10)
+/**
+ * The date the mirrors and the sitemap report, for anything the content model
+ * does not stamp itself (case studies have no per-entry `updated`).
+ *
+ * Derived from the newest `updated` in `content/`, NOT from the clock. Two
+ * reasons: Cache Components rejects a bare `new Date()` during a prerender, and
+ * a wall-clock value would rewrite every `<lastmod>` on every deploy, which
+ * tells crawlers a page changed when only the build did. An edit to
+ * `content/pages/*.mdx` moves this; a rebuild does not.
+ */
+export const LAST_UPDATED = [getPage("about").updated, getPage("uses").updated]
+  .sort()
+  .at(-1) as string
 
 const site = getSite()
 
@@ -53,7 +64,7 @@ function header({ title, description, path, updated }: HeaderInput): string {
     `title: ${yamlString(title)}`,
     `description: ${yamlString(description)}`,
     `canonical: ${yamlString(`${site.url}${path}`)}`,
-    `updated: ${yamlString(updated ?? BUILD_DATE)}`,
+    `updated: ${yamlString(updated ?? LAST_UPDATED)}`,
     `source: ${yamlString(site.name)}`,
     "---",
     "",
@@ -384,7 +395,7 @@ export function llmsTxt(): string {
     "Any page is available as markdown by appending `.md` to its path, or by",
     "sending `Accept: text/markdown`.",
     "",
-    `Last updated: ${BUILD_DATE}`,
+    `Last updated: ${LAST_UPDATED}`,
     "",
   ].join("\n")
 }
@@ -483,7 +494,7 @@ export function llmsFullTxt(): string {
     `- ${site.url}/about`,
     `- ${site.url}/uses`,
     "",
-    `Last updated: ${BUILD_DATE}`,
+    `Last updated: ${LAST_UPDATED}`,
     ""
   )
 
