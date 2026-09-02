@@ -13,18 +13,38 @@ are trying to enforce.
 | `a11y.spec.ts` | axe on the core routes — no `serious`/`critical` violations. |
 | `no-js.spec.ts` | `javaScriptEnabled: false` — hero, work rows, timeline, mentoring bubbles, and a case study still render. |
 | `reduced-motion.spec.ts` | `reduced-motion` project only — no preloader, no three.js request, hero still (not canvas), zero running animations. |
-| `motion.spec.ts` | Desktop Chrome only — preloader lifecycle (once per session via `sessionStorage`), hero canvas mount, CLS budget. |
-| `keyboard.spec.ts` | Tab order (skip link → nav → sound toggle), visible focus, timeline band Enter/Escape/ArrowRight, "worked alongside" popover. |
-| `transitions.spec.ts` | Desktop Chrome only — work row → case study navigation, back navigation, timeline-band state across Cache Components route retention. |
+| `motion.spec.ts` | Desktop Chrome + Desktop Safari — preloader lifecycle (once per session via `sessionStorage`), hero canvas mount, CLS budget. |
+| `keyboard.spec.ts` | Tab order (skip link → nav → sound toggle) and visible focus, both Chromium-only; `keyboardControls` covers the same controls on every engine by focusing them directly; timeline band Enter/Escape/ArrowRight; "worked alongside" popover. |
+| `transitions.spec.ts` | Desktop Chrome + Desktop Safari — work row → case study navigation, back navigation, timeline-band state across Cache Components route retention. |
 | `mobile.spec.ts` | Mobile Safari only — no horizontal overflow, mobile pill and its sheet. |
 | `machine.spec.ts` | `/llms.txt`, `/llms-full.txt`, `/*.md` mirrors, `Accept: text/markdown` negotiation, `Person` JSON-LD. |
-| `budgets.spec.ts` | JS/font transfer size, three.js chunk timing relative to LCP. |
-| `helpers.ts` | Console-error collector, sitemap reader, CLS/LCP `PerformanceObserver` injection, resource-timing and request-tracking helpers. Shared by the specs above. |
+| `budgets.spec.ts` | Initial route JS on `/` (the document's own `<script src>` set) against 200 KB gz, font-file count, three.js chunk timing relative to LCP. |
+| `helpers.ts` | Console-error collector, sitemap reader, CLS/LCP `PerformanceObserver` injection, resource-timing and request-tracking helpers, and the `waitForPreloaderGone` / `waitForRouteReady` settle waits. Shared by the specs above. |
+
+## Projects
+
+| Project | Engine | Specs |
+|---|---|---|
+| `Desktop Chrome` | Chromium 1440×900 | everything except `mobile.spec.ts` and `reduced-motion.spec.ts` |
+| `Mobile Safari` | WebKit, iPhone 14 390×844 | `mobile.spec.ts` |
+| `Desktop Safari` | WebKit 1440×900 | `transitions`, `keyboard`, `a11y`, `motion` |
+| `reduced-motion` | Chromium with `reducedMotion: "reduce"` | `reduced-motion.spec.ts` |
+
+### The one WebKit caveat
+
+macOS ships with "Press Tab to highlight each item" off, and Playwright's
+WebKit inherits it: pressing Tab on `/` cycles `DIV -> BODY -> DIV` and never
+focuses a link. That is the platform's setting, not something the site
+controls, so the two Tab-order tests in `keyboard.spec.ts` are gated on
+`browserName !== "webkit"`. The `keyboardControls` test covers the same six
+header controls on every engine by focusing each one directly and asserting the
+`2px solid #F5DF4D` ring — which is exactly what a Safari user with full
+keyboard access enabled sees.
 
 ## Running locally
 
-Two ways to get a server on port **3104** (fixed, so it never collides with
-the other wave-2 agents' dev servers on 3101–3103):
+The port is fixed at **3104** so it never collides with the other agents' dev
+servers on 3101–3103.
 
 **Option A — let Playwright manage it (simplest):**
 
@@ -43,12 +63,26 @@ pnpm dev -p 3104          # terminal 1, leave running
 pnpm test:e2e             # terminal 2 — reuses the server above
 ```
 
+**Option C — the production path, exactly what CI runs:**
+
+```sh
+pnpm build
+CI=1 pnpm test:e2e
+```
+
+`CI=1` switches `webServer` to `pnpm start -p 3104` and turns off
+`reuseExistingServer`, so build first or the server has nothing to serve. It
+also turns on one retry and the GitHub + HTML reporters. This is the only mode
+in which `budgets.spec.ts` numbers mean anything — a dev build's chunks are
+unminified.
+
 Useful variants:
 
 ```sh
 pnpm test:e2e:ui                          # Playwright's UI mode
 pnpm exec playwright test routes.spec.ts  # one file
 pnpm exec playwright test --project="Desktop Chrome"
+pnpm exec playwright test --project="Desktop Safari"
 pnpm exec playwright test --project="reduced-motion"
 pnpm exec playwright test --project="Mobile Safari"
 pnpm exec playwright show-report          # open the HTML report after a run
@@ -59,29 +93,31 @@ Traces are kept for failed tests (`trace: 'retain-on-failure'`); open one with
 
 ## Running in CI
 
-`.github/workflows/e2e.yml` runs on every pull request: installs dependencies,
-installs the Chromium + WebKit browsers (`playwright install --with-deps`),
-runs `pnpm build && pnpm start -p 3104` as the `webServer` (no dev server, no
-reuse), executes the full suite, and uploads the HTML report as an artifact
-when the run fails.
+`.github/workflows/e2e.yml` runs on every pull request and on push to `main`.
+It restores `.next/cache`, installs dependencies, installs the Chromium +
+WebKit browsers (`playwright install --with-deps`), runs **`pnpm build` as its
+own step**, then runs the suite with `CI=true` so `webServer` only has to start
+`pnpm start -p 3104`. The HTML report is uploaded as an artifact when the run
+fails.
 
-## Expected state against a WIP base
+Building in a separate step matters: a cold Next 16 build on a 2-core runner
+can outlast any sensible `webServer.timeout`, and when it does, a plain compile
+error is reported as "Timed out waiting for the web server".
 
-This harness targets the **finished** site. Run against an unfinished base
-(e.g. the wave-1 foundation snapshot before the hero, shell, and work-system
-agents land) and a large fraction of it is *expected* to fail — that's the
-harness doing its job, not a bug. Failures fall into two buckets:
+## Reading a red run
 
-1. **Missing feature, not a harness bug.** A test-id from the brief
-   (`hero`, `hero-canvas`, `hero-still`, `preloader`, `work-rows`, `timeline`,
-   `timeline-band`, `mobile-pill`) isn't in the DOM yet, or a page is still a
-   labeled "SKELETON" placeholder. These clear up as the other agents' work
-   merges in — no change needed here.
-2. **Harness bug.** The selector, assertion, or config is wrong even against
-   the intended final markup. These are bugs in this suite and should be
-   fixed here.
+The suite is green: **45 passed, 4 skipped, 0 flaky** in ~37 s across all four
+projects. Treat any failure as real. Those four skips are the only expected
+ones; if you see a fifth, find out why before shipping.
 
-When triaging a red run, check first whether the missing piece is one of the
-test ids above or a "SKELETON" comment in the relevant `app/**/page.tsx` —
-if so, it's (1); if the test's own logic looks off against
-`docs/v3-content-contract.md` or `docs/v3-redesign-plan.md`, it's (2).
+| Skip | Where | Why |
+|---|---|---|
+| `"worked alongside" popover` | `Desktop Chrome`, `Desktop Safari` | `content/people.ts` intentionally ships without people until real LinkedIn URLs and notes exist (see the TODO list in `CLAUDE.md`). Self-skips on the missing heading and starts running the moment the content lands. |
+| `Tab reaches the skip link…` | `Desktop Safari` | The WebKit caveat above. `keyboardControls` covers the same six controls there. |
+| `focused elements keep a visible focus indicator` | `Desktop Safari` | Same. |
+
+Tests that self-skip on a missing `data-testid` (`timeline-band`,
+`mobile-pill`, …) are a deliberate escape hatch from when the redesign was
+being built in parallel. Every one of those ids exists today, so a skip that is
+not in the table above means something regressed out of the DOM — not that a
+feature is "not built yet".
