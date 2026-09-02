@@ -12,6 +12,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react"
 
+import { brandInkOnDark, inkOn } from "@/lib/color"
 import type { Company, CompanyId, Home, Person } from "@/lib/content/schema"
 
 import { useHeroHighlight } from "../hero/highlight-store"
@@ -325,16 +326,11 @@ export function TimelineRail({
                     </span>
                   </span>
                   <span className="flex items-center gap-2 overflow-hidden font-mono text-[10px] tracking-[0.06em] whitespace-nowrap">
-                    <span
-                      style={{
-                        color: company.color,
-                        filter: "brightness(1.35)",
-                      }}
-                    >
+                    <span style={{ color: brandInkOnDark(company.color) }}>
                       {company.yearsLabel}
                     </span>
                     {company.approx ? (
-                      <span className="rounded-[3px] border border-line px-[5px] py-px text-[9px] uppercase tracking-[0.08em] text-muted">
+                      <span className="rounded-[3px] border border-line px-[5px] py-px text-[9px] uppercase tracking-[0.08em] text-dim">
                         ≈ dates approximate
                       </span>
                     ) : null}
@@ -383,10 +379,7 @@ export function TimelineRail({
                     <p className="m-0 border-t border-line pt-4 text-[15px] leading-[1.5]">
                       <span
                         className="mb-[6px] block font-mono text-[11px] uppercase tracking-[0.1em]"
-                        style={{
-                          color: company.color,
-                          filter: "brightness(1.35)",
-                        }}
+                        style={{ color: brandInkOnDark(company.color) }}
                       >
                         Worth knowing
                       </span>
@@ -535,12 +528,13 @@ function BandMark({ company, size }: { company: Company; size: number }) {
   return (
     <span
       aria-hidden
-      className="grid flex-none place-items-center font-mono font-semibold text-bg"
+      className="grid flex-none place-items-center font-mono font-semibold"
       style={{
         width: size,
         height: size,
         borderRadius: radius,
         background: company.color,
+        color: inkOn(company.color),
         fontSize: size >= 40 ? 20 : 9,
       }}
     >

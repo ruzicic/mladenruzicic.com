@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 
+import { inkOn } from "@/lib/color"
 import { cn } from "@/lib/utils"
 
 export interface ChipProps {
@@ -40,8 +41,11 @@ export function Chip({
       {mark ? (
         <span
           aria-hidden
-          className="grid h-[18px] w-[18px] place-items-center rounded-xs text-[9px] font-semibold text-bg"
-          style={{ background: color ?? "var(--color-accent)" }}
+          className="grid h-[18px] w-[18px] place-items-center rounded-xs text-[9px] font-semibold"
+          style={{
+            background: color ?? "var(--color-accent)",
+            color: inkOn(color ?? "#f5df4d"),
+          }}
         >
           {mark}
         </span>

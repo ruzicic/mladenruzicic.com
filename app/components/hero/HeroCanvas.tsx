@@ -26,6 +26,27 @@ const Scene = dynamic(() => import("./Scene"), { ssr: false })
 
 type Phase = "poster" | "still" | "loading" | "live"
 
+/**
+ * The first-visit preloader (see app/components/preloader) fades out ~1.5s in.
+ * Parsing the three.js chunk on the main thread during that fade makes it
+ * stutter, so the scene waits for the preloader to announce it is gone
+ * (or 3s, whichever comes first). Resolves immediately when there is none.
+ */
+function waitForPreloader(): Promise<void> {
+  if (typeof document === "undefined") return Promise.resolve()
+  if (!document.querySelector('[data-testid="preloader"]'))
+    return Promise.resolve()
+  return new Promise((resolve) => {
+    const done = () => {
+      window.removeEventListener("mr:preloader:done", done)
+      window.clearTimeout(timer)
+      resolve()
+    }
+    const timer = window.setTimeout(done, 3000)
+    window.addEventListener("mr:preloader:done", done)
+  })
+}
+
 function prefersReducedMotion(): boolean {
   return (
     typeof window !== "undefined" &&
@@ -102,6 +123,7 @@ export function HeroCanvas({ logos }: { logos: HeroLogoShard[] }) {
       const fonts = document.fonts?.ready ?? Promise.resolve()
       fonts
         .catch(() => undefined)
+        .then(waitForPreloader)
         .then(() => {
           if (cancelled || prefersReducedMotion()) return
           cancelIdle = onIdle(() => {
@@ -139,7 +161,7 @@ export function HeroCanvas({ logos }: { logos: HeroLogoShard[] }) {
   return (
     <div
       ref={wrapperRef}
-      data-testid="hero-canvas"
+      data-testid={phase === "still" ? undefined : "hero-canvas"}
       data-hero-canvas
       data-hero-phase={phase}
       aria-hidden

@@ -108,7 +108,7 @@ test("timeline band: Enter expands, Escape collapses, ArrowRight scrolls the rai
     "false"
   )
 
-  const rail = page.locator('[data-testid="timeline"]')
+  const rail = page.locator("[data-rail-scroller]").first()
   const scrollBefore = await rail.evaluate((el) => el.scrollLeft)
   await band.focus()
   await page.keyboard.press("ArrowRight")

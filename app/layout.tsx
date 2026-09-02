@@ -83,7 +83,7 @@ export default async function RootLayout({
         <Suspense fallback={null}>
           <FathomAnalytics />
         </Suspense>
-        <SpeedInsights sampleRate={0.3} />
+        {process.env.VERCEL ? <SpeedInsights sampleRate={0.3} /> : null}
       </body>
     </html>
   )

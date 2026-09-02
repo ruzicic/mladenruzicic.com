@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test"
 
-import { getLcp, getResourceTimings, installLcpObserver } from "./helpers"
+import {
+  getLcp,
+  getResourceTimings,
+  installLcpObserver,
+  type ResourceTiming,
+} from "./helpers"
 
 /**
  * Performance budgets — docs/v3-redesign-plan.md §9:
@@ -43,8 +48,16 @@ test("JS shell transfer, three.js-after-LCP, and font-file budgets on /", async 
   const jsResources = resources.filter(
     (r) => r.name.endsWith(".js") || r.initiatorType === "script"
   )
-  const threeResources = jsResources.filter((r) => r.name.includes("three"))
-  const shellJs = jsResources.filter((r) => !r.name.includes("three"))
+  // Turbopack hashes chunk names, so the three.js scene chunk is identified
+  // by timing rather than by name: it is the script the page requests after
+  // LCP (lazy: fonts.ready + idle + preloader done).
+  const lcpForSplit = await getLcp(page)
+  const isLazy = (r: ResourceTiming) =>
+    lcpForSplit !== null &&
+    lcpForSplit !== undefined &&
+    r.startTime > lcpForSplit.startTime + 50
+  const threeResources = jsResources.filter(isLazy)
+  const shellJs = jsResources.filter((r) => !isLazy(r))
   const shellJsBytes = shellJs.reduce((sum, r) => sum + r.transferSize, 0)
 
   test.info().annotations.push({

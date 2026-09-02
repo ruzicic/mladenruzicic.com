@@ -1,5 +1,6 @@
 import { ViewTransition } from "react"
 
+import { brandInkOnDark, inkOn } from "@/lib/color"
 import { getCompany, getFeaturedWork, getHome } from "@/lib/content"
 import type { WorkEntry, WorkStatus } from "@/lib/content/schema"
 
@@ -102,7 +103,6 @@ export function WorkRows() {
     <section
       id="work"
       data-section="Work"
-      data-testid="work-rows"
       aria-labelledby="work-heading"
       className="relative pb-20 pt-[120px]"
     >
@@ -113,7 +113,7 @@ export function WorkRows() {
           meta={`${featured.length} ${home.work.countLabel}`}
         />
 
-        <div className="grid gap-[112px]">
+        <div className="grid gap-[112px]" data-testid="work-rows">
           {featured.map((entry) => {
             const company = entry.company
               ? getCompany(entry.company)
@@ -151,12 +151,15 @@ export function WorkRows() {
                           href="#history"
                           data-hover
                           className="inline-flex items-center gap-2"
-                          style={{ color: company.color }}
+                          style={{ color: brandInkOnDark(company.color) }}
                         >
                           <span
                             aria-hidden
                             className="inline-block h-[14px] w-[14px] rounded-[3px]"
-                            style={{ background: company.color }}
+                            style={{
+                              background: company.color,
+                              color: inkOn(company.color),
+                            }}
                           />
                           {company.short}
                         </a>

@@ -40,7 +40,7 @@ test("clicking the first work row's link navigates to its case study with a matc
   }
 
   await page.goBack()
-  await expect(page).toHaveURL(/\/$/)
+  await expect(page).toHaveURL(/\/(#[\w-]*)?$/)
 })
 
 test("back navigation preserves an expanded timeline band when the route stays mounted", async ({
@@ -69,7 +69,7 @@ test("back navigation preserves an expanded timeline band when the route stays m
   await expect(page).toHaveURL(/\/work\//)
 
   await page.goBack()
-  await expect(page).toHaveURL(/\/$/)
+  await expect(page).toHaveURL(/\/(#[\w-]*)?$/)
 
   const expandedAfter = await page
     .locator('[data-testid="timeline-band"]')

@@ -66,7 +66,10 @@ export function Preloader({ verbs, finalVerb }: PreloaderProps) {
     if (skip) {
       // Already hidden by CSS before paint; just take it out of the DOM after
       // this commit, so nothing renders synchronously from inside the effect.
-      fadeTimer = window.setTimeout(() => setMounted(false), 0)
+      fadeTimer = window.setTimeout(() => {
+        setMounted(false)
+        window.dispatchEvent(new Event("mr:preloader:done"))
+      }, 0)
       return () => window.clearTimeout(fadeTimer)
     }
 
@@ -95,7 +98,10 @@ export function Preloader({ verbs, finalVerb }: PreloaderProps) {
         /* ignore */
       }
       rootRef.current?.setAttribute("data-phase", "out")
-      fadeTimer = window.setTimeout(() => setMounted(false), FADE_MS)
+      fadeTimer = window.setTimeout(() => {
+        setMounted(false)
+        window.dispatchEvent(new Event("mr:preloader:done"))
+      }, FADE_MS)
     }
 
     const tick = () => {
