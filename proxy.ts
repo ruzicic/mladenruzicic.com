@@ -15,10 +15,30 @@ import { WORK_SLUGS } from "@/lib/content/schema"
 
 const MIRRORED = new Set(["/about", "/uses", "/mentoring", "/work"])
 
+/**
+ * Next's file-based metadata routes sit next to the case studies in the URL
+ * space — `/work/opengraph-image` is `app/work/opengraph-image.tsx`, not a slug.
+ * Without this they would be rewritten to `/404` below and every crawler that
+ * followed the `/work` card's `og:image` would get an HTML 404 instead.
+ */
+const METADATA_SEGMENTS = new Set([
+  "opengraph-image",
+  "twitter-image",
+  "icon",
+  "apple-icon",
+])
+
 export function proxy(request: NextRequest) {
   const accept = request.headers.get("accept") ?? ""
 
   const { pathname } = request.nextUrl
+  if (
+    pathname.startsWith("/work/") &&
+    METADATA_SEGMENTS.has(pathname.slice("/work/".length))
+  ) {
+    return NextResponse.next()
+  }
+
   const mirrored = MIRRORED.has(pathname) || pathname.startsWith("/work/")
 
   // Unknown case-study slugs: under Cache Components the route serves its

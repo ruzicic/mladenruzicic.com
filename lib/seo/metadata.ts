@@ -47,9 +47,20 @@ export interface PageMetadataInput {
   /** Path with a leading slash, e.g. `/work/tenderlift`. */
   path: string
   /**
+   * `og:type`. `article` for a case study, `website` for an index, `profile`
+   * for `/about`. Defaults to `article` because case studies are the majority.
+   */
+  type?: "article" | "website" | "profile"
+  /**
    * Override the OG image. Omit and Next uses the colocated
-   * `opengraph-image.tsx` for the route (or the root one), which is what every
-   * route wants — pass this only for an image that is not file-based.
+   * `opengraph-image.tsx` for the route, which is what every route wants — pass
+   * this only for an image that is not file-based.
+   *
+   * NOTE: it has to be colocated with the ROUTE. Returning an `openGraph`
+   * object here replaces the one in `baseMetadata` wholesale (Next merges
+   * metadata a top-level key at a time), so a route without its own image file
+   * ships no `og:image` at all — the root `app/opengraph-image.tsx` does not
+   * cascade into it.
    */
   image?: string
 }
@@ -65,6 +76,7 @@ export function pageMetadata({
   title,
   description,
   path,
+  type = "article",
   image,
 }: PageMetadataInput): Metadata {
   const url = new URL(path, SITE.url).toString()
@@ -77,7 +89,9 @@ export function pageMetadata({
       ...(path === "/" ? null : { types: { "text/markdown": `${path}.md` } }),
     },
     openGraph: {
-      type: "article",
+      type,
+      // Re-stated because this object replaces `baseMetadata.openGraph`.
+      locale: "en_US",
       siteName: SITE.name,
       title,
       description,
