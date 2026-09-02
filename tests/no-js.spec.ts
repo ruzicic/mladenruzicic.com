@@ -2,7 +2,8 @@ import { expect, test } from "@playwright/test"
 
 /**
  * "Nothing important lives only in a canvas" — docs/v3-redesign-plan.md §4.
- * Loads every page with JS disabled and checks the copy is still there.
+ * Loads every route with JS disabled and checks the copy is still there:
+ * `/`, `/work`, `/about`, `/uses`, `/mentoring` and one `/work/<slug>`.
  */
 test.use({ javaScriptEnabled: false })
 
@@ -54,6 +55,56 @@ test.describe("/ renders without JS", () => {
     ).toBeGreaterThanOrEqual(1)
   })
 })
+
+test.describe("/work renders without JS", () => {
+  test("every case-study card is in the HTML document", async ({ page }) => {
+    await page.goto("/work")
+
+    const h1 = page.getByRole("heading", { level: 1 })
+    await expect(h1).toHaveCount(1)
+
+    // The index is a client island (the filter row) wrapping server-rendered
+    // cards. If the island ever goes dynamic again — `useSearchParams`,
+    // `cookies()`, a Suspense boundary around it — the cards fall out of the
+    // static HTML into the flight payload and this drops to zero.
+    const cards = page.locator('a[href^="/work/"]')
+    const cardCount = await cards.count()
+    expect(
+      cardCount,
+      "at least 20 case-study links render without JS"
+    ).toBeGreaterThanOrEqual(20)
+
+    const cardHeadings = page.getByRole("heading", { level: 3 })
+    expect(
+      await cardHeadings.count(),
+      "each card ships its own h3 without JS"
+    ).toBeGreaterThanOrEqual(20)
+  })
+})
+
+for (const path of ["/about", "/uses", "/mentoring"]) {
+  test.describe(`${path} renders without JS`, () => {
+    test("h1 and body copy are server-rendered", async ({ page }) => {
+      await page.goto(path)
+
+      const h1 = page.getByRole("heading", { level: 1 })
+      await expect(h1).toHaveCount(1)
+      expect((await h1.innerText()).trim().length).toBeGreaterThan(0)
+
+      const sectionHeadings = page.getByRole("heading", { level: 2 })
+      expect(
+        await sectionHeadings.count(),
+        "at least one section heading renders without JS"
+      ).toBeGreaterThanOrEqual(1)
+
+      const bodyText = await page.locator("main").innerText()
+      expect(
+        bodyText.trim().length,
+        "the page body is not empty without JS"
+      ).toBeGreaterThan(400)
+    })
+  })
+}
 
 test.describe("/work/tenderlift renders without JS", () => {
   test("case-study body sections render", async ({ page }) => {

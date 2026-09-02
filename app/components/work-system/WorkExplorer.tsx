@@ -2,11 +2,11 @@
 
 import {
   startTransition,
+  useEffect,
   useState,
   ViewTransition,
   type ReactNode,
 } from "react"
-import { useSearchParams } from "next/navigation"
 
 import { Eyebrow } from "../primitives/Eyebrow"
 import {
@@ -51,13 +51,22 @@ export interface WorkExplorerProps {
  * hatch) rather than `router.replace`, so a filter click never round-trips to
  * the server and never stacks history entries; `?filter=` is still read on load
  * and is still shareable.
+ *
+ * The initial filter is deliberately *not* read with `useSearchParams`: under
+ * Cache Components that hook makes this subtree dynamic, so the static shell
+ * emits only the Suspense fallback and all twenty server-rendered cards end up
+ * in the flight payload instead of the HTML document — the index then ships zero
+ * card markup to a crawler or a reader without JS. `?filter=` is read once from
+ * `window.location` after mount instead: the document carries the unfiltered
+ * list, and a deep link narrows it a frame later.
  */
 export function WorkExplorer({ groups, counts }: WorkExplorerProps) {
-  const searchParams = useSearchParams()
-  const fromUrl = searchParams.get("filter")
-  const [filter, setFilter] = useState<FilterId>(
-    isFilterId(fromUrl) ? fromUrl : "all"
-  )
+  const [filter, setFilter] = useState<FilterId>("all")
+
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("filter")
+    if (isFilterId(fromUrl) && fromUrl !== "all") setFilter(fromUrl)
+  }, [])
 
   function select(next: FilterId) {
     if (next === filter) return
