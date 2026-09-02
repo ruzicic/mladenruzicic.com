@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
 
 import type { CompanyId } from "@/lib/content/schema"
 
@@ -17,6 +18,12 @@ import { SoundToggle } from "../sound/SoundToggle"
  * IntersectionObserver over `[data-section]`, and taps open a `popover="auto"`
  * sheet anchored to the pill: the employer colour scrubber, the three nav
  * destinations, and the sound toggle.
+ *
+ * `#work`, `#history` and the hero highlight store only exist on the homepage,
+ * but the pill renders from `app/layout.tsx` on every route — so every target
+ * here is location-aware. Off-home the scrubber and "Work" become real
+ * cross-route links and `requestExpand` is not called, since `TimelineRail` is
+ * not mounted to consume it.
  */
 
 export interface PillCompany {
@@ -42,8 +49,11 @@ function closeSheet(target: EventTarget | null) {
 const NAV_LINK =
   "block border-b border-line py-[6px] font-display text-[34px] leading-tight tracking-[-0.02em]"
 
+const SEGMENT = "block h-full w-full rounded-[2px]"
+
 export function MobilePill({ companies }: { companies: PillCompany[] }) {
   const [section, setSection] = useState("Intro")
+  const onHome = usePathname() === "/"
 
   useEffect(() => {
     const sections = document.querySelectorAll<HTMLElement>("[data-section]")
@@ -120,29 +130,52 @@ export function MobilePill({ companies }: { companies: PillCompany[] }) {
                 className="block"
                 style={{ flex: `${company.years} 1 0%` }}
               >
-                <a
-                  href="#history"
-                  data-hover
-                  aria-label={`${company.short}, ${company.yearsLabel}`}
-                  onClick={(event) => {
-                    requestExpand(company.id)
-                    closeSheet(event.currentTarget)
-                  }}
-                  className="block h-full w-full rounded-[2px]"
-                  style={{ background: company.color }}
-                />
+                {onHome ? (
+                  <a
+                    href="#history"
+                    data-hover
+                    aria-label={`${company.short}, ${company.yearsLabel}`}
+                    onClick={(event) => {
+                      requestExpand(company.id)
+                      closeSheet(event.currentTarget)
+                    }}
+                    className={SEGMENT}
+                    style={{ background: company.color }}
+                  />
+                ) : (
+                  <TransitionLink
+                    href="/#history"
+                    data-hover
+                    aria-label={`${company.short}, ${company.yearsLabel}`}
+                    onClick={(event) => closeSheet(event.currentTarget)}
+                    className={SEGMENT}
+                    style={{ background: company.color }}
+                  />
+                )}
               </li>
             ))}
           </ul>
 
-          <a
-            href="#work"
-            data-hover
-            className={NAV_LINK}
-            onClick={(event) => closeSheet(event.currentTarget)}
-          >
-            Work
-          </a>
+          {onHome ? (
+            <a
+              href="#work"
+              data-hover
+              className={NAV_LINK}
+              onClick={(event) => closeSheet(event.currentTarget)}
+            >
+              Work
+            </a>
+          ) : (
+            <TransitionLink
+              href="/work"
+              data-hover
+              className={NAV_LINK}
+              onClick={(event) => closeSheet(event.currentTarget)}
+            >
+              Work
+              <NavPending />
+            </TransitionLink>
+          )}
           <TransitionLink
             href="/mentoring"
             data-hover

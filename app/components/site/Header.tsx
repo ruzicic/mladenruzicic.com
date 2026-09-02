@@ -31,12 +31,23 @@ export function Header({ siteName }: { siteName: string }) {
         "font-mono text-[12px] uppercase tracking-[0.06em] text-fg",
       ].join(" ")}
     >
-      <a href="#top" data-hover className="flex items-center gap-3">
-        <span className="font-display text-[22px] normal-case leading-none tracking-[-0.04em]">
-          MR
-        </span>
-        <span className="opacity-70">{siteName}</span>
-      </a>
+      {/* `id="top"` only exists on the homepage, so off-home the monogram has
+          to be a real link back to `/` rather than a dead fragment. */}
+      {onHome ? (
+        <a href="#top" data-hover className="flex items-center gap-3">
+          <Monogram siteName={siteName} />
+        </a>
+      ) : (
+        <TransitionLink
+          href="/"
+          aria-label={`${siteName} — home`}
+          data-hover
+          className="flex items-center gap-3"
+        >
+          <Monogram siteName={siteName} />
+          <NavPending />
+        </TransitionLink>
+      )}
 
       <nav
         aria-label="Primary"
@@ -63,5 +74,16 @@ export function Header({ siteName }: { siteName: string }) {
         <SoundToggle />
       </nav>
     </header>
+  )
+}
+
+function Monogram({ siteName }: { siteName: string }) {
+  return (
+    <>
+      <span className="font-display text-[22px] normal-case leading-none tracking-[-0.04em]">
+        MR
+      </span>
+      <span className="opacity-70">{siteName}</span>
+    </>
   )
 }
