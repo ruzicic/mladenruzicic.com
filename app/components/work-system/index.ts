@@ -51,3 +51,4 @@ export {
   type WorkExplorerProps,
 } from "./WorkExplorer"
 export { WorkFilters, type WorkFiltersProps } from "./WorkFilters"
+export { fallbackMark, WorkMark, type WorkMarkProps } from "./WorkMark"

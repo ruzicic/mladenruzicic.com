@@ -4,6 +4,7 @@ import type { WorkEntry } from "@/lib/content/schema"
 import { Eyebrow, TransitionLink } from "../primitives"
 import { StaticAccentGradient } from "../shaders"
 import { formatYears, statusLabel } from "./taxonomy"
+import { WorkMark } from "./WorkMark"
 
 /** Same company first, then same kind. Never the entry itself. */
 export function relatedTo(entry: WorkEntry, limit = 3): WorkEntry[] {
@@ -62,8 +63,11 @@ export function RelatedWork({ entry, limit = 3 }: RelatedWorkProps) {
                 </span>
                 <span>{statusLabel(item.status)}</span>
               </span>
-              <span className="mt-2 block font-display text-[22px] leading-[1.15] text-fg transition-colors duration-fast group-hover:text-accent">
-                {item.title}
+              <span className="mt-2 flex items-center gap-3">
+                <WorkMark entry={item} size={20} />
+                <span className="font-display text-[22px] leading-[1.15] text-fg transition-colors duration-fast group-hover:text-accent">
+                  {item.title}
+                </span>
               </span>
               <span className="mt-2 block text-[15px] leading-[1.5] text-dim-2">
                 {item.line}

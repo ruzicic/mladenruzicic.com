@@ -2,6 +2,7 @@ import { getWork } from "@/lib/content"
 import type { WorkEntry } from "@/lib/content/schema"
 
 import { TransitionLink } from "../primitives"
+import { WorkMark } from "./WorkMark"
 
 export interface PrevNextWorkProps {
   entry: WorkEntry
@@ -52,8 +53,13 @@ function Side({
       <span className="block font-mono text-[10px] uppercase leading-none tracking-[0.1em] text-muted">
         {next ? "Next →" : "← Previous"}
       </span>
-      <span className="mt-3 block font-display text-[24px] leading-[1.15] text-fg transition-colors duration-fast group-hover:text-accent">
-        {entry.title}
+      <span
+        className={`mt-3 flex items-center gap-3 ${next ? "sm:flex-row-reverse" : ""}`}
+      >
+        <WorkMark entry={entry} size={22} />
+        <span className="font-display text-[24px] leading-[1.15] text-fg transition-colors duration-fast group-hover:text-accent">
+          {entry.title}
+        </span>
       </span>
       <span className="mt-2 block text-[15px] leading-[1.5] text-dim-2">
         {entry.line}

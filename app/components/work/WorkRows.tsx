@@ -11,6 +11,7 @@ import { Eyebrow } from "../primitives/Eyebrow"
 import { NavPending } from "../primitives/NavPending"
 import { SectionHeader } from "../primitives/Section"
 import { TransitionLink } from "../primitives/TransitionLink"
+import { WorkMark } from "../work-system/WorkMark"
 import { WorkFocus } from "./WorkFocus"
 
 /**
@@ -69,6 +70,7 @@ function ArtTile({ entry }: { entry: WorkEntry }) {
           <Chip
             variant="brand"
             color={company.color}
+            logo={company.logo}
             mark={company.mark}
             className="rounded-pill bg-bg/75 backdrop-blur-[8px]"
           >
@@ -177,12 +179,15 @@ export function WorkRows() {
                   />
 
                   <meta itemProp="name" content={entry.title} />
-                  <ViewTransition
-                    name={`work-title-${entry.slug}`}
-                    share="vt-morph"
-                  >
-                    <Display as="h3">{entry.title}</Display>
-                  </ViewTransition>
+                  <div className="flex items-center gap-4">
+                    <WorkMark entry={entry} size={32} />
+                    <ViewTransition
+                      name={`work-title-${entry.slug}`}
+                      share="vt-morph"
+                    >
+                      <Display as="h3">{entry.title}</Display>
+                    </ViewTransition>
+                  </div>
 
                   <p
                     itemProp="abstract"

@@ -15,6 +15,13 @@ export interface ChipProps {
   color?: string
   /** 1–2 letter mark rendered in a leading square (brand variant). */
   mark?: string
+  /**
+   * A monochrome SVG under `/static/logos/`, painted into the leading square
+   * instead of `mark`. It is applied as a `mask-image` rather than an `<img>`
+   * so the glyph takes `inkOn(color)` and stays legible on a pale brand colour
+   * — the files themselves are white-filled, which an `<img>` could not recolour.
+   */
+  logo?: string
   className?: string
 }
 
@@ -24,8 +31,10 @@ export function Chip({
   variant = "tech",
   color,
   mark,
+  logo,
   className,
 }: ChipProps) {
+  const ink = inkOn(color ?? ACCENT)
   return (
     <span
       className={cn(
@@ -38,16 +47,30 @@ export function Chip({
       )}
       style={variant === "brand" && color ? { borderColor: color } : undefined}
     >
-      {mark ? (
+      {logo || mark ? (
         <span
           aria-hidden
           className="grid h-[18px] w-[18px] place-items-center rounded-xs text-[9px] font-semibold"
-          style={{
-            background: color ?? ACCENT,
-            color: inkOn(color ?? ACCENT),
-          }}
+          style={{ background: color ?? ACCENT, color: ink }}
         >
-          {mark}
+          {logo ? (
+            <span
+              className="block h-[13px] w-[13px]"
+              style={{
+                background: ink,
+                maskImage: `url(${logo})`,
+                WebkitMaskImage: `url(${logo})`,
+                maskSize: "contain",
+                WebkitMaskSize: "contain",
+                maskPosition: "center",
+                WebkitMaskPosition: "center",
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+              }}
+            />
+          ) : (
+            mark
+          )}
         </span>
       ) : null}
       {children}

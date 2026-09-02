@@ -9,6 +9,7 @@ import { StatusBadge } from "./StatusBadge"
 import { caseStudyLinks, formatPeriod, statusLabel } from "./taxonomy"
 import { MORPH_CLASS, workTitleTransitionName } from "./transitions"
 import { WorkArt } from "./WorkArt"
+import { WorkMark } from "./WorkMark"
 
 const ART_SIZES = "(min-width: 1080px) 42vw, (min-width: 720px) 50vw, 92vw"
 
@@ -48,21 +49,29 @@ export function CaseStudyHeader({ entry }: CaseStudyHeaderProps) {
               </span>
               <span className="tabular-nums">{formatPeriod(entry.period)}</span>
               {company ? (
-                <Chip variant="brand" color={company.color} mark={company.mark}>
+                <Chip
+                  variant="brand"
+                  color={company.color}
+                  logo={company.logo}
+                  mark={company.mark}
+                >
                   {company.name}
                 </Chip>
               ) : null}
             </p>
 
-            <ViewTransition
-              name={workTitleTransitionName(entry.slug)}
-              share={MORPH_CLASS}
-              default="none"
-            >
-              <Display as="h1" size="section" className="mt-6">
-                {entry.title}
-              </Display>
-            </ViewTransition>
+            <div className="mt-6 flex items-center gap-5">
+              <WorkMark entry={entry} size={44} />
+              <ViewTransition
+                name={workTitleTransitionName(entry.slug)}
+                share={MORPH_CLASS}
+                default="none"
+              >
+                <Display as="h1" size="section">
+                  {entry.title}
+                </Display>
+              </ViewTransition>
+            </div>
 
             <p className="mt-6 mb-0 max-w-[34ch] text-[clamp(20px,2.2vw,24px)] leading-[1.35] text-fg">
               {entry.line}
