@@ -202,7 +202,7 @@ test('"worked alongside" popover opens with Enter and closes with Escape', async
   })
   test.skip(
     (await alongsideHeading.count()) === 0,
-    '"Worked alongside" heading not found — content/people.ts ships empty until real LinkedIn URLs and notes exist (CLAUDE.md TODO)'
+    '"Worked alongside" heading not found — the row only renders when content/people.ts has entries'
   )
   await alongsideHeading.scrollIntoViewIfNeeded()
 
@@ -214,12 +214,20 @@ test('"worked alongside" popover opens with Enter and closes with Escape', async
     .first()
   test.skip(
     (await trigger.count()) === 0,
-    'no focusable person trigger near "Worked alongside" — content/people.ts ships empty (CLAUDE.md TODO)'
+    'no focusable person trigger near "Worked alongside" — content/people.ts ships empty'
   )
   await trigger.focus()
   await page.keyboard.press("Enter")
 
-  const popover = page.locator('[popover], [role="dialog"]').first()
+  /*
+   * Target the panel this trigger owns, not the first `[popover]` in the
+   * document. Every expanded band also renders a person popover, and those
+   * come earlier in DOM order while staying closed — `.first()` would assert
+   * on somebody else's card and always fail.
+   */
+  const panelId = await trigger.getAttribute("popovertarget")
+  expect(panelId, "person trigger names the panel it opens").toBeTruthy()
+  const popover = page.locator(`#${panelId}`)
   await expect(popover, "popover opens on Enter").toBeVisible({
     timeout: 2_000,
   })

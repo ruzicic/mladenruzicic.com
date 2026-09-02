@@ -117,6 +117,12 @@ export const personSchema = z.object({
   id: personIdSchema,
   name: z.string().min(1),
   where: z.string().min(1),
+  /**
+   * 320x320 WebP under `public/static/people/`. Optional: `PersonPopover`
+   * falls back to the initials disc, which is what every entry rendered
+   * before photos existed.
+   */
+  avatar: z.string().startsWith("/static/people/").optional(),
   /** Full URL or omitted. Never a placeholder. */
   linkedin: z.url().optional(),
   why: z.string().min(1),
@@ -295,7 +301,6 @@ export const homeSchema = z.object({
   }),
   work: z.object({
     eyebrow: z.string().min(1),
-    countLabel: z.string().min(1),
     allWorkLabel: z.string().min(1),
   }),
   history: z.object({

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useRef } from "react"
 
 import type { CompanyId, Person } from "@/lib/content/schema"
@@ -105,12 +106,24 @@ export function PersonPopover({
             background: `hsl(${hue} 35% 32%)`,
           }}
           className={[
-            "grid place-items-center rounded-full border-2 border-bg p-0",
+            "grid place-items-center overflow-hidden rounded-full border-2 border-bg p-0",
             "text-[11px] font-semibold text-fg",
             "transition-transform duration-fast ease-pill hover:-translate-y-1",
           ].join(" ")}
         >
-          {initials}
+          {/* `alt=""`: the button already carries the name as `aria-label`, so
+              a described image would announce the person twice. */}
+          {person.avatar ? (
+            <Image
+              src={person.avatar}
+              alt=""
+              width={size}
+              height={size}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            initials
+          )}
         </button>
       )}
     >
@@ -123,10 +136,20 @@ export function PersonPopover({
         <div className="flex items-center gap-[14px]">
           <span
             aria-hidden
-            className="grid h-14 w-14 flex-none place-items-center rounded-full text-[16px] font-semibold"
+            className="grid h-14 w-14 flex-none place-items-center overflow-hidden rounded-full text-[16px] font-semibold"
             style={{ background: `hsl(${hue} 35% 32%)` }}
           >
-            {initials}
+            {person.avatar ? (
+              <Image
+                src={person.avatar}
+                alt=""
+                width={56}
+                height={56}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              initials
+            )}
           </span>
           <span className="grid min-w-0 gap-1">
             <strong className="font-display text-[28px] font-normal leading-none tracking-[-0.02em]">

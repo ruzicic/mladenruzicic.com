@@ -1,9 +1,14 @@
 import type { Company, CompanyId, HeroLogoId } from "@/lib/content/schema"
 
 /**
- * Timeline bands, newest first. `approx: true` marks a date range the dossier
- * itself flags as unverified — the UI shows an "approximate" badge until the
- * real start/end months are confirmed. See content/OPEN-QUESTIONS.md.
+ * Timeline bands, newest first.
+ *
+ * Every range is verified against the owner's LinkedIn profile (captured
+ * 2026-09-02), so `approx` is `false` throughout and no band shows the
+ * "dates approximate" badge. `from` and `to` are decimal years: a start is the
+ * first day of its month, `year + (month - 1) / 12`, and an end is the last,
+ * `year + month / 12`. Keep both to two decimals — the rail only needs pixel
+ * accuracy, and exact thirds read as noise in a diff.
  */
 export const COMPANIES = [
   {
@@ -35,10 +40,10 @@ export const COMPANIES = [
     // the bag is #5E8E3E. The timeline band and hero shard tint use this
     // instead of the older #5A31F4 (decision 8).
     color: "#95BF47",
-    from: 2021.0,
-    to: 2023.7,
-    approx: true,
-    yearsLabel: "~2021 – 2023",
+    from: 2021.25,
+    to: 2023.5,
+    approx: false,
+    yearsLabel: "Apr 2021 – Jun 2023",
     role: "Senior Software Engineer, Shop Minis",
     summary:
       "Worked on Shop Minis from zero: a system for embedding mini React Native apps inside Shop.app, plus the SDK and partner ecosystem around it. Forward-deployed with the first partner builders, from submission and review through promotion. Also contributed to Shopify checkout and spent six months interviewing.",
@@ -53,10 +58,10 @@ export const COMPANIES = [
     name: "HEGIAS",
     short: "HEGIAS",
     color: "#6F246F",
-    from: 2019.5,
-    to: 2021.0,
-    approx: true,
-    yearsLabel: "~2019 – 2021",
+    from: 2020.5,
+    to: 2021.33,
+    approx: false,
+    yearsLabel: "Jul 2020 – Apr 2021",
     role: "Full-stack team lead",
     prev: "Reported to the CTO",
     summary:
@@ -72,14 +77,14 @@ export const COMPANIES = [
     name: "WolkAbout / Execom",
     short: "WolkAbout",
     color: "#12A3A8",
-    from: 2016.0,
-    to: 2019.5,
-    approx: true,
-    yearsLabel: "~2016 – 2019",
+    from: 2016.08,
+    to: 2020.5,
+    approx: false,
+    yearsLabel: "Feb 2016 – Jun 2020",
     role: "Junior → Senior Frontend Engineer, team lead",
-    prev: "Execom was the parent company; agency work ran alongside the product",
+    prev: "Execom first, from February 2016; WolkAbout from July 2017. One band, because it was one continuous stretch.",
     summary:
-      "Joined WolkAbout very early and grew from junior to senior in about three years. Angular and RxJS frontends for IoT products pushing large volumes of live data, plus client work, websites, internal tooling and technical interviews. Led a remote team of five to six for the last six months.",
+      "Started at Execom on the web team — client apps, internal tools, microservices — then moved to WolkAbout in 2017 and grew from junior to senior over the next three years. Angular and RxJS frontends for IoT products pushing large volumes of live data, plus client work, websites, internal tooling and technical interviews. Led a remote team of five to six for the last six months.",
     fact: "Agency work meant a new client, industry and stack every few weeks. It is the fastest way I know to learn how to start from nothing.",
     people: ["radovan", "milena", "tamara", "igor"],
     logo: "/static/logos/mono/wolkabout.svg",
@@ -92,9 +97,11 @@ export const COMPANIES = [
     short: "Freelance",
     color: "#939597",
     from: 2011.0,
-    to: 2016.0,
-    approx: true,
-    yearsLabel: "~2011 – 2016",
+    to: 2016.67,
+    approx: false,
+    // LinkedIn gives a year-only start for the freelance stretch, so `from`
+    // stays on the year boundary. The end is exact: August 2016.
+    yearsLabel: "2011 – Aug 2016",
     role: "Independent web developer",
     summary:
       "Dozens of websites and web apps for clients of every size, on whatever stack the job needed. This is where the practical engineering came from: scoping, delivering, supporting and getting paid.",
@@ -107,14 +114,14 @@ export const COMPANIES = [
     name: "Nemestic",
     short: "Nemestic",
     color: "#E8622C",
-    from: 2008.0,
-    to: 2011.0,
-    approx: true,
-    yearsLabel: "~2008 – 2011",
+    from: 2010.08,
+    to: 2011.58,
+    approx: false,
+    yearsLabel: "Feb 2010 – Jul 2011",
     role: "Web developer, while studying",
     summary:
-      "Roughly one website a month: PSD-to-WordPress builds, custom plugins and PHP. This is where studenti.rs was originally built, as a company project.",
-    fact: "studenti.rs started here in 2008 and belonged to the company. I bought it back in 2022 and still run it.",
+      "Roughly one website a month: PSD-to-WordPress builds, custom plugins and PHP. studenti.rs came out of this studio and went live in 2008; the contract dates on this band start later, in 2010.",
+    fact: "studenti.rs went live in 2008 and belonged to the studio. I bought it back in 2022 and still run it.",
     people: [],
     logo: "/static/logos/mono/nemestic.svg",
     mark: "N",

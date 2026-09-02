@@ -114,10 +114,11 @@ export function WorkRows() {
           id="work-heading"
           title={home.work.eyebrow}
           /*
-           * Computed, not copy. `home.work.countLabel` was the literal
-           * "Five of twenty" — interpolated after `featured.length`, so this
+           * Computed, not copy. This was `home.work.countLabel`, the literal
+           * "Five of twenty" — interpolated after `featured.length`, so it
            * actually rendered "5 Five of twenty", and the total went stale the
-           * moment a case study was added or removed.
+           * moment a case study was added or removed. The key is now gone from
+           * `content/pages/home.ts` and from the schema.
            */
           meta={`${featured.length} of ${getWork().length}`}
         />
