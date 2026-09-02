@@ -13,6 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Before `pnpm install`, so the source hash never walks node_modules.
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('app/**', 'lib/**', 'content/**', 'types/**', 'next.config.ts', 'postcss.config.mjs', 'proxy.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-next-${{ hashFiles('pnpm-lock.yaml') }}-
+            ${{ runner.os }}-next-
+
       - uses: pnpm/action-setup@v4
 
       - name: Install Node.js

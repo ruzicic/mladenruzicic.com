@@ -9,8 +9,9 @@ import { defineConfig, devices } from "@playwright/test"
  *
  * Locally: run `pnpm dev -p 3104` in one terminal and `pnpm test:e2e` in
  * another — Playwright reuses that server. With no server running it starts
- * `pnpm dev -p 3104` itself. In CI there is no dev server running, so it always
- * builds and starts the production server fresh.
+ * `pnpm dev -p 3104` itself. `CI=1 pnpm test:e2e` runs the production path
+ * instead: it starts `pnpm start -p 3104` and never reuses a running server,
+ * so build first (`pnpm build`), which is what e2e.yml does.
  */
 
 const PORT = 3104
@@ -53,6 +54,25 @@ export default defineConfig({
       testMatch: [/mobile\.spec\.ts$/],
     },
     {
+      /*
+       * Desktop WebKit over the specs where an engine difference would
+       * actually change the result: view transitions, focus, axe and the
+       * preloader/canvas timing. `motion.spec.ts` is anchored so it does not
+       * also pull in `reduced-motion.spec.ts`, which has its own project.
+       */
+      name: "Desktop Safari",
+      use: {
+        ...devices["Desktop Safari"],
+        viewport: { width: 1440, height: 900 },
+      },
+      testMatch: [
+        /transitions\.spec\.ts$/,
+        /keyboard\.spec\.ts$/,
+        /a11y\.spec\.ts$/,
+        /(^|[\\/])motion\.spec\.ts$/,
+      ],
+    },
+    {
       name: "reduced-motion",
       use: {
         ...devices["Desktop Chrome"],
@@ -64,12 +84,19 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: process.env.CI
-      ? "pnpm build && pnpm start -p 3104"
-      : "pnpm dev -p 3104",
+    /*
+     * CI builds in its own workflow step (.github/workflows/e2e.yml) and
+     * starts the prerendered output here, so this only has to wait for
+     * `next start` — under a second. Building inside `webServer` made a cold
+     * Next 16 build on a 2-core runner race this timeout, and reported a
+     * compile error as "Timed out waiting for the web server". Run
+     * `pnpm build` yourself before `CI=1 pnpm test:e2e` locally.
+     */
+    command: process.env.CI ? "pnpm start -p 3104" : "pnpm dev -p 3104",
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
+    /* Belt and braces: a cold `pnpm dev` first compile is the slow path now. */
+    timeout: 600_000,
     stdout: "pipe",
   },
 })
