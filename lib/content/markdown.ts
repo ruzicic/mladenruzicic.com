@@ -1,5 +1,6 @@
 import {
   getCompanies,
+  getHome,
   getMentoring,
   getPage,
   getSite,
@@ -63,7 +64,10 @@ function header({ title, description, path, updated }: HeaderInput): string {
     "---",
     `title: ${yamlString(title)}`,
     `description: ${yamlString(description)}`,
-    `canonical: ${yamlString(`${site.url}${path}`)}`,
+    // No trailing slash on the home URL: that is what Next resolves
+    // `alternates.canonical` to, and the sitemap `<loc>` and the breadcrumb
+    // agree with it. One document, one spelling.
+    `canonical: ${yamlString(path === "/" ? site.url : `${site.url}${path}`)}`,
     `updated: ${yamlString(updated ?? LAST_UPDATED)}`,
     `source: ${yamlString(site.name)}`,
     "---",
@@ -71,6 +75,23 @@ function header({ title, description, path, updated }: HeaderInput): string {
     `# ${title}`,
     "",
   ].join("\n")
+}
+
+/**
+ * Resolve the two display-only markups in a copy string: `{braces}` mark the
+ * italic accent word, `[[token]]` marks an inline chip. Both are rendering
+ * instructions, not content, so the mirrors carry the words the chip shows —
+ * the company or case-study name, the same label `app/components/hero` renders
+ * — and an unknown token degrades to its own text rather than throwing.
+ */
+function plain(value: string) {
+  return value
+    .replace(/\[\[([a-z0-9-]+)\]\]/g, (_, token: string) => {
+      const company = getCompanies().find((c) => c.id === token)
+      if (company) return company.name
+      return getWorkBySlug(token)?.title ?? token
+    })
+    .replace(/[{}]/g, "")
 }
 
 function meta(pairs: [string, string | undefined][]) {
@@ -191,6 +212,75 @@ export function workMarkdown(slug: string): string | undefined {
     ""
   )
   return lines.join("\n")
+}
+
+/* -------------------------------------------------------------------------- */
+/* /md/index — the home page                                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * `/` as markdown, reached at `/index.md` or with `Accept: text/markdown` on
+ * `/`. Built from the same `content/pages/home.ts` the page renders, minus the
+ * two display-only markups: `{braces}` mark the italic accent word and
+ * `[[slug]]` marks an inline chip, neither of which means anything in text.
+ */
+export function homeMarkdown(): string {
+  const home = getHome()
+  const featured = getWork().filter((entry) => entry.featured)
+
+  return [
+    header({
+      title: `${site.name} — ${site.roles[0]}`,
+      description: site.description,
+      path: "/",
+    }),
+    `> ${plain(home.hero.h1)}`,
+    "",
+    plain(home.hero.lede),
+    "",
+    meta([
+      ["Roles", site.roles.join(", ")],
+      ["Based in", `${site.location.city}, ${site.location.country}`],
+      ["Years shipping", `${site.yearsShipping}`],
+      ["Case studies", `${getWork().length}`],
+    ]),
+    "",
+    "## Selected work",
+    "",
+    ...featured.map(
+      (entry) =>
+        `- [${entry.title}](${site.url}/work/${entry.slug}) — ${entry.line}`
+    ),
+    "",
+    `Everything: ${site.url}/work`,
+    "",
+    "## Work history",
+    "",
+    home.history.rangeLabel,
+    "",
+    ...getCompanies().map(
+      (company) =>
+        `- **${company.name}** (${company.yearsLabel}${company.approx ? ", approximate" : ""}) — ${company.role}`
+    ),
+    "",
+    `Detail: ${site.url}/about`,
+    "",
+    "## Mentoring",
+    "",
+    plain(home.mentoring.h2),
+    "",
+    home.mentoring.lede,
+    "",
+    `Detail: ${site.url}/mentoring`,
+    "",
+    "## Links",
+    "",
+    `- [LinkedIn](${site.links.linkedin})`,
+    `- [GitHub](${site.links.github})`,
+    `- [MentorCruise](${site.links.mentorcruise})`,
+    `- [Book a call](${site.links.calendar})`,
+    "",
+  ].join("\n")
 }
 
 /* -------------------------------------------------------------------------- */
@@ -360,7 +450,7 @@ export function llmsTxt(): string {
     "",
     "## Pages",
     "",
-    `- [Home](${site.url}/): ${site.tagline}`,
+    `- [Home](${site.url}): ${site.tagline}`,
     `- [Work](${site.url}/work): every case study, product and experiment`,
     `- [Mentoring](${site.url}/mentoring): one-to-one mentoring for engineers`,
     `- [About](${site.url}/about): professional background and timeline`,
@@ -393,7 +483,8 @@ export function llmsTxt(): string {
     `- [Sitemap](${site.url}/sitemap.xml)`,
     "",
     "Any page is available as markdown by appending `.md` to its path, or by",
-    "sending `Accept: text/markdown`.",
+    "sending `Accept: text/markdown`. The home page has no path segment of its",
+    `own, so its mirror is ${site.url}/index.md.`,
     "",
     `Last updated: ${LAST_UPDATED}`,
     "",
