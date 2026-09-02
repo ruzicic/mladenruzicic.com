@@ -5,6 +5,7 @@ import type { CompanyId } from "@/lib/content/schema"
 
 import { Container, Display, Eyebrow } from "../primitives"
 import { HeroCanvas } from "./HeroCanvas"
+import { HeroStill } from "./HeroStill"
 import { ExpandChip, LinkChip } from "./LedeChip"
 import type { HeroLogoShard } from "./types"
 
@@ -107,7 +108,10 @@ export function Hero() {
       data-testid="hero"
       className="relative flex h-[100svh] min-h-[640px] items-end overflow-hidden"
     >
-      <HeroCanvas logos={logos} />
+      {/* `HeroStill` is rendered here, on the server, and handed to the client
+          gate as a node — so the reduced-motion still is in the HTML document
+          rather than appearing only after hydration. */}
+      <HeroCanvas logos={logos} still={<HeroStill logos={logos} />} />
 
       {/* Vignette that lifts the copy off the shards. */}
       <div

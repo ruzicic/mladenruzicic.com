@@ -14,9 +14,15 @@ const VIEW_H = 1000
  * The reduced-motion hero — §5.1 "Fallbacks".
  *
  * A frame-zero render of the *same* seeded layout the WebGL scene uses, drawn
- * as inline SVG: no three.js request, no canvas, no animation, and it renders
- * on the server. Purely decorative, so it is `aria-hidden`; every company here
- * is also a real button in the timeline.
+ * as inline SVG: no three.js request, no canvas, no animation. Purely
+ * decorative, so it is `aria-hidden`; every company here is also a real button
+ * in the timeline.
+ *
+ * It really does render on the server: `app/components/hero/index.tsx` renders
+ * it and hands it to `HeroCanvas` as a node, because `HeroCanvas` is a client
+ * component and anything it constructed itself would only exist after
+ * hydration. `app/styles/hero.css` hides it until the reduced-motion query
+ * matches.
  */
 export function HeroStill({
   logos,
