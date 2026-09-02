@@ -488,7 +488,13 @@ export function TimelineRail({
       <Container className="flex flex-wrap items-center justify-between gap-6 pt-4">
         {people.length > 0 ? (
           <div className="flex items-center gap-[14px] font-mono text-[11px] uppercase tracking-[0.08em] text-muted">
-            <span id="alongside-label">{labels.alongsideLabel}</span>
+            {/* A heading, not a span: it names the list of people below it, it
+                is the `aria-labelledby` target, and it sits under the section's
+                own `h2`. Preflight resets size and weight to inherit, so it
+                still renders as the designed mono eyebrow. */}
+            <h3 id="alongside-label" className="m-0">
+              {labels.alongsideLabel}
+            </h3>
             <ul
               role="list"
               aria-labelledby="alongside-label"
