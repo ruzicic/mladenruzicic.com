@@ -292,7 +292,6 @@ export const homeSchema = z.object({
   }),
   work: z.object({
     eyebrow: z.string().min(1),
-    countLabel: z.string().min(1),
     allWorkLabel: z.string().min(1),
   }),
   history: z.object({

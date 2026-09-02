@@ -11,7 +11,6 @@ export const HOME = {
   },
   work: {
     eyebrow: "Selected work",
-    countLabel: "Five of twenty",
     allWorkLabel: "All work",
   },
   history: {
