@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react"
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
+import { Canvas, useFrame } from "@react-three/fiber"
 import type { ThreeEvent } from "@react-three/fiber"
 import {
   Color,
@@ -54,6 +54,13 @@ export interface SceneProps {
   sectionRef: RefObject<HTMLElement | null>
   onFirstFrame: () => void
   onTooltip: (info: TooltipInfo | null) => void
+  /**
+   * Fired on `webglcontextlost`. The GPU can drop this context at any time — a
+   * laptop suspending, or Chrome evicting it because too many WebGL tabs are
+   * open — and nothing here can recover it, so the caller falls back to the
+   * poster instead of leaving a dead black rectangle.
+   */
+  onContextLost: () => void
 }
 
 /* -------------------------------------------------------------------------- */
@@ -248,7 +255,8 @@ function Shard({
 /* Scene contents                                                             */
 /* -------------------------------------------------------------------------- */
 
-interface ContentsProps extends Omit<SceneProps, "onFirstFrame"> {
+interface ContentsProps
+  extends Omit<SceneProps, "onFirstFrame" | "onContextLost"> {
   shards: ShardSpec[]
   textures: (CanvasTexture | null)[]
   onFirstFrame: () => void
@@ -265,7 +273,6 @@ function Contents({
   const groupRef = useRef<Group>(null)
   const keyRef = useRef<PointLight>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
-  const invalidate = useThree((state) => state.invalidate)
 
   const pointer = useRef({ x: 0, y: 0 })
   const smooth = useRef({ x: 0, y: 0, progress: 0 })
@@ -273,18 +280,40 @@ function Contents({
   const intersecting = useRef(true)
   const firstFrame = useRef(false)
 
-  /* Pointer parallax — window-level and passive, exactly as in the reference. */
+  /*
+   * Pointer parallax — window-level and passive, exactly as in the reference.
+   *
+   * The rect is cached rather than measured per event: this listener is on
+   * `window` and stays attached for the life of the scene, so a
+   * `getBoundingClientRect()` inside it was a synchronous style+layout flush on
+   * every pointer sample (120 Hz+ on a modern trackpad), anywhere on the page —
+   * including far below the hero, where the value is not read at all. It is
+   * refreshed on resize and on scroll, and skipped entirely while the hero is
+   * off screen.
+   */
   useEffect(() => {
     const section = sectionRef.current
     if (!section) return
+
+    let rect = section.getBoundingClientRect()
+    const refresh = () => {
+      rect = section.getBoundingClientRect()
+    }
     const onMove = (event: PointerEvent) => {
-      const rect = section.getBoundingClientRect()
+      if (!intersecting.current) return
       if (!rect.width || !rect.height) return
       pointer.current.x = ((event.clientX - rect.left) / rect.width - 0.5) * 2
       pointer.current.y = ((event.clientY - rect.top) / rect.height - 0.5) * 2
     }
+
     window.addEventListener("pointermove", onMove, { passive: true })
-    return () => window.removeEventListener("pointermove", onMove)
+    window.addEventListener("resize", refresh, { passive: true })
+    window.addEventListener("scroll", refresh, { passive: true })
+    return () => {
+      window.removeEventListener("pointermove", onMove)
+      window.removeEventListener("resize", refresh)
+      window.removeEventListener("scroll", refresh)
+    }
   }, [sectionRef])
 
   /* Only read scroll while the hero is on screen — §5.1 "Motion". */
@@ -372,7 +401,6 @@ function Contents({
       x: event.clientX,
       y: event.clientY,
     })
-    invalidate()
   }
 
   const handleMove = (event: ThreeEvent<PointerEvent>, logo: HeroLogoShard) => {
@@ -450,6 +478,7 @@ export default function Scene({
   sectionRef,
   onFirstFrame,
   onTooltip,
+  onContextLost,
 }: SceneProps) {
   // Resolved once at mount; a device does not change class mid-session.
   const [{ mobile, antialias }] = useState(() => {
@@ -473,18 +502,33 @@ export default function Scene({
     [mobile, logos.length]
   )
 
-  /* Rasterise the six marks off the critical path. */
+  /*
+   * Rasterise the six marks off the critical path.
+   *
+   * R3F only disposes what its own reconciler created; a texture handed in as a
+   * plain `alphaMap={…}` prop is not one of those, so it has to be disposed by
+   * hand. Without this each client-side navigation back to `/` uploaded six
+   * fresh 512² textures into a new GL context with the old ones still held.
+   */
   useEffect(() => {
     let cancelled = false
+    let created: (CanvasTexture | null)[] = []
     Promise.all(
       logos.map((logo) =>
         loadMarkTexture({ src: logo.markSrc, text: logo.mark })
       )
     ).then((result) => {
-      if (!cancelled) setTextures(result)
+      created = result
+      if (cancelled) {
+        for (const texture of result) texture?.dispose()
+        return
+      }
+      setTextures(result)
     })
     return () => {
       cancelled = true
+      for (const texture of created) texture?.dispose()
+      created = []
     }
   }, [logos])
 
@@ -527,6 +571,20 @@ export default function Scene({
         if ("transmissionResolutionScale" in renderer) {
           renderer.transmissionResolutionScale = 0.5
         }
+        /*
+         * `preventDefault()` is what tells the browser a restore is wanted; we
+         * do not attempt one, because the whole scene has to be rebuilt anyway.
+         * Handing the phase back to the caller returns the gradient poster
+         * rather than leaving a transparent, permanently dead canvas.
+         */
+        gl.domElement.addEventListener(
+          "webglcontextlost",
+          (event) => {
+            event.preventDefault()
+            onContextLost()
+          },
+          { once: true }
+        )
       }}
     >
       <Contents
