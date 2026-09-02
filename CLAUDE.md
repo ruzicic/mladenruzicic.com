@@ -170,16 +170,16 @@ proxy.ts                   Accept: text/markdown → /md/* rewrite (Node runtime
       them with clean marks before the hero etches them.
 - [ ] **Sample the exact Shopify green** from the official bag asset and update
       `content/companies.ts` (currently `#96BF48`).
-- [ ] **Verified employer dates** for Shopify, HEGIAS, WolkAbout/Execom,
-      Freelance and Nemestic. Five of six are `approx: true` and ship with a
-      "dates approximate" badge until confirmed.
-- [ ] **"Worked alongside" entries**: real LinkedIn URLs and one or two sentences
-      each. `content/people.ts` omits `linkedin` and `note` rather than shipping
-      placeholders; the section ships without people until the copy exists.
+- [ ] **"Worked alongside" notes**: the four `note` lines in `content/people.ts`
+      are assembled from public profiles, not written by the owner. Names,
+      LinkedIn URLs and photos are done; the sentences need his voice.
 - [ ] **Project screenshots** (1440×1000, 834×1112, 390×844) for TenderLift,
       studenti.rs, FontAlternatives, Amada and EVO Touch, plus `blurDataURL`s.
       Until then the accent-tinted shader header stands in.
-- [ ] **Metric permissions**: Shop.app MAU, Velocity adoption, studenti.rs user
-      and document counts (currently `needs-verification`).
+- [ ] **ZF sign-off** on the Velocity adoption figures. They ship as coarse
+      public shapes (`~45%` of teams, `~50` components) on the owner's say-so;
+      nobody has asked ZF.
 - [ ] **Case-study copy** for ZF SCALAR, Shopify, TenderLift and studenti.rs.
-- [ ] Confirm "eighteen years of shipping" (2008 → 2026) in `content/site.ts`.
+- [ ] Confirm how studenti.rs relates to the Nemestic contract dates. The
+      "eighteen years of shipping" claim is anchored on studenti.rs going live
+      in 2008; employment starts February 2010.
