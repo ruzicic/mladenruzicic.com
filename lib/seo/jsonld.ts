@@ -134,7 +134,9 @@ export function creativeWorkJsonLd(entry: WorkEntry) {
     : undefined
 
   const from = entry.period.from
-  const to = entry.period.to === "now" ? "" : entry.period.to
+  // ISO 8601 spells an open-ended interval `2024/..`. An empty right-hand side
+  // (`2024/`) is not a valid interval and schema.org consumers drop it.
+  const to = entry.period.to === "now" ? ".." : entry.period.to
 
   return {
     "@context": "https://schema.org",
