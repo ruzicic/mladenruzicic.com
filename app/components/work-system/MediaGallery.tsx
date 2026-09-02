@@ -74,15 +74,23 @@ export function MediaGallery({ media, title, className }: MediaGalleryProps) {
               >
                 <span className="sr-only">Open {item.alt} full size</span>
                 {item.kind === "video" ? (
+                  /*
+                   * The thumbnail is a still first frame, never a playing clip:
+                   * a looping autoplay video longer than 5s has to be pausable
+                   * (WCAG 2.2.2) and there is no room for controls here, and
+                   * autoplay is exactly what a reduced-motion visitor asked not
+                   * to get. Playback lives in the dialog below, where the
+                   * <video> carries `controls`. No `aria-label` either — the
+                   * wrapping <button> already names this.
+                   */
                   <video
                     src={item.src}
                     width={item.width}
                     height={item.height}
                     muted
                     playsInline
-                    loop
-                    autoPlay
-                    aria-label={item.alt}
+                    preload="metadata"
+                    aria-hidden
                     className="block h-auto w-full"
                   />
                 ) : (
