@@ -260,45 +260,14 @@ export function getAboutLinks(): {
   }))
 }
 
-/**
- * Raw frontmatter and body for a case study, for the `/md/` mirrors and
- * `llms-full.txt`. Returns `undefined` for an unknown slug.
- */
-export function getWorkMarkdown(
-  slug: string
-): { frontmatter: Omit<WorkEntry, "body">; body: string } | undefined {
-  const entry = getWorkBySlug(slug)
-  if (!entry) return undefined
-  const { body, ...frontmatter } = entry
-  return { frontmatter, body }
-}
-
 /** Every work slug, for `generateStaticParams` and the sitemap. */
 export function getWorkSlugs(): WorkSlug[] {
   return WORK.map((entry) => entry.slug)
 }
 
-export type {
-  Company,
-  CompanyId,
-  Confidence,
-  Confidentiality,
-  HeroLogo,
-  HeroLogoId,
-  Home,
-  Mentoring,
-  NotFound,
-  PageEntry,
-  PageFrontmatter,
-  Person,
-  PersonId,
-  Site,
-  SiteLinkKey,
-  Testimonial,
-  WorkEntry,
-  WorkFrontmatter,
-  WorkKind,
-  WorkPage,
-  WorkSlug,
-  WorkStatus,
-} from "./schema"
+/*
+ * No type re-exports here on purpose. Types live in `./schema`, which is
+ * filesystem-free and therefore importable from a client component; this
+ * module is server-only. Re-exporting them would offer a second, worse path to
+ * the same types — one that drags a `node:fs` import along behind it.
+ */

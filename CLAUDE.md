@@ -134,9 +134,16 @@ proxy.ts                   Accept: text/markdown → /md/* rewrite (Node runtime
 
 ## Gotchas
 
-- `ViewTransition` is exported by the React that Next bundles, but **not** by
-  `@types/react@19.2`. `types/react-view-transition.d.ts` augments it. Delete
-  that file once the types ship upstream.
+- `ViewTransition` is exported by the React that Next bundles, but
+  `@types/react@19.2` declares it only in `canary.d.ts`, which nothing here
+  opts into. `types/react-view-transition.d.ts` augments it. Delete that file
+  once `ViewTransition` moves out of `@types/react/canary.d.ts` into
+  `index.d.ts` — not merely "once the types ship upstream".
+- Source comments cite `docs/v3-redesign-plan.md` and `docs/v3-content-contract.md`
+  on purpose: they are the real reference for the decisions the code encodes.
+  `docs/` is untracked, so on a fresh clone every one of those pointers dangles.
+  That is the accepted trade for keeping the dossier private — do not strip the
+  citations, and do not commit the directory to satisfy them.
 - `next/font/local` variables are private (`--font-gloock`, …) and are mapped to
   the public token names (`--font-display`, …) in `@theme inline`. Using the same
   name on both sides would be self-referential — do not "simplify" it.

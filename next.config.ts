@@ -40,7 +40,10 @@ const nextConfig: NextConfig = {
           },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-XSS-Protection", value: "1; mode=block" },
+          // Deliberately no `X-XSS-Protection`. The header is deprecated, no
+          // current browser implements it, and the auditor it used to switch
+          // on was itself an XSS vector in the browsers that did — OWASP and
+          // MDN both say omit it (or send `0`). Do not add it back.
           { key: "Referrer-Policy", value: "origin-when-cross-origin" },
           {
             key: "Permissions-Policy",

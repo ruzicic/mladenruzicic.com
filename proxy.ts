@@ -13,7 +13,14 @@ import { WORK_SLUGS } from "@/lib/content/schema"
  * See docs/v3-redesign-plan.md §6.
  */
 
-const MIRRORED = new Set(["/about", "/uses", "/mentoring", "/work"])
+const MIRRORED = new Set(["/", "/about", "/uses", "/mentoring", "/work"])
+
+/**
+ * `/` has no path segment, so its mirror is `/md/index` — reached as
+ * `/index.md` through the `next.config.ts` rewrite, or negotiated here.
+ */
+const MD_PATH = (pathname: string) =>
+  pathname === "/" ? "/md/index" : `/md${pathname}`
 
 /**
  * Next's file-based metadata routes sit next to the case studies in the URL
@@ -43,13 +50,24 @@ export function proxy(request: NextRequest) {
 
   // Unknown case-study slugs: under Cache Components the route serves its
   // prerendered fallback shell (status 200) before `notFound()` can run, so the
-  // 404 has to happen here. `/work/<slug>.md` is left alone for the rewrite.
+  // 404 has to happen here.
+  //
+  // `/404` is deliberately NOT a route. Rewriting to an unmatched path hands
+  // the request to Next's own not-found handling, which answers 404 *and*
+  // resolves `app/not-found.tsx`'s metadata — a page that called `notFound()`
+  // itself would answer 404 with no `<title>`, because a thrown not-found
+  // short-circuits metadata resolution and leaves only `<meta robots=noindex>`.
   if (pathname.startsWith("/work/")) {
+    const markdownRequest = pathname.endsWith(".md") || prefersMarkdown(accept)
     const slug = pathname.slice("/work/".length).replace(/\.md$/, "")
     if (!(WORK_SLUGS as readonly string[]).includes(slug)) {
       const url = request.nextUrl.clone()
-      url.pathname = "/404"
-      return NextResponse.rewrite(url)
+      // A client that asked for markdown gets a markdown 404 body from the
+      // mirror route; only a browser gets the HTML 404. Either way, 404.
+      url.pathname = markdownRequest ? `/md/work/${slug}` : "/404"
+      const notFound = NextResponse.rewrite(url)
+      notFound.headers.set("Vary", "Accept")
+      return notFound
     }
   }
 
@@ -60,7 +78,7 @@ export function proxy(request: NextRequest) {
   }
 
   const url = request.nextUrl.clone()
-  url.pathname = `/md${pathname}`
+  url.pathname = MD_PATH(pathname)
   const response = NextResponse.rewrite(url)
   response.headers.set("Vary", "Accept")
   return response
@@ -89,5 +107,5 @@ function prefersMarkdown(accept: string): boolean {
 }
 
 export const config = {
-  matcher: ["/about", "/uses", "/mentoring", "/work", "/work/:slug"],
+  matcher: ["/", "/about", "/uses", "/mentoring", "/work", "/work/:slug"],
 }

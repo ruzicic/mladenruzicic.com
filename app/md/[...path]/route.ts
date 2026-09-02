@@ -1,6 +1,7 @@
 import { getSite, getWorkSlugs } from "@/lib/content"
 import {
   aboutMarkdown,
+  homeMarkdown,
   MD_CONTENT_TYPE,
   mentoringMarkdown,
   usesMarkdown,
@@ -20,10 +21,15 @@ import {
  *
  * The response is `noindex` and points at its canonical HTML page, so the
  * mirror can never compete with the real URL in search.
+ *
+ * `/` is mirrored too, as `index` — llms.txt promises "any page", so the home
+ * page cannot be the one exception. An unknown route answers 404 with a
+ * markdown body, not an HTML error page: the caller asked for markdown.
  */
 
 export function generateStaticParams() {
   return [
+    { path: ["index"] },
     { path: ["about"] },
     { path: ["uses"] },
     { path: ["mentoring"] },
@@ -39,15 +45,35 @@ export async function GET(
   const { path } = await params
   const route = path.join("/")
 
+  const site = getSite()
+
   const body = render(route)
   if (!body) {
-    return new Response("Not found\n", {
-      status: 404,
-      headers: { "Content-Type": "text/plain; charset=utf-8" },
-    })
+    // A markdown 404 for a markdown request: an agent that asked for
+    // `text/markdown` gets a document it can parse, not an HTML error page.
+    // The status is still 404.
+    return new Response(
+      [
+        `# Not found`,
+        "",
+        `No page at \`/${route}\`.`,
+        "",
+        `- Index: ${site.url}/llms.txt`,
+        `- Work: ${site.url}/work.md`,
+        "",
+      ].join("\n"),
+      {
+        status: 404,
+        headers: {
+          "Content-Type": MD_CONTENT_TYPE,
+          "X-Robots-Tag": "noindex",
+          Vary: "Accept",
+        },
+      }
+    )
   }
 
-  const canonical = `${getSite().url}/${route}`
+  const canonical = route === "index" ? site.url : `${site.url}/${route}`
 
   return new Response(body, {
     headers: {
@@ -62,6 +88,9 @@ export async function GET(
 }
 
 function render(route: string): string | undefined {
+  // `/` has no path segment of its own, so the home mirror lives at
+  // `/index.md`; `proxy.ts` rewrites `Accept: text/markdown` on `/` here too.
+  if (route === "index") return homeMarkdown()
   if (route === "about") return aboutMarkdown()
   if (route === "uses") return usesMarkdown()
   if (route === "mentoring") return mentoringMarkdown()

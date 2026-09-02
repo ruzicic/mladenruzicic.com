@@ -5,10 +5,28 @@ import localFont from "next/font/local"
  * See docs/v3-redesign-plan.md §5.5.
  *
  * NOTE ON CALL COUNT: the plan says "two `localFont()` calls"; the actual
- * acceptance criterion behind it is "exactly three preload links, no Google
- * Fonts request". `next/font/local` emits one CSS custom property per call, and
- * we need four distinct ones, so this is four calls with `preload: false` on the
- * mono face — which produces exactly three `<link rel=preload>` tags.
+ * acceptance criterion behind it is "three preloaded faces, no Google Fonts
+ * request". `next/font/local` emits one CSS custom property per call, and we
+ * need four distinct ones, so this is four calls with `preload: false` on the
+ * mono face.
+ *
+ * NOTE ON WHAT `preload: true` ACTUALLY SHIPS (verified against `next build`
+ * output on 16.3.4): it puts the three faces in `next-font-manifest.json`, and
+ * Next turns those into `ReactDOM.preload(…, { as: "font" })` calls during the
+ * RSC render. Under `cacheComponents` those land in the flight payload as
+ * `:HL["…woff2","font",…]` hints and are applied by the client runtime after
+ * the JS bundle executes — there is NO parser-discoverable
+ * `<link rel="preload" as="font">` in the prerendered `<head>`. The faces are
+ * still discovered early, because the `@font-face` rules live in the
+ * render-blocking stylesheet; what is lost is the head start over that
+ * stylesheet for the LCP (Gloock) face.
+ *
+ * A hand-written `ReactDOM.preload()` in the root layout is not possible here:
+ * `localFont()` returns only `{ className, style, variable }`, and the hashed
+ * `/_next/static/media/*.woff2` URL exists nowhere but the emitted CSS and that
+ * manifest. So `preload` stays `true` (it is what keeps the mono face out of
+ * the hint set) and the claim above is stated as what it is. Re-check when this
+ * moves: `grep -c 'as="font"' .next/server/app/index.html`.
  *
  * `adjustFontFallback` makes Next generate metric overrides against the named
  * system face so the `display: swap` reflow is close to shift-free.
