@@ -6,10 +6,12 @@ import { LAST_UPDATED } from "@/lib/content/markdown"
 /**
  * Built from `content/`, so a new case study appears without touching this file.
  *
- * `lastModified` comes from the content's own `updated` where there is one
- * (`/about`, `/uses`) and from the build date otherwise — case studies have no
- * per-entry timestamp in the schema, and a build date is honest: the page really
- * was regenerated then.
+ * `lastModified` comes from the content's own `updated` where there is one —
+ * `/about`, `/uses`, and any case study whose frontmatter sets it — and from
+ * `LAST_UPDATED` otherwise. That fallback is the newest `updated` in
+ * `content/`, not a build date, so a rebuild never moves it; the cost is that
+ * an edit to `content/pages/uses.mdx` bumps every entry that has not set its
+ * own `updated`. Set it in the frontmatter to opt an entry out of that.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const site = getSite()
@@ -60,7 +62,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         ? "monthly"
         : "yearly",
     priority: entry.featured ? 0.8 : 0.6,
-    lastModified: LAST_UPDATED,
+    lastModified: entry.updated ?? LAST_UPDATED,
   }))
 
   return [...staticRoutes, ...workRoutes]

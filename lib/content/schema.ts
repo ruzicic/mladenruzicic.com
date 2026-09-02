@@ -32,6 +32,19 @@ export type HeroLogoId = (typeof HERO_LOGO_IDS)[number]
 
 export type PersonId = string
 
+/**
+ * Every `content/work/*.mdx` slug, hand-maintained because `proxy.ts` is the
+ * one consumer that cannot read the filesystem — it runs in the proxy, and the
+ * loaders in `lib/content/index.ts` are server-only.
+ *
+ * KEEP IN SYNC, and mind that the two directions fail differently. ADDING an
+ * `.mdx` without adding it here fails loudly: the zod `slug` enum rejects the
+ * file and `next build` stops with the path. REMOVING an `.mdx` and leaving
+ * the entry here fails silently — the proxy waves the slug through, the case
+ * study route serves its prerendered fallback shell, and the visitor gets a
+ * 200 for a page that no longer exists. Delete the entry in the same commit as
+ * the file.
+ */
 export const WORK_SLUGS = [
   "zf-scalar",
   "shopify",
@@ -171,6 +184,17 @@ export const workFrontmatterSchema = z.object({
     ]),
     approx: z.boolean().optional(),
   }),
+  /**
+   * `YYYY-MM-DD`, the last time this case study's copy actually changed.
+   * Optional: entries without one fall back to `LAST_UPDATED`, which is what
+   * every entry used before this field existed. It is the sitemap's per-entry
+   * `<lastmod>`, so setting it here is the only way to stop an edit to
+   * `content/pages/uses.mdx` claiming all twenty case studies changed.
+   */
+  updated: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "expected YYYY-MM-DD")
+    .optional(),
   role: z.string().min(1),
   location: z.string().min(1).optional(),
   accent: hex,

@@ -169,6 +169,7 @@ export function workMarkdown(slug: string): string | undefined {
       title: entry.title,
       description: entry.seo.description,
       path: `/work/${entry.slug}`,
+      updated: entry.updated,
     }),
     `> ${entry.line}`,
     "",
