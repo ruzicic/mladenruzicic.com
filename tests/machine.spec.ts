@@ -59,6 +59,29 @@ test("GET /work/tenderlift with Accept: text/markdown returns markdown", async (
   expect(body).toContain("TenderLift")
 })
 
+/**
+ * Flattens a parsed JSON-LD payload into its individual node objects.
+ *
+ * `jsonLdScript()` (lib/seo/jsonld.ts) accepts either a single node, an array
+ * of nodes, or (in principle) a `{ "@graph": [...] }` wrapper, and a
+ * `<script type="application/ld+json">` can legally hold any of the three. A
+ * test that only looks at the top-level parsed value — as this one used to —
+ * misses a Person nested inside an array or a `@graph`.
+ */
+function flattenJsonLdNodes(parsed: unknown): Record<string, unknown>[] {
+  if (Array.isArray(parsed)) {
+    return parsed as Record<string, unknown>[]
+  }
+  if (parsed && typeof parsed === "object") {
+    const graph = (parsed as Record<string, unknown>)["@graph"]
+    if (Array.isArray(graph)) {
+      return graph as Record<string, unknown>[]
+    }
+    return [parsed as Record<string, unknown>]
+  }
+  return []
+}
+
 test('JSON-LD on / parses and declares a Person named "Mladen Ružičić"', async ({
   page,
 }) => {
@@ -72,11 +95,14 @@ test('JSON-LD on / parses and declares a Person named "Mladen Ružičić"', asyn
     "at least one application/ld+json script is present"
   ).toBeGreaterThan(0)
 
-  const parsed = jsonLdTexts.map(
-    (text) => JSON.parse(text) as Record<string, unknown>
+  const nodes = jsonLdTexts.flatMap((text) =>
+    flattenJsonLdNodes(JSON.parse(text))
   )
-  const person = parsed.find((entry) => entry["@type"] === "Person")
 
+  const person = nodes.find((entry) => entry["@type"] === "Person")
   expect(person, "a Person JSON-LD block exists on /").toBeTruthy()
   expect(person?.name).toBe("Mladen Ružičić")
+
+  const website = nodes.find((entry) => entry["@type"] === "WebSite")
+  expect(website, "a WebSite JSON-LD block exists on /").toBeTruthy()
 })
