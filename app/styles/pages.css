@@ -268,3 +268,27 @@
   overflow-x: auto;
   overscroll-behavior-inline: contain;
 }
+
+/* ---------------------------------------------------------------------------
+   Legibility scrim for copy over a shader header. Sits between the shader
+   (z 0) and the content container (z 2). Bright accents (TenderLift yellow)
+   would otherwise sit directly under light text.
+   --------------------------------------------------------------------------- */
+.scrim-header {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(11, 11, 12, 0.92) 0%,
+      rgba(11, 11, 12, 0.7) 45%,
+      rgba(11, 11, 12, 0.25) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(11, 11, 12, 0) 55%,
+      rgba(11, 11, 12, 0.85) 100%
+    );
+}

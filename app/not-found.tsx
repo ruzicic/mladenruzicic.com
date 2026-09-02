@@ -11,6 +11,7 @@ export default function NotFound() {
   return (
     <div className="relative isolate overflow-hidden">
       <GrainSurface />
+      <div aria-hidden className="scrim-header" />
       <Container className="relative z-[2] flex min-h-[60dvh] flex-col justify-center py-[96px] md:py-[128px]">
         <Eyebrow items={["404", "Not found"]} />
 

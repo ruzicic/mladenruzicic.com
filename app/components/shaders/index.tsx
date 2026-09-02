@@ -15,10 +15,6 @@ const MeshGradient = dynamic(
   () => import("@paper-design/shaders-react").then((m) => m.MeshGradient),
   { ssr: false }
 )
-const StaticMeshGradient = dynamic(
-  () => import("@paper-design/shaders-react").then((m) => m.StaticMeshGradient),
-  { ssr: false }
-)
 const GrainGradient = dynamic(
   () => import("@paper-design/shaders-react").then((m) => m.GrainGradient),
   { ssr: false }
@@ -203,34 +199,17 @@ export interface StaticAccentGradientProps {
   className?: string
 }
 
-/** The still version, for `/work` cards. Cheap enough to mount many. */
+/**
+ * The still version, for `/work` cards and related-work tiles. CSS only: a
+ * WebGL shader per card means one GL context per card, and Chrome evicts the
+ * oldest once ~16 are alive, which left the first four cards white. The mesh
+ * look is reserved for the single animated header per page.
+ */
 export function StaticAccentGradient({
   accent,
   className,
 }: StaticAccentGradientProps) {
-  const supported = useWebGL2()
-  if (!supported) {
-    return <GradientFallback accent={accent} className={className} />
-  }
-  return (
-    <>
-      <GradientFallback accent={accent} className={className} />
-      <StaticMeshGradient
-        aria-hidden
-        className={className}
-        style={BASE_STYLE}
-        colors={palette(accent)}
-        positions={4}
-        waveX={0.4}
-        waveY={0.3}
-        mixing={0.6}
-        grainMixer={0.2}
-        grainOverlay={0.1}
-        minPixelRatio={1}
-        maxPixelCount={MAX_PIXELS}
-      />
-    </>
-  )
+  return <GradientFallback accent={accent} className={className} />
 }
 
 export interface GrainSurfaceProps {

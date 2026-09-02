@@ -55,6 +55,7 @@ export default function MentoringPage() {
 
         <header className="relative isolate overflow-hidden border-b border-line-soft">
           <GrainSurface />
+          <div aria-hidden className="scrim-header" />
           <Container className="relative z-[2] py-[80px] md:py-[112px]">
             <Eyebrow items={["Mentoring", "One to one", "Since 2021"]} />
             <Display as="h1" size="section" className="mt-6 max-w-[18ch]">

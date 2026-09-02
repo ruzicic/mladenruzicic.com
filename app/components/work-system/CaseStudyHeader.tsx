@@ -35,6 +35,7 @@ export function CaseStudyHeader({ entry }: CaseStudyHeaderProps) {
     <header className="relative isolate overflow-hidden border-b border-line-soft">
       <AccentGradient accent={entry.accent} />
       <Grain />
+      <div aria-hidden className="scrim-header" />
 
       <Container className="relative z-[2] pt-[72px] pb-[80px] md:pt-[104px] md:pb-[96px]">
         <div className="grid items-center gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)]">
