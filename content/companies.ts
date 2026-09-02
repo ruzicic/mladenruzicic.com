@@ -21,6 +21,7 @@ export const COMPANIES = [
       "Joined as a senior engineer on a platform migration, then built the proof of concept for Velocity, the SCALAR design system and React component library. Led the five-person UI Platform team that took it from prototype to the standard for new development. Now own vision, roadmap and delivery for EVO Touch, ZF's multi-platform app for commercial vehicle drivers.",
     fact: "Platform work is what opened the product-ownership role: Velocity became the default UI answer inside SCALAR, and the product seat followed.",
     people: [],
+    logo: "/static/logos/mono/zf-scalar.svg",
     mark: "ZF",
     workSlug: "zf-scalar",
   },
@@ -28,9 +29,12 @@ export const COMPANIES = [
     id: "shopify",
     name: "Shopify",
     short: "Shopify",
-    // Shopify green, sampled from the official bag asset. The timeline band and
-    // hero shard tint use this instead of the older #5A31F4 (decision 8).
-    color: "#96BF48",
+    // Shopify green, read straight out of the official Shopping Bag asset
+    // (shopify_glyph.svg, `.st0`, in shopify-shopping-bag.zip from
+    // shopify.com/brand-assets, retrieved 2026-09-02). The darker side face of
+    // the bag is #5E8E3E. The timeline band and hero shard tint use this
+    // instead of the older #5A31F4 (decision 8).
+    color: "#95BF47",
     from: 2021.0,
     to: 2023.7,
     approx: true,
@@ -40,6 +44,7 @@ export const COMPANIES = [
       "Worked on Shop Minis from zero: a system for embedding mini React Native apps inside Shop.app, plus the SDK and partner ecosystem around it. Forward-deployed with the first partner builders, from submission and review through promotion. Also contributed to Shopify checkout and spent six months interviewing.",
     fact: "Consumer scale changes the checklist: kill switches, spam controls and takedown flows shipped alongside the feature, not after it.",
     people: [],
+    logo: "/static/logos/mono/shopify.svg",
     mark: "S",
     workSlug: "shopify",
   },
@@ -58,7 +63,7 @@ export const COMPANIES = [
       "Joined to move an AR/VR MVP toward a production-ready product. Microservices on AWS, heavy 3D-model processing through Blender pipelines, in-app voice communication, and integrations with third-party 3D model libraries. Frontend, backend and architecture in the same week.",
     fact: "Technically the densest domain I have worked in: browser-delivered 3D has no forgiving path between a 200 MB asset and a usable scene.",
     people: ["josip"],
-    logo: "/static/logos/hegias.svg",
+    logo: "/static/logos/mono/hegias.svg",
     mark: "H",
     workSlug: "hegias",
   },
@@ -77,7 +82,7 @@ export const COMPANIES = [
       "Joined WolkAbout very early and grew from junior to senior in about three years. Angular and RxJS frontends for IoT products pushing large volumes of live data, plus client work, websites, internal tooling and technical interviews. Led a remote team of five to six for the last six months.",
     fact: "Agency work meant a new client, industry and stack every few weeks. It is the fastest way I know to learn how to start from nothing.",
     people: ["radovan", "milena", "tamara", "igor"],
-    logo: "/static/logos/wolkabout.svg",
+    logo: "/static/logos/mono/wolkabout.svg",
     mark: "W",
     workSlug: "wolkabout",
   },
@@ -111,6 +116,7 @@ export const COMPANIES = [
       "Roughly one website a month: PSD-to-WordPress builds, custom plugins and PHP. This is where studenti.rs was originally built, as a company project.",
     fact: "studenti.rs started here in 2008 and belonged to the company. I bought it back in 2022 and still run it.",
     people: [],
+    logo: "/static/logos/mono/nemestic.svg",
     mark: "N",
   },
 ] satisfies Company[]
@@ -118,28 +124,54 @@ export const COMPANIES = [
 /**
  * The six employer marks etched into the hero shards. Execom gets its own shard
  * but points at the WolkAbout band, because that is the one timeline row it
- * belongs to. `logo` is set only where an SVG actually exists in
- * public/static/logos/; everything else falls back to `mark`.
+ * belongs to. Every `logo` is a real monochrome mark under
+ * `public/static/logos/mono/` — see the sourcing notes in
+ * `public/static/logos/mono/SOURCES.md`. `mark` stays as the text fallback the
+ * rasteriser paints when an SVG is missing or fails to decode.
  */
 export const HERO_LOGOS = [
-  { id: "zf-scalar", label: "ZF SCALAR", bandId: "zf-scalar", mark: "ZF" },
-  { id: "shopify", label: "Shopify", bandId: "shopify", mark: "S" },
+  {
+    id: "zf-scalar",
+    label: "ZF SCALAR",
+    bandId: "zf-scalar",
+    logo: "/static/logos/mono/zf-scalar.svg",
+    mark: "ZF",
+  },
+  {
+    id: "shopify",
+    label: "Shopify",
+    bandId: "shopify",
+    logo: "/static/logos/mono/shopify.svg",
+    mark: "S",
+  },
   {
     id: "hegias",
     label: "HEGIAS",
     bandId: "hegias",
-    logo: "/static/logos/hegias.svg",
+    logo: "/static/logos/mono/hegias.svg",
     mark: "H",
   },
   {
     id: "wolkabout",
     label: "WolkAbout",
     bandId: "wolkabout",
-    logo: "/static/logos/wolkabout.svg",
+    logo: "/static/logos/mono/wolkabout.svg",
     mark: "W",
   },
-  { id: "execom", label: "Execom", bandId: "wolkabout", mark: "E" },
-  { id: "nemestic", label: "Nemestic", bandId: "nemestic", mark: "N" },
+  {
+    id: "execom",
+    label: "Execom",
+    bandId: "wolkabout",
+    logo: "/static/logos/mono/execom.svg",
+    mark: "E",
+  },
+  {
+    id: "nemestic",
+    label: "Nemestic",
+    bandId: "nemestic",
+    logo: "/static/logos/mono/nemestic.svg",
+    mark: "N",
+  },
 ] satisfies {
   id: HeroLogoId
   label: string
