@@ -28,7 +28,8 @@ export function MentoringSection() {
       data-section="Mentoring"
       data-testid="mentoring"
       aria-labelledby="mentoring-heading"
-      className="relative border-t border-line-soft py-24"
+      // scroll-mt: clears the 70px fixed header when #mentoring is followed.
+      className="relative scroll-mt-[80px] border-t border-line-soft py-24"
     >
       <Container>
         <div className="mr-mentoring-grid">
@@ -65,7 +66,7 @@ export function MentoringSection() {
             </div>
           </div>
 
-          <ol className="m-0 grid list-none gap-[22px] p-0">
+          <ol role="list" className="m-0 grid list-none gap-[22px] p-0">
             {testimonials.map((testimonial, index) => {
               const mirrored = index % 2 === 1
               return (

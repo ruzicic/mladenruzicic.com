@@ -26,9 +26,19 @@ export function TestimonialGrid({
   className,
 }: TestimonialGridProps) {
   return (
-    <ul className={cn("testimonial-columns m-0 list-none p-0", className)}>
+    /*
+     * Explicit roles because the styling removes the implicit ones:
+     * `list-style: none` drops list semantics in Safari/VoiceOver, and the
+     * `display: inline-block` the column layout needs on each `<li>`
+     * (app/styles/pages.css) removes `display: list-item`, which drops item
+     * semantics in every engine.
+     */
+    <ul
+      role="list"
+      className={cn("testimonial-columns m-0 list-none p-0", className)}
+    >
       {testimonials.map((testimonial) => (
-        <li key={testimonial.id}>
+        <li key={testimonial.id} role="listitem">
           <figure className="m-0 rounded-sm border border-line bg-surface p-6">
             <blockquote className="m-0 text-[16px] leading-[1.6] text-dim">
               {testimonial.quote}

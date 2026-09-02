@@ -1,4 +1,3 @@
-import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { getWork, getWorkPage } from "@/lib/content"
@@ -101,20 +100,10 @@ export default function WorkIndexPage() {
           </header>
 
           <div className="mt-12">
-            <Suspense fallback={<FilterFallback />}>
-              <WorkExplorer groups={groups} counts={counts} />
-            </Suspense>
+            <WorkExplorer groups={groups} counts={counts} />
           </div>
         </Container>
       </div>
     </PageTransition>
   )
-}
-
-/**
- * `useSearchParams` needs a Suspense boundary on a statically rendered route.
- * The fallback keeps the filter row's height so nothing jumps.
- */
-function FilterFallback() {
-  return <div aria-hidden className="h-[34px]" />
 }

@@ -87,6 +87,20 @@
 }
 
 /* ---------------------------------------------------------------------------
+   The two fallbacks before the scene is live.
+
+   `HeroCanvas` cannot know whether the visitor asked for reduced motion until
+   an effect runs, so the server HTML — phase "poster" — carries both the SVG
+   still and the gradient poster, and CSS decides which one is seen. That is
+   what gives a reduced-motion visitor the still in the document instead of a
+   poster flash, and gives one without JS the still at all. Once the phase
+   resolves, JS renders only the winner and these rules stop applying.
+   --------------------------------------------------------------------------- */
+[data-hero-phase="poster"] [data-hero-still-slot] {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------
    Reduced motion: no bob, no recede, no pulse. The SVG still is static by
    construction, so there is nothing else to switch off.
    --------------------------------------------------------------------------- */
@@ -99,5 +113,13 @@
   [data-hero-canvas],
   #hero-content {
     animation: none;
+  }
+
+  [data-hero-phase="poster"] [data-hero-still-slot] {
+    display: block;
+  }
+
+  [data-hero-phase="poster"] [data-hero-poster] {
+    display: none;
   }
 }

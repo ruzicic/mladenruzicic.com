@@ -155,6 +155,58 @@ export function hostOf(url: string): string {
   }
 }
 
+/**
+ * Same destination written two ways — a trailing slash, a `www.`, a different
+ * case in the host — collapses to one key.
+ */
+function sameDestination(url: string): string {
+  try {
+    const parsed = new URL(url)
+    const host = parsed.host.replace(/^www\./, "").toLowerCase()
+    const path = parsed.pathname.replace(/\/+$/, "")
+    return `${parsed.protocol}//${host}${path}${parsed.search}`
+  } catch {
+    return url.replace(/\/+$/, "")
+  }
+}
+
+/**
+ * The case study's Links block: the entry's own `url` first, then `links`, with
+ * duplicates removed.
+ *
+ * Several entries (tenderlift, studenti-rs, fontalternatives) set `url` and
+ * repeat it as `links[0]`, which printed the site twice. Deduped here rather
+ * than in the MDX because the frontmatter is legitimately redundant — `url` is
+ * the canonical destination and `links` is the labelled list, and either can be
+ * present alone. Where both point at the same place the more specific label
+ * wins: a hand-written one beats the host derived from `url`.
+ */
+export function caseStudyLinks(
+  entry: WorkEntry
+): { label: string; url: string }[] {
+  const out: { label: string; url: string }[] = []
+  const seen = new Map<string, number>()
+
+  const add = (link: { label: string; url: string }) => {
+    const key = sameDestination(link.url)
+    const at = seen.get(key)
+    if (at === undefined) {
+      seen.set(key, out.length)
+      out.push(link)
+      return
+    }
+    const existing = out[at]
+    const existingIsDerived = existing.label === hostOf(existing.url)
+    if (existingIsDerived && link.label !== hostOf(link.url)) {
+      out[at] = { label: link.label, url: existing.url }
+    }
+  }
+
+  if (entry.url) add({ label: hostOf(entry.url), url: entry.url })
+  for (const link of entry.links ?? []) add(link)
+  return out
+}
+
 /* -------------------------------------------------------------------------- */
 /* Grouping                                                                   */
 /* -------------------------------------------------------------------------- */

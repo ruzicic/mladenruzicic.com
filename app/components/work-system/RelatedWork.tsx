@@ -44,7 +44,12 @@ export function RelatedWork({ entry, limit = 3 }: RelatedWorkProps) {
         </Eyebrow>
       </div>
 
-      <ul className="mt-10 grid list-none grid-cols-1 gap-8 p-0 sm:grid-cols-3">
+      {/* role="list": Safari/VoiceOver drops list semantics on
+          `list-style: none`. */}
+      <ul
+        role="list"
+        className="mt-10 grid list-none grid-cols-1 gap-8 p-0 sm:grid-cols-3"
+      >
         {items.map((item) => (
           <li key={item.slug}>
             <TransitionLink href={`/work/${item.slug}`} className="group block">

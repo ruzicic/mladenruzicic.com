@@ -18,7 +18,7 @@ export const COMPANIES = [
     role: "Global Product Owner, EVO Touch",
     prev: "Senior Software Engineer → UI Platform Engineer → Engineering Manager, UI Platform",
     summary:
-      "Joined as a senior engineer on a platform migration, then built the proof of concept for Velocity, the SCALAR design system and React component library. Led the five-person UI Platform team that took it from prototype to the standard for new development. Now own vision, roadmap and delivery for EVO Touch, ZF's multi-platform app for commercial vehicle drivers.",
+      "Joined as a senior engineer on a platform migration, then built the proof of concept for Velocity, the SCALAR design system and React component library. Led the UI Platform team that took it from prototype to the standard for new development. Now own vision, roadmap and delivery for EVO Touch, ZF's multi-platform app for commercial vehicle drivers.",
     fact: "Platform work is what opened the product-ownership role: Velocity became the default UI answer inside SCALAR, and the product seat followed.",
     people: [],
     logo: "/static/logos/mono/zf-scalar.svg",

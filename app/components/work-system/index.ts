@@ -25,6 +25,7 @@ export {
 export {
   FILTER_IDS,
   FILTERS,
+  caseStudyLinks,
   filterLabel,
   formatPeriod,
   formatPeriodPart,

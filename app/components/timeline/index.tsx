@@ -43,7 +43,9 @@ export async function Timeline() {
       data-section="History"
       data-testid="timeline"
       aria-labelledby="history-heading"
-      className="relative border-t border-line-soft pb-20 pt-24"
+      // scroll-mt: the header is fixed at 70px, so #history would otherwise
+      // land the heading behind it.
+      className="relative scroll-mt-[80px] border-t border-line-soft pb-20 pt-24"
     >
       <Container>
         <SectionHeader

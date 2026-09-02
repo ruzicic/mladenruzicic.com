@@ -67,7 +67,7 @@ Parallel agents must stay inside their own paths.
 | **copy** | everything under `content/` |
 | **foundation (done)** | `app/components/primitives/**`, `app/globals.css`, `app/fonts.ts`, `lib/content/**`, `next.config.ts`, `eslint.config.mjs`, `tsconfig.json`, `types/**` |
 
-Shared, low-churn: `lib/utils.ts` (`cn`), `app/components/icons.tsx`,
+Shared, low-churn: `lib/utils.ts` (`cn`),
 `app/components/FathomAnalytics.tsx`, `proxy.ts`, `app/sitemap.ts`,
 `app/robots.ts`, `app/not-found.tsx`, `app/opengraph-image.tsx`.
 
@@ -118,8 +118,11 @@ proxy.ts                   Accept: text/markdown → /md/* rewrite (Node runtime
 1. Motion mode at launch is **calm**. Playful is a later toggle.
 2. **Custom cursor dropped** — it cannot render above the browser top layer where
    native `<dialog>` and popovers live, and adds nothing on touch.
-3. **Newsletter dropped for v3.** `app/api/subscribe/route.ts` stays in the repo,
-   dormant; `NewsletterBanner` is deleted.
+3. **Newsletter dropped for v3.** `NewsletterBanner` is deleted, and
+   `app/api/subscribe/route.ts` was removed too — `export async function POST`
+   deploys a publicly reachable, unauthenticated endpoint that writes to a live
+   ConvertKit list, which is not "dormant". Git history is the archive if the
+   newsletter comes back.
 4. Analytics: **keep Fathom, add `@vercel/speed-insights`** at `sampleRate 0.3`.
 5. Hero logo set: **six employers** — ZF SCALAR, Shopify, HEGIAS, WolkAbout,
    Execom, Nemestic (`HERO_LOGOS` in `content/companies.ts`).

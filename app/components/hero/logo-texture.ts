@@ -22,8 +22,6 @@ export interface MarkRequest {
   text: string
 }
 
-const cache = new Map<string, Promise<CanvasTexture | null>>()
-
 function makeCanvas(): HTMLCanvasElement | null {
   if (typeof document === "undefined") return null
   const canvas = document.createElement("canvas")
@@ -105,15 +103,18 @@ async function rasterise({
   return texture
 }
 
-/** Memoised per `src|text`, so a remount never re-rasterises. */
+/**
+ * One fresh `CanvasTexture` per call — the caller owns it and must `dispose()`
+ * it (`Scene.tsx`'s texture effect does).
+ *
+ * Deliberately not memoised at module scope: a `CanvasTexture` is bound to the
+ * GL context that uploaded it, so a cache that outlives the context hands the
+ * next mount a texture belonging to a dead one while keeping the old GPU
+ * allocation reachable. Re-rasterising six 512² canvases on remount is cheap;
+ * leaking six textures per navigation is not.
+ */
 export function loadMarkTexture(
   request: MarkRequest
 ): Promise<CanvasTexture | null> {
-  const key = `${request.src ?? ""}|${request.text}`
-  let entry = cache.get(key)
-  if (!entry) {
-    entry = rasterise(request)
-    cache.set(key, entry)
-  }
-  return entry
+  return rasterise(request)
 }

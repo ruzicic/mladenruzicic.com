@@ -142,14 +142,17 @@ html[data-preloader="off"] [data-testid="preloader"] {
 [data-project] {
   transition:
     opacity 600ms var(--ease-reveal),
-    transform 600ms var(--ease-reveal),
-    filter 600ms var(--ease-reveal);
+    transform 600ms var(--ease-reveal);
 }
 
-[data-work-focus="on"] [data-project]:not([data-active]) {
+/* WorkFocus marks the *most visible* row `data-active`; tab order has no
+   relationship to visibility, so focus regularly lands in a dimmed row.
+   `:focus-within` restores it to full contrast. No `filter: blur()` here —
+   a filter on an ancestor smears the descendant's own focus ring, so no
+   child outline can escape it; opacity alone carries the effect. */
+[data-work-focus="on"] [data-project]:not([data-active]):not(:focus-within) {
   opacity: 0.35;
   transform: scale(0.96);
-  filter: blur(2px);
 }
 
 /* ---------------------------------------------------------------------------
@@ -242,10 +245,11 @@ html[data-preloader="off"] [data-testid="preloader"] {
     transition: none !important;
   }
 
-  [data-work-focus="on"] [data-project]:not([data-active]) {
+  /* Selector kept in lockstep with the dim rule above: it has to tie on
+     specificity for source order to win. */
+  [data-work-focus="on"] [data-project]:not([data-active]):not(:focus-within) {
     opacity: 1;
     transform: none;
-    filter: none;
   }
 
   [data-rail-band]:not([data-expanded]):hover {
@@ -254,5 +258,43 @@ html[data-preloader="off"] [data-testid="preloader"] {
 
   [data-scroll-hairline] > span {
     animation: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Nav-pending hairline — the styles for `primitives/NavPending`.
+
+   Lives here rather than in a `<style>` element the component renders, because
+   `NavPending` is a child of an `<a>`: a `<style>` there is invalid nesting
+   that browsers merely tolerate, and it was re-inserted on every pending
+   navigation. The 100ms delay is what keeps a prefetched (instant) navigation
+   from flashing it at all.
+   --------------------------------------------------------------------------- */
+@keyframes nav-pending {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes nav-pending-show {
+  to {
+    opacity: 1;
+  }
+}
+
+[data-nav-pending] {
+  opacity: 0;
+  animation:
+    nav-pending 1.4s var(--ease-reveal) 100ms forwards,
+    nav-pending-show 1ms linear 100ms forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-nav-pending] {
+    animation: nav-pending-show 1ms linear 100ms forwards;
+    transform: scaleX(1);
   }
 }

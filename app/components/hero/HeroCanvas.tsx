@@ -1,9 +1,8 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import dynamic from "next/dynamic"
 
-import { HeroStill } from "./HeroStill"
 import { Poster } from "./Poster"
 import type { TooltipInfo } from "./Scene"
 import type { HeroLogoShard } from "./types"
@@ -21,6 +20,9 @@ import type { HeroLogoShard } from "./types"
  *
  * Under reduced motion we render the seeded SVG still instead and three.js is
  * never fetched. With no WebGL2 the gradient poster simply stays.
+ *
+ * The still arrives as the `still` prop — a server-rendered node — so it is in
+ * the HTML document from the first byte; see the render comment below.
  */
 const Scene = dynamic(() => import("./Scene"), { ssr: false })
 
@@ -34,6 +36,11 @@ type Phase = "poster" | "still" | "loading" | "live"
  */
 function waitForPreloader(): Promise<void> {
   if (typeof document === "undefined") return Promise.resolve()
+  // Latched by the preloader before it dispatches, and by the <head> bootstrap
+  // on a repeat visit. Checked first because the element outlives the event by
+  // one React commit, so "element present" alone is not proof it is still there.
+  if (document.documentElement.dataset.preloader === "off")
+    return Promise.resolve()
   if (!document.querySelector('[data-testid="preloader"]'))
     return Promise.resolve()
   return new Promise((resolve) => {
@@ -91,7 +98,18 @@ function onIdle(callback: () => void, timeout = 1200): () => void {
   return () => window.clearTimeout(handle)
 }
 
-export function HeroCanvas({ logos }: { logos: HeroLogoShard[] }) {
+export function HeroCanvas({
+  logos,
+  still,
+}: {
+  logos: HeroLogoShard[]
+  /**
+   * The reduced-motion `<HeroStill>`, rendered by the server `Hero` and passed
+   * in as a node so it is genuinely server HTML rather than something this
+   * client component produces after hydration.
+   */
+  still: ReactNode
+}) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   /*
    * The hero <section> owns R3F's events (`eventSource`), so the copy above the
@@ -156,6 +174,17 @@ export function HeroCanvas({ logos }: { logos: HeroLogoShard[] }) {
 
   const handleFirstFrame = useCallback(() => setPhase("live"), [])
 
+  /*
+   * The GPU dropped the context (a suspended laptop, or Chrome evicting it
+   * because too many WebGL tabs are open). Nothing here can bring it back, and
+   * leaving `phase` at "live" would hold the poster at opacity 0 over a dead,
+   * transparent canvas — so fall all the way back to the poster.
+   */
+  const handleContextLost = useCallback(() => {
+    setTooltip(null)
+    setPhase("poster")
+  }, [])
+
   const showScene = phase === "loading" || phase === "live"
 
   return (
@@ -167,16 +196,30 @@ export function HeroCanvas({ logos }: { logos: HeroLogoShard[] }) {
       aria-hidden
       className="pointer-events-none absolute inset-0 overflow-hidden"
     >
-      {phase === "still" ? (
-        <HeroStill logos={logos} />
-      ) : (
+      {/*
+        `phase` is "poster" on the server and through hydration, because the
+        reduced-motion decision cannot be made until an effect runs. So while it
+        is "poster" *both* the server-rendered still and the gradient poster are
+        in the document and CSS picks between them on `prefers-reduced-motion`
+        (app/styles/hero.css); once the phase resolves, JS narrows it to one.
+        That is what puts the still in the HTML for a reader with reduced motion
+        and no JS, rather than only after hydration.
+      */}
+      {phase === "still" || phase === "poster" ? (
+        <div data-hero-still-slot className="absolute inset-0">
+          {still}
+        </div>
+      ) : null}
+
+      {phase !== "still" ? (
         <div
+          data-hero-poster
           className="absolute inset-0 transition-opacity duration-700 ease-reveal"
           style={{ opacity: phase === "live" ? 0 : 1 }}
         >
           <Poster />
         </div>
-      )}
+      ) : null}
 
       {showScene ? (
         <div
@@ -188,6 +231,7 @@ export function HeroCanvas({ logos }: { logos: HeroLogoShard[] }) {
             sectionRef={sectionRef}
             onFirstFrame={handleFirstFrame}
             onTooltip={setTooltip}
+            onContextLost={handleContextLost}
           />
         </div>
       ) : null}

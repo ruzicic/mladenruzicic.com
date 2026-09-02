@@ -40,6 +40,7 @@ export function PersonPopover({
   const timer = useRef(0)
   const hue = hueFromId(person.id)
   const initials = initialsOf(person.name)
+  const whereColor = `hsl(${hue} 60% ${labelLightness(hue)}%)`
 
   const panel = (id: string) =>
     typeof document === "undefined" ? null : document.getElementById(id)
@@ -133,7 +134,7 @@ export function PersonPopover({
             </strong>
             <span
               className="font-mono text-[12px] uppercase tracking-[0.08em]"
-              style={{ color: `hsl(${hue} 60% 60%)` }}
+              style={{ color: whereColor }}
             >
               {person.where}
             </span>
@@ -179,4 +180,21 @@ export function PersonPopover({
       </div>
     </Popover>
   )
+}
+
+/**
+ * Lightness for the `person.where` label, per hue.
+ *
+ * `hsl(h 60% 60%)` is not equally light at every hue: it bottoms out at 3.20:1
+ * against `--color-surface-2` around 240° (`#5c5cd6`), below the 4.5:1 that
+ * 12px text needs. `hueFromId` hashes the person id, so the hue is not under
+ * editorial control — today's five people happen to land elsewhere, but any new
+ * id can hash into the blue band. Lift lightness across that band, on a base
+ * two points above the designed 60% so red (the next-worst hue) clears too.
+ * Worst case across hues 0–359 goes from 3.20:1 to 4.80:1.
+ */
+function labelLightness(hue: number): number {
+  const raw = Math.abs(hue - 240)
+  const distance = Math.min(raw, 360 - raw)
+  return 62 + 16 * Math.max(0, 1 - distance / 90)
 }

@@ -82,7 +82,15 @@ export default async function RootLayout({
 
         <Header siteName={site.name} />
 
-        <main id="main">{children}</main>
+        {/* tabIndex={-1} so the skip link actually moves focus: without it the
+            hash changes, Chromium's sequential-focus starting point puts the
+            next Tab inside, but activeElement stays on <body>, so a screen
+            reader's virtual cursor never moves and the main landmark is never
+            announced. `:focus-visible` scopes the ring, so a programmatic -1
+            focus paints nothing. */}
+        <main id="main" tabIndex={-1}>
+          {children}
+        </main>
 
         <Footer />
         <MobilePill companies={pillCompanies} />

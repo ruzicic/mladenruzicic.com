@@ -94,11 +94,14 @@ export default async function WorkDetailPage({
 
         <Container className="py-[72px] md:py-[96px]">
           <div className="grid gap-16">
+            {/* Notice first, then the numbers — the same order the markdown
+                mirror uses (lib/content/markdown.ts), and the only order in
+                which the promise is made before the reader can test it. */}
+            <ConfidentialityNotice confidentiality={entry.confidentiality} />
+
             {publicMetrics.length > 0 ? (
               <MetricStrip metrics={publicMetrics} />
             ) : null}
-
-            <ConfidentialityNotice confidentiality={entry.confidentiality} />
 
             <Prose>
               <MDXRemote source={entry.body} />

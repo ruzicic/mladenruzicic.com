@@ -3,7 +3,7 @@
 
    Everything that could not be expressed as a Tailwind utility lives here:
    the tuned typographic scale for `Prose`, the `/work` filter transition
-   classes, the testimonial column layout and the shader-stub drift keyframes.
+   classes and the testimonial column layout.
 
    INTEGRATION: imported by every page that needs it
    (`app/work/page.tsx`, `app/work/[slug]/page.tsx`, `app/mentoring/page.tsx`,
@@ -14,34 +14,6 @@
 
    All values come from the tokens in `app/globals.css`. No new hexes.
    --------------------------------------------------------------------------- */
-
-/* ---------------------------------------------------------------------------
-   Shader stub drift. Replaced (with its element) when the real Paper Shaders
-   land; harmless if it outlives them.
-   --------------------------------------------------------------------------- */
-@keyframes shader-drift {
-  0%,
-  100% {
-    background-position:
-      0% 0%,
-      100% 0%,
-      50% 100%;
-  }
-  50% {
-    background-position:
-      6% 4%,
-      94% 8%,
-      44% 96%;
-  }
-}
-
-.shader-drift {
-  background-size: 160% 160%;
-  animation-name: shader-drift;
-  animation-timing-function: var(--ease-reveal);
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
-}
 
 /* ---------------------------------------------------------------------------
    Prose — the compiled MDX body of a case study, /about and /uses.

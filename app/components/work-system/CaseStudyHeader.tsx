@@ -6,7 +6,7 @@ import type { WorkEntry } from "@/lib/content/schema"
 import { Chip, Container, Display } from "../primitives"
 import { AccentGradient, Grain } from "../shaders"
 import { StatusBadge } from "./StatusBadge"
-import { formatPeriod, hostOf, statusLabel } from "./taxonomy"
+import { caseStudyLinks, formatPeriod, statusLabel } from "./taxonomy"
 import { MORPH_CLASS, workTitleTransitionName } from "./transitions"
 import { WorkArt } from "./WorkArt"
 
@@ -26,10 +26,7 @@ export interface CaseStudyHeaderProps {
  */
 export function CaseStudyHeader({ entry }: CaseStudyHeaderProps) {
   const company = entry.company ? getCompany(entry.company) : undefined
-  const links = [
-    ...(entry.url ? [{ label: hostOf(entry.url), url: entry.url }] : []),
-    ...(entry.links ?? []),
-  ]
+  const links = caseStudyLinks(entry)
 
   return (
     <header className="relative isolate overflow-hidden border-b border-line-soft">
@@ -101,7 +98,7 @@ export function CaseStudyHeader({ entry }: CaseStudyHeaderProps) {
 
           {links.length > 0 ? (
             <Field label="Links">
-              <ul className="m-0 flex list-none flex-col gap-2 p-0">
+              <ul role="list" className="m-0 flex list-none flex-col gap-2 p-0">
                 {links.map((link) => (
                   <li key={link.url}>
                     <a
@@ -120,7 +117,7 @@ export function CaseStudyHeader({ entry }: CaseStudyHeaderProps) {
           ) : null}
 
           <Field label="Tech" className="sm:col-span-2 lg:col-span-4">
-            <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
+            <ul role="list" className="m-0 flex list-none flex-wrap gap-2 p-0">
               {entry.tech.map((tech) => (
                 <li key={tech}>
                   <Chip>{tech}</Chip>

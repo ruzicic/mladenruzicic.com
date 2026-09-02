@@ -99,8 +99,19 @@ export function Preloader({ verbs, finalVerb }: PreloaderProps) {
       }
       rootRef.current?.setAttribute("data-phase", "out")
       fadeTimer = window.setTimeout(() => {
-        setMounted(false)
+        /*
+         * The attribute goes up FIRST, and it is what closes a race with
+         * `HeroCanvas.waitForPreloader`: React batches `setMounted(false)`, so
+         * the overlay element is still in the DOM when the event fires. A
+         * listener attached in that window would see the element, wait for an
+         * event that has already gone, and fall through to its 3s timeout.
+         * A latched attribute has no such window — the same `data-preloader`
+         * flag the <head> bootstrap uses, so `shell.css` hides the overlay
+         * immediately too.
+         */
+        document.documentElement.setAttribute("data-preloader", "off")
         window.dispatchEvent(new Event("mr:preloader:done"))
+        setMounted(false)
       }, FADE_MS)
     }
 
