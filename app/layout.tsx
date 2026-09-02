@@ -52,7 +52,20 @@ export default async function RootLayout({
   }))
 
   return (
-    <html lang="en" className={fontVariables} suppressHydrationWarning>
+    // `data-scroll-behavior="smooth"` is what tells the Next 16 router to
+    // temporarily force `scroll-behavior: auto` while it resets the scroll
+    // position for a new route. Without it the router's scroll-to-top is
+    // animated by `html { scroll-behavior: smooth }` in globals.css, so a fresh
+    // case study visibly slides up from the source page's offset — and any
+    // interruption leaves it parked under the fixed header. In-page `#hash`
+    // links keep their smooth scroll: the router opts out of the override for
+    // hash-only navigations.
+    <html
+      lang="en"
+      className={fontVariables}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: PRELOADER_BOOTSTRAP }} />
       </head>
