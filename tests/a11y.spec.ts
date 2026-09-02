@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test } from "@playwright/test"
 
+import { waitForRouteReady } from "./helpers"
+
 /**
  * axe smoke per docs/v3-redesign-plan.md §8 ("Playwright + axe smoke" on every
  * PR). `serious`/`critical` violations fail the run; everything below that is
@@ -8,6 +10,11 @@ import { expect, test } from "@playwright/test"
  *
  * `/404` is requested literally: there is no `app/404` route, so it resolves
  * to the same not-found boundary as any other unmatched path.
+ *
+ * Every route is audited *after* `waitForRouteReady` — see the note on
+ * `waitForPreloaderGone` in `helpers.ts`. Nothing is excluded from axe here:
+ * the wait removes a transient cross-fade from the sample, it does not hide a
+ * failing element.
  */
 
 const ROUTES = [
@@ -27,7 +34,7 @@ for (const route of ROUTES) {
     page,
   }) => {
     await page.goto(route)
-    await page.waitForLoadState("networkidle").catch(() => {})
+    await waitForRouteReady(page)
 
     const results = await new AxeBuilder({ page }).analyze()
 
