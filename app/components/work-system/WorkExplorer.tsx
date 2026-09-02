@@ -2,8 +2,7 @@
 
 import {
   startTransition,
-  useEffect,
-  useState,
+  useSyncExternalStore,
   ViewTransition,
   type ReactNode,
 } from "react"
@@ -37,6 +36,51 @@ export interface WorkExplorerProps {
   counts: Record<FilterId, number>
 }
 
+/* ---------------------------------------------------------------------------
+   `?filter=` as an external store.
+
+   The URL is the single source of truth for the active filter, and it is an
+   external system, so it is read with `useSyncExternalStore` rather than with
+   `useSearchParams`. That matters for more than tidiness: `useSearchParams`
+   makes this subtree dynamic under Cache Components, which pushes all twenty
+   server-rendered cards out of the static HTML and into the flight payload —
+   the index then ships zero card markup to a crawler or a reader without JS.
+
+   `getServerSnapshot` returns "all", so the prerendered document is the full,
+   unfiltered list; after hydration React re-reads `getSnapshot` and a deep link
+   narrows it. `select()` writes the URL with `history.replaceState` (the
+   documented Next escape hatch — no server round-trip, no history entry) and
+   notifies by hand, since `replaceState` fires no event of its own.
+   --------------------------------------------------------------------------- */
+
+const listeners = new Set<() => void>()
+
+function subscribeToFilter(listener: () => void) {
+  listeners.add(listener)
+  window.addEventListener("popstate", listener)
+  return () => {
+    listeners.delete(listener)
+    window.removeEventListener("popstate", listener)
+  }
+}
+
+function getFilterSnapshot(): FilterId {
+  const value = new URLSearchParams(window.location.search).get("filter")
+  return isFilterId(value) ? value : "all"
+}
+
+function getFilterServerSnapshot(): FilterId {
+  return "all"
+}
+
+function writeFilter(next: FilterId) {
+  const url = new URL(window.location.href)
+  if (next === "all") url.searchParams.delete("filter")
+  else url.searchParams.set("filter", next)
+  window.history.replaceState(null, "", url)
+  for (const listener of listeners) listener()
+}
+
 /**
  * The client island on `/work` — docs/v3-redesign-plan.md §5.3.
  *
@@ -50,32 +94,19 @@ export interface WorkExplorerProps {
  * URL state goes through `history.replaceState` (the documented Next escape
  * hatch) rather than `router.replace`, so a filter click never round-trips to
  * the server and never stacks history entries; `?filter=` is still read on load
- * and is still shareable.
- *
- * The initial filter is deliberately *not* read with `useSearchParams`: under
- * Cache Components that hook makes this subtree dynamic, so the static shell
- * emits only the Suspense fallback and all twenty server-rendered cards end up
- * in the flight payload instead of the HTML document — the index then ships zero
- * card markup to a crawler or a reader without JS. `?filter=` is read once from
- * `window.location` after mount instead: the document carries the unfiltered
- * list, and a deep link narrows it a frame later.
+ * and is still shareable. See the store above for why it is not `useSearchParams`.
  */
 export function WorkExplorer({ groups, counts }: WorkExplorerProps) {
-  const [filter, setFilter] = useState<FilterId>("all")
-
-  useEffect(() => {
-    const fromUrl = new URLSearchParams(window.location.search).get("filter")
-    if (isFilterId(fromUrl) && fromUrl !== "all") setFilter(fromUrl)
-  }, [])
+  const filter = useSyncExternalStore(
+    subscribeToFilter,
+    getFilterSnapshot,
+    getFilterServerSnapshot
+  )
 
   function select(next: FilterId) {
     if (next === filter) return
     startTransition(() => {
-      setFilter(next)
-      const url = new URL(window.location.href)
-      if (next === "all") url.searchParams.delete("filter")
-      else url.searchParams.set("filter", next)
-      window.history.replaceState(null, "", url)
+      writeFilter(next)
     })
   }
 
@@ -109,7 +140,10 @@ export function WorkExplorer({ groups, counts }: WorkExplorerProps) {
                 </Eyebrow>
               </div>
 
-              <ul className="mt-10 grid list-none grid-cols-1 gap-x-10 gap-y-16 p-0 md:grid-cols-2">
+              <ul
+                role="list"
+                className="mt-10 grid list-none grid-cols-1 gap-x-10 gap-y-16 p-0 md:grid-cols-2"
+              >
                 {group.items.map((item) => (
                   <ViewTransition key={item.slug} default="vt-card">
                     <li>{item.card}</li>

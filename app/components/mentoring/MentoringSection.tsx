@@ -66,7 +66,7 @@ export function MentoringSection() {
             </div>
           </div>
 
-          <ol className="m-0 grid list-none gap-[22px] p-0">
+          <ol role="list" className="m-0 grid list-none gap-[22px] p-0">
             {testimonials.map((testimonial, index) => {
               const mirrored = index % 2 === 1
               return (

@@ -131,7 +131,10 @@ export function MobilePill({ companies }: { companies: PillCompany[] }) {
         )}
       >
         <nav aria-label="Sections">
-          <ul className="m-0 mb-[14px] flex h-[6px] list-none gap-[3px] p-0">
+          <ul
+            role="list"
+            className="m-0 mb-[14px] flex h-[6px] list-none gap-[3px] p-0"
+          >
             {companies.map((company) => (
               <li
                 key={company.id}

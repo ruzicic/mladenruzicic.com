@@ -83,11 +83,17 @@ export function TimelineRail({
     startLeft: number
   } | null>(null)
 
+  /*
+   * Derived from `nowFraction` rather than a hardcoded 2026: the axis runs to
+   * SPAN_TO and "now" is live, so a literal here silently stops the ticks short
+   * the moment the year rolls over.
+   */
   const ticks = useMemo(() => {
     const out: number[] = []
-    for (let year = 2026; year >= SPAN_FROM; year -= 2) out.push(year)
+    for (let year = Math.floor(nowFraction); year >= SPAN_FROM; year -= 2)
+      out.push(year)
     return out
-  }, [])
+  }, [nowFraction])
 
   /** id → the band that lists this person, for the "Where:" link. */
   const bandOfPerson = useMemo(() => {
@@ -302,7 +308,14 @@ export function TimelineRail({
                   boxShadow: isExpanded
                     ? `0 40px 100px -20px rgba(0,0,0,.95), 0 0 0 6px ${company.color}1A`
                     : isHighlighted
-                      ? `0 0 0 2px ${company.color}, 0 0 32px 0 ${company.color}80`
+                      ? /*
+                         * Two rings: the brand one, then a token-coloured one
+                         * outside it. The brand colour alone is 2.86:1 for ZF
+                         * and 2.02:1 for HEGIAS against `--color-bg`, so on
+                         * those two bands a hero-driven highlight was a state
+                         * change no low-vision reader could see.
+                         */
+                        `0 0 0 2px ${company.color}, 0 0 0 4px var(--color-muted), 0 0 32px 0 ${company.color}80`
                       : "none",
                 }}
               >
@@ -477,6 +490,7 @@ export function TimelineRail({
           <div className="flex items-center gap-[14px] font-mono text-[11px] uppercase tracking-[0.08em] text-muted">
             <span id="alongside-label">{labels.alongsideLabel}</span>
             <ul
+              role="list"
               aria-labelledby="alongside-label"
               className="m-0 flex list-none p-0"
             >

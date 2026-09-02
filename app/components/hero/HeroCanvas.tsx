@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react"
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import dynamic from "next/dynamic"
 
 import { Poster } from "./Poster"
@@ -42,6 +36,11 @@ type Phase = "poster" | "still" | "loading" | "live"
  */
 function waitForPreloader(): Promise<void> {
   if (typeof document === "undefined") return Promise.resolve()
+  // Latched by the preloader before it dispatches, and by the <head> bootstrap
+  // on a repeat visit. Checked first because the element outlives the event by
+  // one React commit, so "element present" alone is not proof it is still there.
+  if (document.documentElement.dataset.preloader === "off")
+    return Promise.resolve()
   if (!document.querySelector('[data-testid="preloader"]'))
     return Promise.resolve()
   return new Promise((resolve) => {

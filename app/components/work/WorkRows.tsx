@@ -1,7 +1,7 @@
 import { ViewTransition } from "react"
 
 import { brandInkOnDark, inkOn } from "@/lib/color"
-import { getCompany, getFeaturedWork, getHome } from "@/lib/content"
+import { getCompany, getFeaturedWork, getHome, getWork } from "@/lib/content"
 import type { WorkEntry, WorkStatus } from "@/lib/content/schema"
 
 import { Chip } from "../primitives/Chip"
@@ -111,7 +111,13 @@ export function WorkRows() {
         <SectionHeader
           id="work-heading"
           title={home.work.eyebrow}
-          meta={`${featured.length} ${home.work.countLabel}`}
+          /*
+           * Computed, not copy. `home.work.countLabel` was the literal
+           * "Five of twenty" — interpolated after `featured.length`, so this
+           * actually rendered "5 Five of twenty", and the total went stale the
+           * moment a case study was added or removed.
+           */
+          meta={`${featured.length} of ${getWork().length}`}
         />
 
         <div className="grid gap-[112px]" data-testid="work-rows">
@@ -193,6 +199,7 @@ export function WorkRows() {
 
                   {entry.tech.length > 0 ? (
                     <ul
+                      role="list"
                       aria-label="Built with"
                       className="m-0 flex list-none flex-wrap gap-2 p-0"
                     >

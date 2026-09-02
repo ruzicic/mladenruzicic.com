@@ -60,7 +60,10 @@ export function MediaGallery({ media, title, className }: MediaGalleryProps) {
 
   return (
     <div className={className}>
-      <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+      <ul
+        role="list"
+        className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3"
+      >
         {items.map((item, index) => (
           <li key={item.src}>
             <figure className="m-0">

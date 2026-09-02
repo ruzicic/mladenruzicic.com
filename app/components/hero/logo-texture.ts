@@ -22,7 +22,6 @@ export interface MarkRequest {
   text: string
 }
 
-
 function makeCanvas(): HTMLCanvasElement | null {
   if (typeof document === "undefined") return null
   const canvas = document.createElement("canvas")

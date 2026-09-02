@@ -61,7 +61,7 @@ Parallel agents must stay inside their own paths.
 | **copy** | everything under `content/` |
 | **foundation (done)** | `app/components/primitives/**`, `app/globals.css`, `app/fonts.ts`, `lib/content/**`, `next.config.ts`, `eslint.config.mjs`, `tsconfig.json`, `types/**` |
 
-Shared, low-churn: `lib/utils.ts` (`cn`), `app/components/icons.tsx`,
+Shared, low-churn: `lib/utils.ts` (`cn`),
 `app/components/FathomAnalytics.tsx`, `proxy.ts`, `app/sitemap.ts`,
 `app/robots.ts`, `app/not-found.tsx`, `app/opengraph-image.tsx`.
 
