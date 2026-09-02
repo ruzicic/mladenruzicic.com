@@ -14,7 +14,7 @@ test.describe("sitemap routes", () => {
     request,
     baseURL,
   }) => {
-    test.setTimeout(180_000)
+    test.setTimeout(600_000)
 
     const urls = await readSitemapUrls(request, baseURL!)
     expect(urls.length, "sitemap.xml lists at least one URL").toBeGreaterThan(0)

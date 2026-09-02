@@ -1,5 +1,6 @@
 "use client"
 
+import { inkOn } from "@/lib/color"
 import type { CompanyId } from "@/lib/content/schema"
 
 import { requestExpand } from "./highlight-store"
@@ -20,8 +21,8 @@ function Mark({ mark, color }: { mark: string; color: string }) {
   return (
     <span
       aria-hidden
-      className="grid h-[18px] w-[18px] shrink-0 translate-y-[3px] place-items-center rounded-xs font-mono text-[9px] font-semibold leading-none text-bg"
-      style={{ background: color }}
+      className="grid h-[18px] w-[18px] shrink-0 translate-y-[3px] place-items-center rounded-xs font-mono text-[9px] font-semibold leading-none"
+      style={{ background: color, color: inkOn(color) }}
     >
       {mark}
     </span>

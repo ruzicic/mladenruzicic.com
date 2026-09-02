@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 
+import { WORK_SLUGS } from "@/lib/content/schema"
+
 /**
  * Content negotiation for agents: when the client prefers `text/markdown` over
  * `text/html`, serve the markdown mirror from `app/md/[...path]` instead of the
@@ -18,6 +20,18 @@ export function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
   const mirrored = MIRRORED.has(pathname) || pathname.startsWith("/work/")
+
+  // Unknown case-study slugs: under Cache Components the route serves its
+  // prerendered fallback shell (status 200) before `notFound()` can run, so the
+  // 404 has to happen here. `/work/<slug>.md` is left alone for the rewrite.
+  if (pathname.startsWith("/work/")) {
+    const slug = pathname.slice("/work/".length).replace(/\.md$/, "")
+    if (!(WORK_SLUGS as readonly string[]).includes(slug)) {
+      const url = request.nextUrl.clone()
+      url.pathname = "/404"
+      return NextResponse.rewrite(url)
+    }
+  }
 
   if (!mirrored || !prefersMarkdown(accept)) {
     const pass = NextResponse.next()

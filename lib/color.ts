@@ -55,7 +55,7 @@ export function contrast(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05)
 }
 
-function mix(a: string, b: string, t: number): string {
+export function mix(a: string, b: string, t: number): string {
   const ra = hexToRgb(a)
   const rb = hexToRgb(b)
   return rgbToHex([
@@ -68,6 +68,22 @@ function mix(a: string, b: string, t: number): string {
 /** The ink (dark or light) with the higher contrast on a given fill. */
 export function inkOn(fill: string): string {
   return contrast(fill, GROUND) >= contrast(fill, INK) ? GROUND : INK
+}
+
+/**
+ * Ink for a brand colour used as text on top of its own tint over the ground
+ * (the timeline bands: brand at `alpha` over #0B0B0C). Lightens toward the page
+ * ink until it reaches `min` contrast against that tinted surface.
+ */
+export function inkOnTint(hex: string, alpha = 0.26, min = 4.5): string {
+  const surface = mix(GROUND, hex, alpha)
+  let t = 0
+  let out = hex
+  while (contrast(out, surface) < min && t < 1) {
+    t += 0.05
+    out = mix(hex, INK, t)
+  }
+  return out
 }
 
 /**

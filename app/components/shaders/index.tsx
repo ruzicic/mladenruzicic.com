@@ -1,13 +1,28 @@
 "use client"
 
 import { useSyncExternalStore, type CSSProperties, type ReactNode } from "react"
-import {
-  GrainGradient,
-  MeshGradient,
-  StaticMeshGradient,
-} from "@paper-design/shaders-react"
+import dynamic from "next/dynamic"
 
 import { cn } from "@/lib/utils"
+
+/*
+ * The library (~80 KB gz, WebGL2) is loaded on demand: `app/not-found.tsx` is
+ * part of every route's tree, so a static import here would ship the shaders
+ * on the homepage too. Each surface paints its CSS fallback first and the
+ * shader mounts over it when the chunk arrives.
+ */
+const MeshGradient = dynamic(
+  () => import("@paper-design/shaders-react").then((m) => m.MeshGradient),
+  { ssr: false }
+)
+const StaticMeshGradient = dynamic(
+  () => import("@paper-design/shaders-react").then((m) => m.StaticMeshGradient),
+  { ssr: false }
+)
+const GrainGradient = dynamic(
+  () => import("@paper-design/shaders-react").then((m) => m.GrainGradient),
+  { ssr: false }
+)
 
 /**
  * Paper Shaders surfaces — docs/v3-redesign-plan.md §5.2.
@@ -164,19 +179,22 @@ export function AccentGradient({
     return <GradientFallback accent={accent} className={className} />
   }
   return (
-    <MeshGradient
-      aria-hidden
-      className={className}
-      style={BASE_STYLE}
-      colors={palette(accent)}
-      speed={reduced ? 0 : speed}
-      distortion={0.85}
-      swirl={0.55}
-      grainMixer={0.25}
-      grainOverlay={0.12}
-      minPixelRatio={1}
-      maxPixelCount={MAX_PIXELS}
-    />
+    <>
+      <GradientFallback accent={accent} className={className} />
+      <MeshGradient
+        aria-hidden
+        className={className}
+        style={BASE_STYLE}
+        colors={palette(accent)}
+        speed={reduced ? 0 : speed}
+        distortion={0.85}
+        swirl={0.55}
+        grainMixer={0.25}
+        grainOverlay={0.12}
+        minPixelRatio={1}
+        maxPixelCount={MAX_PIXELS}
+      />
+    </>
   )
 }
 
@@ -195,20 +213,23 @@ export function StaticAccentGradient({
     return <GradientFallback accent={accent} className={className} />
   }
   return (
-    <StaticMeshGradient
-      aria-hidden
-      className={className}
-      style={BASE_STYLE}
-      colors={palette(accent)}
-      positions={4}
-      waveX={0.4}
-      waveY={0.3}
-      mixing={0.6}
-      grainMixer={0.2}
-      grainOverlay={0.1}
-      minPixelRatio={1}
-      maxPixelCount={MAX_PIXELS}
-    />
+    <>
+      <GradientFallback accent={accent} className={className} />
+      <StaticMeshGradient
+        aria-hidden
+        className={className}
+        style={BASE_STYLE}
+        colors={palette(accent)}
+        positions={4}
+        waveX={0.4}
+        waveY={0.3}
+        mixing={0.6}
+        grainMixer={0.2}
+        grainOverlay={0.1}
+        minPixelRatio={1}
+        maxPixelCount={MAX_PIXELS}
+      />
+    </>
   )
 }
 
@@ -231,20 +252,23 @@ export function GrainSurface({
     )
   }
   return (
-    <GrainGradient
-      aria-hidden
-      className={className}
-      style={BASE_STYLE}
-      colorBack={NEAR_BLACK}
-      colors={[accent, dim(accent), SURFACE]}
-      shape="wave"
-      softness={0.85}
-      intensity={0.2}
-      noise={0.35}
-      speed={reduced ? 0 : 0.06}
-      minPixelRatio={1}
-      maxPixelCount={MAX_PIXELS}
-    />
+    <>
+      <GradientFallback accent={accent} className={className} variant="grain" />
+      <GrainGradient
+        aria-hidden
+        className={className}
+        style={BASE_STYLE}
+        colorBack={NEAR_BLACK}
+        colors={[accent, dim(accent), SURFACE]}
+        shape="wave"
+        softness={0.85}
+        intensity={0.2}
+        noise={0.35}
+        speed={reduced ? 0 : 0.06}
+        minPixelRatio={1}
+        maxPixelCount={MAX_PIXELS}
+      />
+    </>
   )
 }
 

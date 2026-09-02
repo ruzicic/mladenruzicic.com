@@ -12,7 +12,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react"
 
-import { brandInkOnDark, inkOn } from "@/lib/color"
+import { brandInkOnDark, inkOn, inkOnTint } from "@/lib/color"
 import type { Company, CompanyId, Home, Person } from "@/lib/content/schema"
 
 import { useHeroHighlight } from "../hero/highlight-store"
@@ -326,7 +326,7 @@ export function TimelineRail({
                     </span>
                   </span>
                   <span className="flex items-center gap-2 overflow-hidden font-mono text-[10px] tracking-[0.06em] whitespace-nowrap">
-                    <span style={{ color: brandInkOnDark(company.color) }}>
+                    <span style={{ color: inkOnTint(company.color) }}>
                       {company.yearsLabel}
                     </span>
                     {company.approx ? (
