@@ -190,6 +190,12 @@ export const workFrontmatterSchema = z.object({
         width: z.number().int().positive(),
         height: z.number().int().positive(),
         kind: z.enum(["image", "video"]),
+        /**
+         * 16px-wide base64 data URI used as `next/image`'s `placeholder="blur"`.
+         * Optional: `WorkArt` and `MediaGallery` already read it defensively and
+         * fall back to `placeholder="empty"` when it is absent.
+         */
+        blurDataURL: z.string().startsWith("data:image/").optional(),
       })
     )
     .optional(),
