@@ -17,6 +17,21 @@ export const RAIL_HEIGHT_EXPANDED = 740
 /** Width of an expanded band's panel. */
 export const EXPANDED_WIDTH = 480
 
+/**
+ * Horizontal breathing room trimmed off the right of every band, so two
+ * adjacent spans never look welded together. Shared by the band width and by
+ * the overlap strip, which has to land on the same pixel.
+ */
+export const BAND_GAP = 6
+
+/**
+ * Overlaps shorter than two months are an artefact of how a range is written
+ * down, not a real double engagement: HEGIAS ends in April 2021 and Shopify
+ * starts in April 2021, and both are inclusive. Drawing a 7px hatch there would
+ * claim something the dates do not say.
+ */
+export const MIN_OVERLAP_YEARS = 2 / 12
+
 /** Vertical anchors from the design, in px inside the rail. */
 export const ROW = {
   employedLabel: 44,
@@ -36,6 +51,29 @@ export function pct(year: number): number {
 /** Resolves a company's `to`, which is `"now"` for the current employer. */
 export function resolveTo(to: number | "now", now: number): number {
   return to === "now" ? now : to
+}
+
+/**
+ * How much of a band its newer neighbour covers, as a fraction of the band's
+ * own width (0 when they do not overlap).
+ *
+ * Bands are painted newest-first, so the *older* band of an overlapping pair is
+ * the one drawn on top — it keeps its end edge, its mark and its date line
+ * readable, and it is the one that has to admit what is underneath it. That
+ * admission is the hatched strip along its leading edge, which is exactly this
+ * fraction wide.
+ *
+ * `band.to` must already be resolved through `resolveTo`.
+ */
+export function overlapWithNewer(
+  band: { from: number; to: number },
+  newerFrom: number | undefined
+): number {
+  if (newerFrom === undefined) return 0
+  const overlap = band.to - newerFrom
+  const span = band.to - band.from
+  if (overlap < MIN_OVERLAP_YEARS || span <= 0) return 0
+  return Math.min(overlap / span, 1)
 }
 
 /** Stable 0–359 hue from an id, so an avatar keeps its colour across renders. */

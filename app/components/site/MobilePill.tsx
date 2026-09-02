@@ -55,6 +55,9 @@ const NAV_LINK =
  * `#0057B8` at 2.47:1 and HEGIAS `#6F246F` at 1.75:1 — so those two bars are
  * effectively invisible. A 1px `line-strong` outline gives every segment a
  * boundary that does not depend on its fill.
+ *
+ * The bar stays 6px tall; `[data-pill-segment]` in `app/styles/shell.css` grows
+ * it to a 24px target (WCAG 2.5.8) without changing what it looks like.
  */
 const SEGMENT =
   "block h-full w-full rounded-[2px] outline outline-[var(--color-line-strong)]"
@@ -133,6 +136,7 @@ export function MobilePill({ companies }: { companies: PillCompany[] }) {
         <nav aria-label="Sections">
           <ul
             role="list"
+            data-pill-scrubber
             className="m-0 mb-[14px] flex h-[6px] list-none gap-[3px] p-0"
           >
             {companies.map((company) => (
@@ -145,6 +149,7 @@ export function MobilePill({ companies }: { companies: PillCompany[] }) {
                   <a
                     href="#history"
                     data-hover
+                    data-pill-segment
                     aria-label={`${company.short}, ${company.yearsLabel}`}
                     onClick={(event) => {
                       requestExpand(company.id)
@@ -157,6 +162,7 @@ export function MobilePill({ companies }: { companies: PillCompany[] }) {
                   <TransitionLink
                     href="/#history"
                     data-hover
+                    data-pill-segment
                     aria-label={`${company.short}, ${company.yearsLabel}`}
                     onClick={(event) => closeSheet(event.currentTarget)}
                     className={SEGMENT}

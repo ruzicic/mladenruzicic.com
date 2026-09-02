@@ -207,6 +207,130 @@ html[data-preloader="off"] [data-testid="preloader"] {
 }
 
 /* ---------------------------------------------------------------------------
+   Band head — the container the narrow state is measured against.
+
+   `container-type` sits here, on a wrapper around the button only, and not on
+   the band itself: it computes to `contain: layout style inline-size`, and
+   containing the whole band would make it the containing block for the person
+   popovers inside the expanded panel.
+   --------------------------------------------------------------------------- */
+[data-band-head] {
+  /* The narrow-band threshold. Kept in lockstep with the literal in the
+     `@container band` condition below, which cannot read it. */
+  --band-narrow: 150px;
+
+  container: band / inline-size;
+  position: relative;
+  display: block;
+}
+
+/* The months a band shares with the newer one it is painted over. A hatch in
+   the covered band's colour, closed by a dashed rule exactly where that band
+   starts — the one edge the stack hides. The wash recesses the strip, so what
+   shows through the top band's 26%-alpha fill (the covered band's own border,
+   and its expand affordance when the join lands on it) reads as underneath
+   rather than as a second control. Width comes from the component, because only
+   it knows the two spans. */
+[data-band-overlap] {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  border-right: 1px dashed;
+  background-color: color-mix(in oklab, var(--color-bg) 55%, transparent);
+  pointer-events: none;
+}
+
+/* An expanded band is 480px of panel at a position of its own: there is no
+   join left to describe. */
+[data-rail-band][data-expanded] [data-band-overlap] {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Narrow bands — §5.7.
+
+   A ten-month span (HEGIAS, Jul 2020 – Apr 2021) is ~70px wide at the rail's
+   full 1800px, which fits neither the name nor "Jul 2020 – Apr 2021": both used
+   to render clipped mid-word. Under the threshold the band drops to its mark
+   with the expand affordance beneath it, and the full label moves to
+   `[data-band-tip]` on hover/focus. The button keeps its size, its click target
+   and its `aria-label`, so nothing is lost to a pointer, a keyboard or a screen
+   reader.
+
+   150px is the narrow-band threshold — the widest band that cannot hold a
+   two-date mono line plus the 28px affordance. It is written as a literal
+   because a container query cannot read a custom property; `--band-narrow` on
+   `[data-band-head]` above is the same number, and the two have to move
+   together.
+   --------------------------------------------------------------------------- */
+/* The label a mark-only band shows on hover or focus. Hidden outright at full
+   width, where the band already spells it out. Sits above the band, in the tick
+   gutter, so it never covers the neighbouring spans. */
+[data-band-tip] {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 1;
+  display: none;
+  translate: -50% 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-2);
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  color: var(--color-dim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms var(--ease-reveal);
+}
+
+@container band (width <= 150px) {
+  [data-band-button] {
+    align-items: center;
+    justify-content: center;
+    /* `--band-lead` is the share of the band its neighbour covers, so the mark
+       centres in the part that is still this band's alone. */
+    padding-inline: calc(2px + var(--band-lead, 0%)) 2px;
+  }
+
+  [data-band-name] {
+    padding-right: 0;
+  }
+
+  [data-band-text],
+  [data-band-dates] {
+    display: none;
+  }
+
+  [data-band-toggle] {
+    position: static;
+    height: 20px;
+    width: 20px;
+    font-size: 11px;
+  }
+
+  [data-band-tip] {
+    display: block;
+  }
+
+  [data-band-head]:hover > [data-band-tip],
+  [data-band-head]:has(:focus-visible) > [data-band-tip] {
+    opacity: 1;
+  }
+}
+
+/* The band clips its expanded panel, which would also clip the tip. Lifted only
+   while a collapsed band is hovered or holds focus, so the expanded panel keeps
+   its rounded corners. */
+[data-rail-band]:not([data-expanded]):hover,
+[data-rail-band]:not([data-expanded]):has(:focus-visible) {
+  overflow: visible;
+}
+
+/* ---------------------------------------------------------------------------
    Mobile pill sheet — §5.6.
    The Popover panel morphs out of the 220px pill: 999px → 22px radius.
    --------------------------------------------------------------------------- */
@@ -234,6 +358,36 @@ html[data-preloader="off"] [data-testid="preloader"] {
 }
 
 /* ---------------------------------------------------------------------------
+   Employer scrubber — WCAG 2.5.8 (target size, minimum).
+
+   Segments are sized in years, and ten months of HEGIAS came to 14px of the
+   323px row: a target no thumb can hit, and too close to its neighbours for the
+   spacing exception. `min-width` floors every segment at the 24px minimum (the
+   flex algorithm freezes the floored one and re-divides the rest, so the row
+   still fits and the other five stay proportional), and the overlay grows the
+   6px bar to a 24px tall hit area without changing how the bar reads.
+   --------------------------------------------------------------------------- */
+[data-pill-scrubber] {
+  --pill-target-min: 24px;
+}
+
+[data-pill-scrubber] > li {
+  min-width: var(--pill-target-min);
+}
+
+[data-pill-segment] {
+  position: relative;
+}
+
+[data-pill-segment]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  /* Negative: the bar is 6px tall, so this reaches 9px past each edge. */
+  inset-block: calc((100% - var(--pill-target-min)) / 2);
+}
+
+/* ---------------------------------------------------------------------------
    Reduced motion — §5.3, §9. Everything the shell animates goes quiet.
    (globals.css already zeroes the ::view-transition-* pseudo-elements.)
    --------------------------------------------------------------------------- */
@@ -241,6 +395,7 @@ html[data-preloader="off"] [data-testid="preloader"] {
   [data-project],
   [data-rail-inner],
   [data-rail-band],
+  [data-band-tip],
   .mr-pill-sheet {
     transition: none !important;
   }
