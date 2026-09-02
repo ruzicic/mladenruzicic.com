@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { getWork } from "@/lib/content"
-import { itemListJsonLd, jsonLdScript } from "@/lib/seo/jsonld"
+import { breadcrumbJsonLd, itemListJsonLd, jsonLdScript } from "@/lib/seo/jsonld"
 import { pageMetadata } from "@/lib/seo/metadata"
 
 import {
@@ -70,7 +70,13 @@ export default function WorkIndexPage() {
       <div>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={jsonLdScript(itemListJsonLd(work))}
+          dangerouslySetInnerHTML={jsonLdScript([
+            itemListJsonLd(work),
+            breadcrumbJsonLd([
+              { name: "Home", path: "/" },
+              { name: "Work", path: "/work" },
+            ]),
+          ])}
         />
 
         <Container className="py-[72px] md:py-[96px]">
