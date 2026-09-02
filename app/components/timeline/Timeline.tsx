@@ -215,12 +215,15 @@ export function TimelineRail({
       element.scrollLeft -= KEY_STEP
     } else if (event.key === "Escape") {
       setExpanded(null)
-    } else if (event.code === "Space" && event.target === element) {
-      // Only when the rail region itself is focused, so Space never stops
-      // scrolling the page or activating a button.
-      event.preventDefault()
-      setPongOn((value) => !value)
     }
+    /*
+     * No Space handler here. The rail is `role="region" tabIndex={0}`, so a
+     * keyboard visitor tabs onto it on the way down the page; Space is the
+     * universal page-down, and preventing it to start an unannounced Pong
+     * canvas (aria-hidden, no live region) left them stuck with no visible way
+     * out. The `space` shortcut the Play button advertises is the native one:
+     * Space on a focused <button> activates it.
+     */
   }
 
   const railHeight = expanded ? RAIL_HEIGHT_EXPANDED : RAIL_HEIGHT
