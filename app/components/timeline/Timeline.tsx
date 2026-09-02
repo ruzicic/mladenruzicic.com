@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react"
@@ -22,8 +23,10 @@ import { TransitionLink } from "../primitives/TransitionLink"
 import { play } from "../sound/sound"
 import { PersonPopover } from "./PersonPopover"
 import {
+  BAND_GAP,
   EXPANDED_WIDTH,
   initialsOf,
+  overlapWithNewer,
   pct,
   RAIL_HEIGHT,
   RAIL_HEIGHT_EXPANDED,
@@ -55,6 +58,20 @@ export interface TimelineRailProps {
 }
 
 const KEY_STEP = 140
+
+/**
+ * What the band announces, in both the wide and the mark-only state.
+ *
+ * Set explicitly rather than left to the contents, because below
+ * `--band-narrow` the name and the date line are `display: none` and would drop
+ * out of the accessible name with them — a ten-month band would announce as
+ * "HEGIAS logo" and nothing else. No `title`: it is unreachable by keyboard and
+ * duplicates the name for a screen reader.
+ */
+function bandLabel(company: Company): string {
+  const label = `${company.name}, ${company.yearsLabel}`
+  return company.approx ? `${label}, dates approximate` : label
+}
 
 /**
  * The horizontal work-history rail — docs/v3-redesign-plan.md §5.7, §5.8.
@@ -272,11 +289,21 @@ export function TimelineRail({
             {labels.employedLabel}
           </p>
 
-          {companies.map((company) => {
+          {companies.map((company, index) => {
             const to = resolveTo(company.to, nowFraction)
             const isExpanded = expanded === company.id
             const isHighlighted = highlight === company.id
             const widthPct = ((to - company.from) / SPAN_YEARS) * 100
+            /*
+             * `companies` is newest-first, so `index - 1` is the band that was
+             * painted just before this one — the one this band covers when the
+             * two spans overlap.
+             */
+            const newer = companies[index - 1]
+            const overlap = overlapWithNewer(
+              { from: company.from, to },
+              newer?.from
+            )
             const bandPeople = company.people
               .map((id) => peopleById.get(id))
               .filter((person): person is Person => Boolean(person))
@@ -298,7 +325,7 @@ export function TimelineRail({
                     : `${pct(to)}%`,
                   width: isExpanded
                     ? `${EXPANDED_WIDTH}px`
-                    : `calc(${widthPct}% - 6px)`,
+                    : `calc(${widthPct}% - ${BAND_GAP}px)`,
                   zIndex: isExpanded ? 5 : isHighlighted ? 4 : 1,
                   transformOrigin: "left top",
                   borderColor: company.color,
@@ -319,45 +346,99 @@ export function TimelineRail({
                       : "none",
                 }}
               >
-                <button
-                  type="button"
-                  data-testid="timeline-band"
-                  data-band={company.id}
-                  data-hover
-                  aria-expanded={isExpanded}
-                  aria-controls={`band-panel-${company.id}`}
-                  onClick={() => toggleBand(company.id)}
-                  className={[
-                    "relative flex h-[72px] w-full flex-col justify-between gap-1",
-                    "border-0 bg-transparent px-[14px] py-3 text-left text-fg",
-                  ].join(" ")}
-                >
-                  <span className="flex items-center gap-2 pr-7 text-[14px] font-semibold tracking-[-0.01em] whitespace-nowrap">
-                    <BandMark company={company} size={18} />
-                    <span
-                      itemProp="name"
-                      className="overflow-hidden text-ellipsis"
-                    >
-                      {company.name}
-                    </span>
-                  </span>
-                  <span className="flex items-center gap-2 overflow-hidden font-mono text-[10px] tracking-[0.06em] whitespace-nowrap">
-                    <span style={{ color: inkOnTint(company.color) }}>
-                      {company.yearsLabel}
-                    </span>
-                    {company.approx ? (
-                      <span className="rounded-[3px] border border-line px-[5px] py-px text-[9px] uppercase tracking-[0.08em] text-dim">
-                        ≈ dates approximate
-                      </span>
-                    ) : null}
-                  </span>
+                {/*
+                 * The months this band shares with the one underneath it.
+                 * Painted before the head so it tints the fill and never the
+                 * mark or the copy, and `aria-hidden` because both date lines
+                 * already state the overlap.
+                 */}
+                {overlap > 0 && newer ? (
                   <span
                     aria-hidden
-                    className="absolute right-[10px] top-[10px] grid h-[26px] w-[26px] place-items-center rounded-xs border border-[var(--color-line-strong)] text-[13px] leading-none"
+                    data-band-overlap
+                    style={{
+                      // The strip is a share of *this* band's width, while the
+                      // covered pixels are that share of the band plus the gap
+                      // trimmed off its neighbour — hence the correction, which
+                      // lands the dashed edge on the hidden band's start edge
+                      // rather than a few pixels past it.
+                      width: `calc(${(overlap * 100).toFixed(3)}% - ${(BAND_GAP * (1 - overlap)).toFixed(2)}px)`,
+                      backgroundImage: `repeating-linear-gradient(-45deg, transparent 0 4px, ${newer.color}55 4px 8px)`,
+                      borderRightColor: newer.color,
+                    }}
+                  />
+                ) : null}
+
+                <div
+                  data-band-head
+                  // Only the narrow layout reads this: with no name or dates to
+                  // lay out, the mark centres itself, and it should centre in
+                  // the part of the band that is not under its neighbour.
+                  style={
+                    {
+                      "--band-lead": `${(overlap * 100).toFixed(3)}%`,
+                    } as CSSProperties
+                  }
+                >
+                  <button
+                    type="button"
+                    data-testid="timeline-band"
+                    data-band-button
+                    data-band={company.id}
+                    data-hover
+                    aria-expanded={isExpanded}
+                    aria-controls={`band-panel-${company.id}`}
+                    aria-label={bandLabel(company)}
+                    onClick={() => toggleBand(company.id)}
+                    className={[
+                      "relative flex h-[72px] w-full flex-col justify-between gap-1",
+                      "border-0 bg-transparent px-[14px] py-3 text-left text-fg",
+                    ].join(" ")}
                   >
-                    {isExpanded ? "✕" : "⤢"}
+                    <span
+                      data-band-name
+                      className="flex items-center gap-2 pr-7 text-[14px] font-semibold tracking-[-0.01em] whitespace-nowrap"
+                    >
+                      <BandMark company={company} size={18} />
+                      <span
+                        itemProp="name"
+                        data-band-text
+                        className="overflow-hidden text-ellipsis"
+                      >
+                        {company.name}
+                      </span>
+                    </span>
+                    <span
+                      data-band-dates
+                      className="flex items-center gap-2 overflow-hidden font-mono text-[10px] tracking-[0.06em] whitespace-nowrap"
+                    >
+                      <span style={{ color: inkOnTint(company.color) }}>
+                        {company.yearsLabel}
+                      </span>
+                      {company.approx ? (
+                        <span className="rounded-[3px] border border-line px-[5px] py-px text-[9px] uppercase tracking-[0.08em] text-dim">
+                          ≈ dates approximate
+                        </span>
+                      ) : null}
+                    </span>
+                    <span
+                      aria-hidden
+                      data-band-toggle
+                      className="absolute right-[10px] top-[10px] grid h-[26px] w-[26px] place-items-center rounded-xs border border-[var(--color-line-strong)] text-[13px] leading-none"
+                    >
+                      {isExpanded ? "✕" : "⤢"}
+                    </span>
+                  </button>
+
+                  {/*
+                   * The label a mark-only band cannot show. Decorative: the
+                   * button's `aria-label` already carries the same words, so
+                   * announcing them twice would be noise.
+                   */}
+                  <span aria-hidden data-band-tip>
+                    {company.name} · {company.yearsLabel}
                   </span>
-                </button>
+                </div>
 
                 <div
                   id={`band-panel-${company.id}`}
