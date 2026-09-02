@@ -105,14 +105,17 @@ html[data-preloader="off"] [data-testid="preloader"] {
 [data-project] {
   transition:
     opacity 600ms var(--ease-reveal),
-    transform 600ms var(--ease-reveal),
-    filter 600ms var(--ease-reveal);
+    transform 600ms var(--ease-reveal);
 }
 
-[data-work-focus="on"] [data-project]:not([data-active]) {
+/* WorkFocus marks the *most visible* row `data-active`; tab order has no
+   relationship to visibility, so focus regularly lands in a dimmed row.
+   `:focus-within` restores it to full contrast. No `filter: blur()` here —
+   a filter on an ancestor smears the descendant's own focus ring, so no
+   child outline can escape it; opacity alone carries the effect. */
+[data-work-focus="on"] [data-project]:not([data-active]):not(:focus-within) {
   opacity: 0.35;
   transform: scale(0.96);
-  filter: blur(2px);
 }
 
 /* ---------------------------------------------------------------------------
