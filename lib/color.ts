@@ -9,6 +9,15 @@
 
 export const GROUND = "#0b0b0c"
 export const INK = "#f2f0ea"
+/**
+ * The literal value of `--color-accent` in `app/globals.css`. The helpers below
+ * parse hex, so a caller that needs the accent as *data* (to compute ink on it)
+ * must pass this, never the `var(--color-accent)` string — `hexToRgb` cannot
+ * parse a custom property and would silently fall back to black, which flips
+ * `inkOn` to light ink and produces #F2F0EA on yellow. Keep in sync with the
+ * token.
+ */
+export const ACCENT = "#f5df4d"
 
 export function hexToRgb(hex: string): [number, number, number] {
   let h = hex.trim().replace(/^#/, "")

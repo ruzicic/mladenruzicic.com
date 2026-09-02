@@ -1,9 +1,19 @@
 import { Fragment, type ReactNode } from "react"
 
+import { ACCENT } from "@/lib/color"
 import { getCompanies, getHeroLogos, getHome } from "@/lib/content"
 import type { CompanyId } from "@/lib/content/schema"
 
-import { Container, Display, Eyebrow } from "../primitives"
+/*
+ * Direct module paths, not the `../primitives` barrel: the barrel also
+ * re-exports `Dialog` and `Popover`, and Next collects every `"use client"`
+ * module reachable from a page's server graph into that page's client bundle.
+ * Importing it here put the dialog chunk on the homepage, which never opens
+ * one — see the note in `tests/budgets.spec.ts`.
+ */
+import { Container } from "../primitives/Container"
+import { Display } from "../primitives/Display"
+import { Eyebrow } from "../primitives/Eyebrow"
 import { HeroCanvas } from "./HeroCanvas"
 import { ExpandChip, LinkChip } from "./LedeChip"
 import type { HeroLogoShard } from "./types"
@@ -32,7 +42,8 @@ const EXTRA_TOKENS: Record<
   tenderlift: {
     label: "TenderLift",
     mark: "TL",
-    color: "var(--color-accent)",
+    // The hex, not `var(--color-accent)`: `LedeChip` runs it through `inkOn`.
+    color: ACCENT,
     href: "#project-tenderlift",
   },
 }
