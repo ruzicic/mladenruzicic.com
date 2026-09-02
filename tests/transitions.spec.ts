@@ -53,7 +53,7 @@ test("back navigation preserves an expanded timeline band when the route stays m
     test.info().annotations.push({
       type: "skip-reason",
       description:
-        "no [data-testid=timeline-band] found — work-history timeline not built yet",
+        "no [data-testid=timeline-band] — the timeline regressed out of the DOM; this id ships today",
     })
     test.skip()
     return

@@ -1,4 +1,10 @@
-import { Button, Container, Display, Eyebrow } from "./components/primitives"
+// Direct module paths, not the barrel: `not-found` is part of every route's
+// server graph, so a barrel import here would put `Dialog` in every page's
+// client bundle. See `tests/budgets.spec.ts`.
+import { Button } from "./components/primitives/Button"
+import { Container } from "./components/primitives/Container"
+import { Display } from "./components/primitives/Display"
+import { Eyebrow } from "./components/primitives/Eyebrow"
 import { GrainSurface } from "./components/shaders"
 
 /**

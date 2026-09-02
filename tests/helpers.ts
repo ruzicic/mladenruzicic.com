@@ -189,3 +189,62 @@ export function trackRequestsMatching(page: Page, substring: string): string[] {
   })
   return urls
 }
+
+/* -------------------------------------------------------------------------- */
+/* Page-settled waits                                                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Resolves once the first-visit preloader is no longer painting.
+ *
+ * The overlay counts to 100 (600–1000 ms), then cross-fades out over 500 ms
+ * before React unmounts it. Mid-fade its `text-muted` status verb sits at a
+ * fraction of its opacity over the page behind it, so anything that samples
+ * computed colour during that window — axe's `color-contrast` rule above all —
+ * sees a transient 1.0–1.6:1 reading that has nothing to do with the page at
+ * rest. Auditing after it detaches is the honest measurement, and it is
+ * deterministic instead of racing a 500 ms transition.
+ *
+ * Also returns immediately on a repeat visit in the same session, where the
+ * inline `<head>` script stamps `data-preloader="off"` and CSS keeps the
+ * server-rendered overlay at `display: none`.
+ */
+export async function waitForPreloaderGone(
+  page: Page,
+  timeout = 10_000
+): Promise<void> {
+  await page
+    .waitForFunction(
+      () => {
+        const el = document.querySelector('[data-testid="preloader"]')
+        if (!el) return true
+        return getComputedStyle(el).display === "none"
+      },
+      undefined,
+      { timeout }
+    )
+    .catch(() => {
+      /* Leave the assertion that follows to report the real problem. */
+    })
+}
+
+/**
+ * "The route has finished arriving" for pages that never go network-idle.
+ *
+ * The hero canvas, the shader headers and the scroll hairline all run
+ * continuous rAF loops, and the PPR shell streams; `waitForLoadState(
+ * "networkidle")` on those routes burns its whole timeout and then gets
+ * swallowed by a `.catch()`, which is why a 24-route walk needed a 600 s
+ * budget. This waits for the three things that actually change what a test
+ * observes — document load, the preloader, webfonts — and nothing else.
+ */
+export async function waitForRouteReady(
+  page: Page,
+  timeout = 15_000
+): Promise<void> {
+  await page.waitForLoadState("load", { timeout }).catch(() => {})
+  await waitForPreloaderGone(page, timeout)
+  await page
+    .evaluate(() => document.fonts?.ready?.then(() => undefined))
+    .catch(() => {})
+}

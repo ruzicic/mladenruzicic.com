@@ -19,7 +19,7 @@ JetBrains Mono, three.js glass-shard hero, content-driven. The full plan lives i
 | @tailwindcss/typography | ^0.5.19 | loaded with `@plugin` in `app/globals.css` |
 | eslint-config-next | 16.3.4 | flat config, core-web-vitals + typescript |
 | babel-plugin-react-compiler | 1.0.0 | enabled via `reactCompiler: true` |
-| three / @react-three/fiber / @react-three/drei | 0.185.1 / 9.7.0 / 10.7.8 | hero only, lazy, after LCP |
+| three / @react-three/fiber | 0.185.1 / 9.7.0 | hero only, lazy, after LCP. 233 KB gz: r3f's `extend(THREE)` keeps the whole namespace, so three does not tree-shake |
 | @paper-design/shaders-react | 0.0.80 (exact pin) | breaking changes ship under 0.0.x |
 | @oddbird/css-anchor-positioning | 0.10.2 | dynamically imported only when `!CSS.supports('anchor-name: --a')` |
 | zod | ^4.5.4 | content schemas |
@@ -29,7 +29,11 @@ JetBrains Mono, three.js glass-shard hero, content-driven. The full plan lives i
 
 Removed for v3: framer-motion, date-fns, next-sitemap, contentlayer leftovers,
 @mdx-js/react, @next/mdx, eslint-plugin-react, eslint-plugin-tailwindcss,
-eslint-config-prettier, @eslint/eslintrc, pretty-quick, autoprefixer, IBM Plex.
+eslint-config-prettier, @eslint/eslintrc, pretty-quick, autoprefixer, IBM Plex,
+@react-three/drei (the hero uses r3f and three directly) and @types/mdx (there
+is no `mdx-components.tsx`; MDX goes through gray-matter + next-mdx-remote/rsc,
+and nothing imports an `.mdx` file as a module). Removing both left every
+`.next/static` chunk byte-identical.
 
 Package manager: **pnpm 11.12.0** (`packageManager` field; CI reads it via
 `pnpm/action-setup@v4`). Node 22.
@@ -46,8 +50,10 @@ pnpm format:write   # prettier
 pnpm format:check
 ```
 
-CI (`.github/workflows/code-check.yml`) runs lint + typecheck + build on every
-pull request and on push to `main`.
+CI runs on every pull request and on push to `main`:
+`.github/workflows/code-check.yml` does lint + typecheck + build, and
+`.github/workflows/e2e.yml` does its own `pnpm build` (cached on `.next/cache`)
+and then the Playwright suite against `pnpm start -p 3104`.
 
 ## Folder map and ownership
 

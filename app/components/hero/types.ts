@@ -20,7 +20,13 @@ export interface HeroLogoShard {
   markSrc: string
 }
 
-/** Yellow accent from `--color-accent`; the WebGL scene needs a literal. */
-export const ACCENT = "#F5DF4D"
+/**
+ * Yellow accent from `--color-accent`; the WebGL scene needs a literal, not a
+ * custom property. Re-exported from `lib/color` so there is one copy of the
+ * value in the repo — a second literal is how the hero lede chip ended up
+ * computing its ink against black instead of yellow.
+ */
+export { ACCENT } from "@/lib/color"
+
 /** `--color-bg`, for the fog. */
 export const BG = "#0B0B0C"

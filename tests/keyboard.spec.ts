@@ -4,6 +4,15 @@ import { expect, test, type Page } from "@playwright/test"
  * Keyboard-only walkthrough — docs/v3-redesign-plan.md §8 ("keyboard-only
  * walkthrough of header/pill/dialog") and §5.6 (native `<dialog>`/Popover
  * primitives, so nothing here is canvas-only).
+ *
+ * WEBKIT. macOS ships with "Press Tab to highlight each item" off, so Safari —
+ * and Playwright's WebKit, which inherits the setting — never puts links in
+ * the Tab order at all: pressing Tab on `/` cycles `DIV -> BODY -> DIV`, and
+ * `document.activeElement` is `<body>`. That is the platform's choice, not
+ * something the site controls, so the two Tab-order tests are Chromium-only
+ * and WebKit gets `keyboardControls` below instead: it focuses each of the same
+ * controls directly and asserts the same focus ring, which is what a Safari
+ * user with full keyboard access enabled would see.
  */
 
 /** Tabs forward up to `maxTabs` times looking for a focused element whose
@@ -28,9 +37,55 @@ async function tabUntil(
   return undefined
 }
 
+/** The controls the Tab-order tests walk, in Tab order. */
+const HEADER_CONTROLS = [
+  { name: "skip link", selector: 'a[href="#main"]' },
+  { name: "monogram", selector: 'header[data-site-header] a[href="#top"]' },
+  { name: "Work", selector: 'nav[aria-label="Primary"] >> text=Work' },
+  {
+    name: "Mentoring",
+    selector: 'nav[aria-label="Primary"] >> text=Mentoring',
+  },
+  { name: "About", selector: 'nav[aria-label="Primary"] >> text=About' },
+  {
+    name: "sound toggle",
+    selector: 'nav[aria-label="Primary"] button[aria-pressed]',
+  },
+] as const
+
+/** Computed focus indicator of whatever currently has focus. */
+async function focusIndicator(page: Page) {
+  return page.evaluate(() => {
+    const el = document.activeElement as HTMLElement | null
+    if (!el || el === document.body) return null
+    const cs = window.getComputedStyle(el)
+    return {
+      tag: el.tagName,
+      outlineStyle: cs.outlineStyle,
+      outlineWidth: cs.outlineWidth,
+      outlineColor: cs.outlineColor,
+      boxShadow: cs.boxShadow,
+    }
+  })
+}
+
+function hasVisibleRing(
+  style: Awaited<ReturnType<typeof focusIndicator>>
+): boolean {
+  if (!style) return false
+  const outline =
+    style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0
+  return outline || style.boxShadow !== "none"
+}
+
 test("Tab reaches the skip link, then header nav links, then the sound toggle", async ({
   page,
+  browserName,
 }) => {
+  test.skip(
+    browserName === "webkit",
+    "WebKit keeps links out of the Tab order (macOS full keyboard access); see keyboardControls below"
+  )
   await page.goto("/")
 
   await page.keyboard.press("Tab")
@@ -55,30 +110,48 @@ test("Tab reaches the skip link, then header nav links, then the sound toggle", 
   ).toBeTruthy()
 })
 
-test("focused elements keep a visible focus indicator", async ({ page }) => {
+test("focused elements keep a visible focus indicator", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(
+    browserName === "webkit",
+    "WebKit keeps links out of the Tab order (macOS full keyboard access); see keyboardControls below"
+  )
   await page.goto("/")
   await page.keyboard.press("Tab") // skip link
   await page.keyboard.press("Tab") // first real interactive element
 
-  const style = await page.evaluate(() => {
-    const el = document.activeElement as HTMLElement | null
-    if (!el) return null
-    const cs = window.getComputedStyle(el)
-    return {
-      outlineStyle: cs.outlineStyle,
-      outlineWidth: cs.outlineWidth,
-      boxShadow: cs.boxShadow,
-    }
-  })
+  const style = await focusIndicator(page)
 
   expect(style, "an element is focused").not.toBeNull()
-  const hasOutline =
-    style!.outlineStyle !== "none" && parseFloat(style!.outlineWidth) > 0
-  const hasBoxShadow = style!.boxShadow !== "none"
   expect(
-    hasOutline || hasBoxShadow,
-    `focused element needs a visible indicator, got outline-style=${style!.outlineStyle} outline-width=${style!.outlineWidth} box-shadow=${style!.boxShadow}`
+    hasVisibleRing(style),
+    `focused element needs a visible indicator, got outline-style=${style?.outlineStyle} outline-width=${style?.outlineWidth} box-shadow=${style?.boxShadow}`
   ).toBe(true)
+})
+
+test("keyboardControls: every header control takes focus and shows the ring", async ({
+  page,
+}) => {
+  await page.goto("/")
+
+  for (const control of HEADER_CONTROLS) {
+    const target = page.locator(control.selector).first()
+    await expect(
+      target,
+      `${control.name} is present in the header`
+    ).toHaveCount(1)
+
+    await target.focus()
+    await expect(target, `${control.name} takes focus`).toBeFocused()
+
+    const style = await focusIndicator(page)
+    expect(
+      hasVisibleRing(style),
+      `${control.name} needs a visible focus indicator, got outline=${style?.outlineStyle} ${style?.outlineWidth} ${style?.outlineColor} box-shadow=${style?.boxShadow}`
+    ).toBe(true)
+  }
 })
 
 test("timeline band: Enter expands, Escape collapses, ArrowRight scrolls the rail", async ({
@@ -89,7 +162,7 @@ test("timeline band: Enter expands, Escape collapses, ArrowRight scrolls the rai
   const band = page.locator('[data-testid="timeline-band"]').first()
   test.skip(
     (await band.count()) === 0,
-    "no [data-testid=timeline-band] found — work-history timeline not built yet"
+    "no [data-testid=timeline-band] — the timeline regressed out of the DOM; this id ships today"
   )
 
   await band.scrollIntoViewIfNeeded()
@@ -129,7 +202,7 @@ test('"worked alongside" popover opens with Enter and closes with Escape', async
   })
   test.skip(
     (await alongsideHeading.count()) === 0,
-    '"Worked alongside" heading not found — people list not built yet'
+    '"Worked alongside" heading not found — content/people.ts ships empty until real LinkedIn URLs and notes exist (CLAUDE.md TODO)'
   )
   await alongsideHeading.scrollIntoViewIfNeeded()
 
@@ -141,7 +214,7 @@ test('"worked alongside" popover opens with Enter and closes with Escape', async
     .first()
   test.skip(
     (await trigger.count()) === 0,
-    'no focusable person trigger found near "Worked alongside" — popover not built yet'
+    'no focusable person trigger near "Worked alongside" — content/people.ts ships empty (CLAUDE.md TODO)'
   )
   await trigger.focus()
   await page.keyboard.press("Enter")

@@ -3,6 +3,8 @@ name: E2E
 on:
   pull_request:
     branches: ["*"]
+  push:
+    branches: [main]
 
 jobs:
   e2e:
@@ -10,6 +12,18 @@ jobs:
     name: Playwright + axe
     steps:
       - uses: actions/checkout@v4
+
+      # Before `pnpm install`, so the source hash below never walks
+      # node_modules. Restores Turbopack's incremental cache; the key falls
+      # back to the newest cache for this lockfile when sources changed.
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('app/**', 'lib/**', 'content/**', 'types/**', 'next.config.ts', 'postcss.config.mjs', 'proxy.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-next-${{ hashFiles('pnpm-lock.yaml') }}-
+            ${{ runner.os }}-next-
 
       - uses: pnpm/action-setup@v4
 
@@ -24,6 +38,14 @@ jobs:
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium webkit
+
+      # Its own step, not part of `webServer.command`: a cold Next 16 build on
+      # a 2-core runner can outlast any sensible server-start timeout, and a
+      # build failure should read as a build failure rather than as "Timed out
+      # waiting for the web server". `webServer` then only has to start
+      # `next start`, which takes well under a second.
+      - name: Build
+        run: pnpm build
 
       - name: Run E2E suite
         run: pnpm test:e2e
