@@ -12,6 +12,11 @@ export default tseslint.config(
       "node_modules/**",
       "public/**",
       "docs/**",
+      // Playwright artefacts: minified vendor bundles that would otherwise
+      // make `pnpm lint` fail after any local `pnpm test:e2e`. Both are
+      // already in .gitignore.
+      "playwright-report/**",
+      "test-results/**",
       "next-env.d.ts",
       "prettier.config.cjs",
     ],
