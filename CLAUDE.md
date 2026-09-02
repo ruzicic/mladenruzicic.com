@@ -164,22 +164,42 @@ proxy.ts                   Accept: text/markdown → /md/* rewrite (Node runtime
 
 ## TODO — assets and facts the owner must supply
 
-- [ ] **Monochrome brand marks** as SVG in `public/static/logos/`: `zf-scalar`,
-      `shopify` (**the Shopify bag**), `execom`, `nemestic`. The existing HEGIAS
-      and WolkAbout files are 128px white tiles with embedded metadata — replace
-      them with clean marks before the hero etches them.
-- [ ] **Sample the exact Shopify green** from the official bag asset and update
-      `content/companies.ts` (currently `#96BF48`).
+- [x] **Monochrome brand marks** are done: all six employer marks
+      (`zf-scalar`, `shopify`, `hegias`, `wolkabout`, `execom`, `nemestic`)
+      live in `public/static/logos/mono/`, and seventeen project marks live in
+      `public/static/logos/work/` — see the `SOURCES.md` in each directory for
+      provenance and the nominative-fair-use reasoning.
+- [x] **Shopify green** is sampled: `#95BF47`, read out of the official bag
+      asset. `content/companies.ts` and `content/work/shopify.mdx` both carry
+      it now.
 - [ ] **"Worked alongside" notes**: the four `note` lines in `content/people.ts`
       are assembled from public profiles, not written by the owner. Names,
       LinkedIn URLs and photos are done; the sentences need his voice.
-- [ ] **Project screenshots** (1440×1000, 834×1112, 390×844) for TenderLift,
-      studenti.rs, FontAlternatives, Amada and EVO Touch, plus `blurDataURL`s.
-      Until then the accent-tinted shader header stands in.
-- [ ] **ZF sign-off** on the Velocity adoption figures. They ship as coarse
-      public shapes (`~45%` of teams, `~50` components) on the owner's say-so;
-      nobody has asked ZF.
-- [ ] **Case-study copy** for ZF SCALAR, Shopify, TenderLift and studenti.rs.
+- [x] **Project screenshots** shipped for TenderLift, studenti.rs and
+      FontAlternatives — three viewport shots each (1440×1000, 834×1112,
+      390×844) with `blurDataURL`s, in `public/static/work/`. FontAlternatives
+      also carries a Search Console traffic chart.
+- [ ] **Panciona, FlexMatch and Boxium screenshots.** None has a usable
+      Wayback capture; run them from the owner's GitHub repos instead.
+- [ ] **Hi Fam artwork.** No URL and no artwork exist anywhere for this entry
+      — nothing to shoot until one turns up.
+- [ ] **ZF sign-off on the Velocity adoption figures** is the one metric
+      permission still open — Shop.app MAU and the studenti.rs counts are the
+      owner's own data and are already verified and published. `~45%` of
+      teams and `~50` components ship on the owner's say-so; nobody has asked
+      ZF whether they are fine being public.
+- [x] **Case-study copy** for ZF SCALAR, Shopify, TenderLift and studenti.rs is
+      written — full sections, Summary through Learnings, 500–580 words each.
 - [ ] Confirm how studenti.rs relates to the Nemestic contract dates. The
       "eighteen years of shipping" claim is anchored on studenti.rs going live
       in 2008; employment starts February 2010.
+- [ ] **Diacritics on three surnames.** LinkedIn prints "Tamara Radic",
+      "Milena Pajic" and "Radovan Skendzic" stripped; the site ships Radić,
+      Pajić and Skendžić. Confirm with each of them, or drop the diacritics.
+- [ ] **FontAlternatives start date.** Frontmatter still says `2023`
+      (`approx: true`), but LinkedIn dates the project Jan 2026 – Present and
+      Search Console shows no data before January 2026. Confirm 2026-01, or
+      explain what shipped in 2023.
+- [ ] **Nunium status.** `nunium.com` is live and still lists the owner on its
+      team page, but the entry ships `status: "archived"`. Confirm which is
+      right.
