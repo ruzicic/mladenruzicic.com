@@ -1,4 +1,4 @@
-import { getWorkSlugs } from "@/lib/content"
+import { getSite, getWorkSlugs } from "@/lib/content"
 import {
   aboutMarkdown,
   MD_CONTENT_TYPE,
@@ -9,12 +9,17 @@ import {
 } from "@/lib/content/markdown"
 
 /**
- * Markdown mirrors. Reached two ways:
- *   1. `/:path*.md` — rewritten here by `next.config.ts`.
- *   2. `Accept: text/markdown` on the HTML path — rewritten here by `proxy.ts`.
+ * Markdown mirrors. Reached three ways:
+ *   1. `/:path*.md`                    — rewritten here by `next.config.ts`.
+ *   2. `Accept: text/markdown`         — rewritten here by `proxy.ts`.
+ *   3. Directly, from `llms.txt`.
  *
  * Everything is generated from `content/` via `lib/content/markdown.ts`, so the
- * mirrors carry exactly the claims the HTML does.
+ * mirrors carry exactly the claims the HTML does: private metrics never appear,
+ * unverified ones are tagged, and `limited`/`high` entries carry their notice.
+ *
+ * The response is `noindex` and points at its canonical HTML page, so the
+ * mirror can never compete with the real URL in search.
  */
 
 export function generateStaticParams() {
@@ -42,11 +47,16 @@ export async function GET(
     })
   }
 
+  const canonical = `${getSite().url}/${route}`
+
   return new Response(body, {
     headers: {
       "Content-Type": MD_CONTENT_TYPE,
       "Cache-Control":
         "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+      "X-Robots-Tag": "noindex",
+      Link: `<${canonical}>; rel="canonical"`,
+      Vary: "Accept",
     },
   })
 }

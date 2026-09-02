@@ -18,14 +18,20 @@ export async function gloock() {
 export interface OgCardProps {
   eyebrow: string
   title: string
+  /** The entry's one-line summary, under the headline. */
+  line?: string
   meta?: string
   accent?: string
 }
 
-/** Dark card: mono eyebrow, Gloock headline, accent rule. */
+/**
+ * Dark card, 1200×630: mono eyebrow, Gloock headline in the project accent's
+ * company, the one-line summary, and a 12px accent bar along the bottom edge.
+ */
 export function OgCard({
   eyebrow,
   title,
+  line,
   meta,
   accent = "#F5DF4D",
 }: OgCardProps) {
@@ -54,17 +60,32 @@ export function OgCard({
       >
         {eyebrow}
       </div>
-      <div
-        style={{
-          display: "flex",
-          fontFamily: "Gloock",
-          fontSize: title.length > 40 ? 68 : 88,
-          lineHeight: 1.05,
-          letterSpacing: -2,
-          maxWidth: 980,
-        }}
-      >
-        {title}
+      <div style={{ display: "flex", flexDirection: "column", maxWidth: 980 }}>
+        <div
+          style={{
+            display: "flex",
+            fontFamily: "Gloock",
+            fontSize: title.length > 40 ? 68 : 88,
+            lineHeight: 1.05,
+            letterSpacing: -2,
+          }}
+        >
+          {title}
+        </div>
+        {line ? (
+          <div
+            style={{
+              display: "flex",
+              marginTop: 24,
+              fontSize: 30,
+              lineHeight: 1.35,
+              color: "#C9C7C1",
+              maxWidth: 860,
+            }}
+          >
+            {line}
+          </div>
+        ) : null}
       </div>
       <div
         style={{

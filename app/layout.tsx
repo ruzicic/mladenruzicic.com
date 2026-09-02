@@ -16,6 +16,7 @@ import { fontVariables } from "./fonts"
 import "./globals.css"
 import "./styles/shell.css"
 import "./styles/hero.css"
+import "./styles/pages.css"
 
 export { baseMetadata as metadata } from "@/lib/seo/metadata"
 

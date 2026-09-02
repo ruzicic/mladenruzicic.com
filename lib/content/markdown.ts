@@ -7,16 +7,59 @@ import {
   getWork,
   getWorkBySlug,
 } from "./index"
+import type { WorkEntry } from "./schema"
 
 /**
  * Markdown renderers shared by `/md/*`, `/llms.txt` and `/llms-full.txt`, so the
- * mirrors always carry the same claims as the HTML.
+ * mirrors always carry exactly the claims the HTML does — no more, no less.
+ *
+ * Rules enforced here (docs/v3-content-contract.md, fable pack §06):
+ *   · `confidence: 'private'` metrics NEVER appear, in any mirror.
+ *   · `confidence: 'needs-verification'` metrics are tagged `(unverified)`.
+ *   · `limited` / `high` entries carry the confidentiality note, so a model
+ *     quoting the page knows the description is bounded.
+ *   · Every document opens with a frontmatter header: title, description,
+ *     canonical URL, last-updated.
  */
 
 export const MD_CONTENT_TYPE = "text/markdown; charset=utf-8"
+export const TXT_CONTENT_TYPE = "text/plain; charset=utf-8"
 
-function h1(text: string) {
-  return `# ${text}\n`
+/** Build date, used where the content model has no `updated` of its own. */
+export const BUILD_DATE = new Date().toISOString().slice(0, 10)
+
+const site = getSite()
+
+/* -------------------------------------------------------------------------- */
+/* Primitives                                                                 */
+/* -------------------------------------------------------------------------- */
+
+function yamlString(value: string) {
+  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`
+}
+
+interface HeaderInput {
+  title: string
+  description: string
+  /** Path with a leading slash. */
+  path: string
+  updated?: string
+}
+
+/** The frontmatter header every `/md/*` document opens with. */
+function header({ title, description, path, updated }: HeaderInput): string {
+  return [
+    "---",
+    `title: ${yamlString(title)}`,
+    `description: ${yamlString(description)}`,
+    `canonical: ${yamlString(`${site.url}${path}`)}`,
+    `updated: ${yamlString(updated ?? BUILD_DATE)}`,
+    `source: ${yamlString(site.name)}`,
+    "---",
+    "",
+    `# ${title}`,
+    "",
+  ].join("\n")
 }
 
 function meta(pairs: [string, string | undefined][]) {
@@ -26,77 +69,147 @@ function meta(pairs: [string, string | undefined][]) {
     .join("\n")
 }
 
-function period(from: string, to: string) {
-  return to === "now" ? `${from} – now` : `${from} – ${to}`
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+]
+
+function periodPart(value: string) {
+  if (value === "now") return "now"
+  const [year, month] = value.split("-")
+  return month ? `${MONTHS[Number(month) - 1] ?? month} ${year}` : year
 }
 
-/** `/md/work/<slug>` */
+function period(p: WorkEntry["period"]) {
+  const from = periodPart(p.from)
+  const to = periodPart(String(p.to))
+  const range = from === to ? from : `${from} – ${to}`
+  return p.approx ? `${range} (approximate)` : range
+}
+
+const CONFIDENTIALITY_NOTE: Record<string, string> = {
+  limited:
+    "Public surfaces only. Employed work: role, domain and the shape of the contribution are described; private metrics, internal screenshots and system details are omitted.",
+  high: "Public surfaces only. Sensitive work: the description is deliberately generic. No screenshots, no system details, no non-public company claims.",
+}
+
+/** Public metrics, with unverified numbers tagged. `private` is dropped. */
+function metricLines(entry: WorkEntry): string[] {
+  const metrics = (entry.metrics ?? []).filter(
+    (m) => m.confidence !== "private"
+  )
+  if (metrics.length === 0) return []
+  return [
+    "## Metrics",
+    "",
+    ...metrics.map(
+      (m) =>
+        `- ${m.value} — ${m.label}${m.confidence === "needs-verification" ? " (unverified)" : ""}`
+    ),
+    "",
+  ]
+}
+
+/* -------------------------------------------------------------------------- */
+/* /md/work/<slug>                                                            */
+/* -------------------------------------------------------------------------- */
+
 export function workMarkdown(slug: string): string | undefined {
   const entry = getWorkBySlug(slug)
   if (!entry) return undefined
-  const site = getSite()
 
-  const head = [
-    h1(entry.title),
-    entry.line,
+  const company = entry.company
+    ? getCompanies().find((c) => c.id === entry.company)
+    : undefined
+
+  const lines = [
+    header({
+      title: entry.title,
+      description: entry.seo.description,
+      path: `/work/${entry.slug}`,
+    }),
+    `> ${entry.line}`,
     "",
     meta([
-      ["Period", period(entry.period.from, String(entry.period.to))],
-      ["Role", entry.role],
       ["Kind", entry.kind],
       ["Status", entry.status],
+      ["Period", period(entry.period)],
+      ["Role", entry.role],
+      ["Company", company?.name],
+      ["Location", entry.location],
       ["Tech", entry.tech.join(", ")],
       ["URL", entry.url],
       ["Confidentiality", entry.confidentiality],
     ]),
     "",
     entry.detail,
+    "",
   ]
 
-  if (entry.metrics?.length) {
-    head.push(
-      "",
-      "## Metrics",
-      "",
-      ...entry.metrics.map(
-        (m) =>
-          `- ${m.value} — ${m.label}${m.confidence === "needs-verification" ? " (unverified)" : ""}`
-      )
-    )
+  if (entry.confidentiality !== "public") {
+    lines.push(`_${CONFIDENTIALITY_NOTE[entry.confidentiality]}_`, "")
   }
+
+  lines.push(...metricLines(entry))
 
   if (entry.links?.length) {
-    head.push(
-      "",
+    lines.push(
       "## Links",
       "",
-      ...entry.links.map((l) => `- [${l.label}](${l.url})`)
+      ...entry.links.map((l) => `- [${l.label}](${l.url})`),
+      ""
     )
   }
 
-  head.push("", entry.body, "", `---\n\nSource: ${site.url}/work/${entry.slug}`)
-  return head.join("\n")
+  lines.push(
+    entry.body,
+    "",
+    "---",
+    "",
+    `Source: ${site.url}/work/${entry.slug}`,
+    ""
+  )
+  return lines.join("\n")
 }
 
-/** `/md/work` */
+/* -------------------------------------------------------------------------- */
+/* /md/work                                                                   */
+/* -------------------------------------------------------------------------- */
+
 export function workIndexMarkdown(): string {
-  const site = getSite()
+  const work = getWork()
   const lines = [
-    h1("Work"),
-    "",
-    "All case studies, products and experiments.",
+    header({
+      title: "Work",
+      description:
+        "Case studies and products: companies worked for, products built independently, and experiments worth keeping.",
+      path: "/work",
+    }),
+    `${work.length} entries. Featured first, then most recent.`,
     "",
   ]
-  for (const entry of getWork()) {
+
+  for (const entry of work) {
     lines.push(
       `## ${entry.title}`,
       "",
-      `${entry.line}`,
+      entry.line,
       "",
       meta([
-        ["Period", period(entry.period.from, String(entry.period.to))],
-        ["Role", entry.role],
+        ["Kind", entry.kind],
         ["Status", entry.status],
+        ["Period", period(entry.period)],
+        ["Role", entry.role],
         ["Case study", `${site.url}/work/${entry.slug}`],
         ["URL", entry.url],
       ]),
@@ -106,35 +219,82 @@ export function workIndexMarkdown(): string {
   return lines.join("\n")
 }
 
-/** `/md/about` */
+/* -------------------------------------------------------------------------- */
+/* /md/about                                                                  */
+/* -------------------------------------------------------------------------- */
+
 export function aboutMarkdown(): string {
   const page = getPage("about")
-  const lines = [h1(page.title), "", page.description, "", page.body, ""]
-  lines.push("## Timeline", "")
+  const lines = [
+    header({
+      title: page.title,
+      description: page.description,
+      path: "/about",
+      updated: page.updated,
+    }),
+    page.description,
+    "",
+    page.body,
+    "",
+    "## Timeline",
+    "",
+  ]
+
   for (const company of getCompanies()) {
     lines.push(
       `### ${company.name} — ${company.yearsLabel}${company.approx ? " (approximate)" : ""}`,
       "",
-      `${company.role}${company.prev ? ` (previously: ${company.prev})` : ""}`,
+      meta([
+        ["Role", company.role],
+        ["Previously", company.prev],
+        [
+          "Case study",
+          company.workSlug ? `${site.url}/work/${company.workSlug}` : undefined,
+        ],
+      ]),
       "",
       company.summary,
       ""
     )
+    if (company.fact) lines.push(`Worth knowing: ${company.fact}`, "")
   }
+
   return lines.join("\n")
 }
 
-/** `/md/uses` */
+/* -------------------------------------------------------------------------- */
+/* /md/uses                                                                   */
+/* -------------------------------------------------------------------------- */
+
 export function usesMarkdown(): string {
   const page = getPage("uses")
-  return [h1(page.title), "", page.description, "", page.body, ""].join("\n")
+  return [
+    header({
+      title: page.title,
+      description: page.description,
+      path: "/uses",
+      updated: page.updated,
+    }),
+    page.description,
+    "",
+    page.body,
+    "",
+  ].join("\n")
 }
 
-/** `/md/mentoring` */
+/* -------------------------------------------------------------------------- */
+/* /md/mentoring                                                              */
+/* -------------------------------------------------------------------------- */
+
 export function mentoringMarkdown(): string {
   const copy = getMentoring()
   const lines = [
-    h1(copy.h1.replace(/[{}]/g, "")),
+    header({
+      title: copy.seo.title,
+      description: copy.seo.description,
+      path: "/mentoring",
+    }),
+    `> ${copy.h1.replace(/[{}]/g, "")}`,
     "",
     copy.lede,
     "",
@@ -144,7 +304,9 @@ export function mentoringMarkdown(): string {
     "",
     "## How it works",
     "",
-    ...copy.howItWorks.map((step) => `- **${step.title}**: ${step.body}`),
+    ...copy.howItWorks.map(
+      (step, i) => `${i + 1}. **${step.title}** — ${step.body}`
+    ),
     "",
     "## Topics",
     "",
@@ -154,76 +316,176 @@ export function mentoringMarkdown(): string {
     "",
     ...copy.expectations.map((item) => `- ${item}`),
     "",
-    `[${copy.cta.label}](${copy.cta.url})`,
+    "## Start",
+    "",
+    `[${copy.cta.label}](${copy.cta.url})${copy.cta.note ? ` — ${copy.cta.note}` : ""}`,
     "",
     "## Feedback",
     "",
-    ...getTestimonials().map(
-      (t) => `> ${t.quote}\n> — ${t.author} (${t.source})\n`
-    ),
   ]
+
+  for (const t of getTestimonials()) {
+    lines.push(`> ${t.quote}`, ">", `> — ${t.author}, via ${t.source}`, "")
+  }
+
   return lines.join("\n")
 }
 
-/** `/llms.txt` — the index. */
+/* -------------------------------------------------------------------------- */
+/* /llms.txt                                                                  */
+/* -------------------------------------------------------------------------- */
+
+/** The index: who, the primary pages, selected work, contact. */
 export function llmsTxt(): string {
-  const site = getSite()
-  const lines = [
-    h1(site.name),
+  const featured = getWork().filter((entry) => entry.featured)
+  const companies = getWork().filter((entry) => entry.kind === "company")
+
+  return [
+    `# ${site.name}`,
     "",
     `> ${site.description}`,
     "",
-    `${site.roles.join(" · ")} · ${site.location.city}, ${site.location.country}`,
+    `${site.roles.join(" · ")} · ${site.location.city}, ${site.location.country} · ${site.yearsShipping} years shipping`,
     "",
     "## Pages",
     "",
     `- [Home](${site.url}/): ${site.tagline}`,
     `- [Work](${site.url}/work): every case study, product and experiment`,
     `- [Mentoring](${site.url}/mentoring): one-to-one mentoring for engineers`,
-    `- [About](${site.url}/about): professional background`,
-    `- [Uses](${site.url}/uses): tools and hardware`,
+    `- [About](${site.url}/about): professional background and timeline`,
+    `- [Uses](${site.url}/uses): hardware, software and tools`,
     "",
-    "## Work",
+    "## Selected work",
     "",
-    ...getWork().map(
+    ...featured.map(
       (entry) =>
         `- [${entry.title}](${site.url}/work/${entry.slug}): ${entry.line}`
     ),
     "",
-    "## Links",
+    "## Company chapters",
     "",
-    `- [GitHub](${site.links.github})`,
+    ...companies.map(
+      (entry) =>
+        `- [${entry.title}](${site.url}/work/${entry.slug}): ${entry.line}`
+    ),
+    "",
+    "## Contact",
+    "",
     `- [LinkedIn](${site.links.linkedin})`,
+    `- [GitHub](${site.links.github})`,
     `- [MentorCruise](${site.links.mentorcruise})`,
+    `- [Book a call](${site.links.calendar})`,
     "",
     "## Optional",
     "",
-    `- [Full text](${site.url}/llms-full.txt): every page as markdown`,
+    `- [Full text](${site.url}/llms-full.txt): every public page inlined as markdown`,
+    `- [Sitemap](${site.url}/sitemap.xml)`,
     "",
     "Any page is available as markdown by appending `.md` to its path, or by",
     "sending `Accept: text/markdown`.",
     "",
-  ]
-  return lines.join("\n")
+    `Last updated: ${BUILD_DATE}`,
+    "",
+  ].join("\n")
 }
 
-/** `/llms-full.txt` — everything, inlined. */
+/* -------------------------------------------------------------------------- */
+/* /llms-full.txt                                                             */
+/* -------------------------------------------------------------------------- */
+
+/** Everything, inlined, in the order a reader should meet it. */
 export function llmsFullTxt(): string {
-  const site = getSite()
-  const parts = [
-    h1(site.name),
+  const work = getWork()
+  const current = work.filter((entry) => entry.status === "current")
+  const active = work.filter((entry) => entry.status === "active")
+  const companies = work.filter((entry) => entry.kind === "company")
+  const products = work.filter((entry) => entry.kind === "product")
+  const experiments = work.filter((entry) => entry.kind === "experiment")
+  const mentoring = getMentoring()
+  const about = getPage("about")
+
+  const parts: string[] = [
+    `# ${site.name} — full text`,
     "",
     `> ${site.description}`,
     "",
-    aboutMarkdown(),
+    "## Positioning",
     "",
-    mentoringMarkdown(),
+    site.tagline,
     "",
-    usesMarkdown(),
+    `${site.roles.join(" · ")}. Based in ${site.location.city}, ${site.location.country}.`,
+    `${site.yearsShipping} years shipping software. Case studies: ${work.length}.`,
+    "",
+    "## Summary",
+    "",
+    about.description,
+    "",
+    "## Current focus",
+    "",
+    ...[...current, ...active].map(
+      (entry) =>
+        `- **${entry.title}** (${entry.role}, ${period(entry.period)}): ${entry.line}`
+    ),
+    "",
+    "## Company chapters",
     "",
   ]
-  for (const entry of getWork()) {
+
+  for (const company of getCompanies()) {
+    parts.push(
+      `### ${company.name} — ${company.yearsLabel}${company.approx ? " (approximate)" : ""}`,
+      "",
+      meta([
+        ["Role", company.role],
+        ["Previously", company.prev],
+        [
+          "Case study",
+          company.workSlug ? `${site.url}/work/${company.workSlug}` : undefined,
+        ],
+      ]),
+      "",
+      company.summary,
+      ""
+    )
+  }
+
+  parts.push("## Case studies", "")
+  for (const entry of [...companies, ...products, ...experiments]) {
     parts.push(workMarkdown(entry.slug) ?? "", "")
   }
+
+  parts.push(
+    "## Mentoring",
+    "",
+    mentoring.lede,
+    "",
+    ...mentoring.howItWorks.map(
+      (step, i) => `${i + 1}. **${step.title}** — ${step.body}`
+    ),
+    "",
+    `Topics: ${mentoring.topics.join(", ")}.`,
+    "",
+    `[${mentoring.cta.label}](${mentoring.cta.url})`,
+    "",
+    "## Contact",
+    "",
+    `- LinkedIn: ${site.links.linkedin}`,
+    `- GitHub: ${site.links.github}`,
+    `- MentorCruise: ${site.links.mentorcruise}`,
+    `- Calendar: ${site.links.calendar}`,
+    "",
+    "## Canonical links",
+    "",
+    `- ${site.url}/`,
+    `- ${site.url}/work`,
+    ...work.map((entry) => `- ${site.url}/work/${entry.slug}`),
+    `- ${site.url}/mentoring`,
+    `- ${site.url}/about`,
+    `- ${site.url}/uses`,
+    "",
+    `Last updated: ${BUILD_DATE}`,
+    ""
+  )
+
   return parts.join("\n")
 }

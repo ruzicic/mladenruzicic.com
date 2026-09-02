@@ -12,8 +12,9 @@ export default async function Image() {
   return new ImageResponse(
     (
       <OgCard
-        eyebrow={SITE.roles.join(" · ")}
+        eyebrow={SITE.name}
         title={SITE.tagline}
+        line={SITE.roles.join(" · ")}
         meta={`${SITE.location.city}, ${SITE.location.country}`}
       />
     ),

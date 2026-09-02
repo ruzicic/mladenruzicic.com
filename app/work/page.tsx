@@ -1,102 +1,113 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { getWork } from "@/lib/content"
+import { itemListJsonLd, jsonLdScript } from "@/lib/seo/jsonld"
 import { pageMetadata } from "@/lib/seo/metadata"
 
 import {
-  Chip,
+  Container,
+  Display,
   Eyebrow,
   PageTransition,
-  Section,
-  SectionHeader,
-  SharedElement,
-  TransitionLink,
-  workArtTransitionName,
 } from "../components/primitives"
+import {
+  FILTER_IDS,
+  groupOf,
+  GROUPS,
+  topicsFor,
+  WorkCard,
+  WorkExplorer,
+  type ExplorerGroup,
+  type FilterId,
+} from "../components/work-system"
+
 
 export const metadata: Metadata = pageMetadata({
   title: "Work",
   description:
-    "Case studies and products: companies I have worked for, things I have built, and experiments worth keeping.",
+    "Case studies and products: companies I have worked for, things I have built on my own, and the experiments worth keeping.",
   path: "/work",
 })
 
-/** SKELETON. Owned by the work-system agent. */
+/**
+ * The work index — docs/v3-redesign-plan.md §6.
+ *
+ * Grouped Featured → Company chapters → Independent products → Experiments and
+ * archive, derived from `kind` / `status` / `featured` (see `groupOf`). The
+ * cards are Server Components; only the filter row and the re-parenting live on
+ * the client, inside `WorkExplorer`.
+ */
 export default function WorkIndexPage() {
   const work = getWork()
-  const groups = [
-    {
-      id: "featured",
-      label: "Featured",
-      items: work.filter((w) => w.featured),
-    },
-    {
-      id: "companies",
-      label: "Companies",
-      items: work.filter((w) => !w.featured && w.kind === "company"),
-    },
-    {
-      id: "independent",
-      label: "Independent",
-      items: work.filter((w) => !w.featured && w.kind === "product"),
-    },
-    {
-      id: "experiments",
-      label: "Experiments",
-      items: work.filter((w) => !w.featured && w.kind === "experiment"),
-    },
-  ]
+
+  const withTopics = work.map((entry) => ({
+    entry,
+    topics: topicsFor(entry),
+  }))
+
+  const counts = Object.fromEntries(
+    FILTER_IDS.map((id) => [
+      id,
+      id === "all"
+        ? work.length
+        : withTopics.filter((item) => item.topics.includes(id)).length,
+    ])
+  ) as Record<FilterId, number>
+
+  const groups: ExplorerGroup[] = GROUPS.map((group) => ({
+    ...group,
+    items: withTopics
+      .filter(({ entry }) => groupOf(entry) === group.id)
+      .map(({ entry, topics }) => ({
+        slug: entry.slug,
+        topics,
+        card: <WorkCard entry={entry} />,
+      })),
+  })).filter((group) => group.items.length > 0)
 
   return (
     <PageTransition>
-      <main id="main">
-        <Section label="Work">
-          <SectionHeader title="Work" meta={`${work.length} entries`} />
-          {groups.map((group) =>
-            group.items.length === 0 ? null : (
-              <section key={group.id} className="mb-16">
-                <Eyebrow as="h2" className="text-fg">
-                  {group.label}
-                </Eyebrow>
-                <ul className="mt-6 grid list-none gap-8 p-0 md:grid-cols-2">
-                  {group.items.map((entry) => (
-                    <li key={entry.slug}>
-                      <TransitionLink href={`/work/${entry.slug}`}>
-                        <SharedElement name={workArtTransitionName(entry.slug)}>
-                          <div
-                            className="aspect-[16/10] w-full rounded-sm bg-surface"
-                            style={{ outline: `1px solid ${entry.accent}33` }}
-                          />
-                        </SharedElement>
-                        <Eyebrow
-                          className="mt-4"
-                          items={[
-                            `${entry.period.from}–${entry.period.to}`,
-                            entry.status,
-                          ]}
-                        />
-                        <h3 className="mt-2 font-display text-[28px] leading-none">
-                          {entry.title}
-                        </h3>
-                        <p className="mt-2 max-w-[46ch] text-dim-2">
-                          {entry.line}
-                        </p>
-                      </TransitionLink>
-                      <ul className="mt-3 flex list-none flex-wrap gap-2 p-0">
-                        {entry.tech.slice(0, 4).map((tech) => (
-                          <li key={tech}>
-                            <Chip>{tech}</Chip>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )
-          )}
-        </Section>
-      </main>
+      <div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={jsonLdScript(itemListJsonLd(work))}
+        />
+
+        <Container className="py-[72px] md:py-[96px]">
+          <header className="max-w-[52ch]">
+            <Eyebrow
+              items={[
+                "Work",
+                `${work.length} entries`,
+                "featured first, then most recent",
+              ]}
+            />
+            <Display as="h1" size="section" className="mt-6">
+              {"Everything I have {shipped} that is mine to show."}
+            </Display>
+            <p className="mt-6 mb-0 text-[19px] leading-[1.5] text-dim">
+              Four employers, a handful of products I run on my own, and the
+              experiments that taught me something. Company work is described at
+              the level its confidentiality allows.
+            </p>
+          </header>
+
+          <div className="mt-12">
+            <Suspense fallback={<FilterFallback />}>
+              <WorkExplorer groups={groups} counts={counts} />
+            </Suspense>
+          </div>
+        </Container>
+      </div>
     </PageTransition>
   )
+}
+
+/**
+ * `useSearchParams` needs a Suspense boundary on a statically rendered route.
+ * The fallback keeps the filter row's height so nothing jumps.
+ */
+function FilterFallback() {
+  return <div aria-hidden className="h-[34px]" />
 }
