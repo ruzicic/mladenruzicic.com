@@ -171,7 +171,7 @@ Rule applied throughout: no placeholder strings, no private metrics, and no inve
 ## content/pages/mentoring.ts
 
 - **No pricing anywhere.** The current homepage says "$120 per session"; the dossier does not state a public price, so the brief's rule leaves it out. The CTA points at `mentors.to/ruzicic` and says availability and plans live there. Add a price here only if you want it public and stable.
-- The free 15-minute discovery call is described but **not linked**. `lib/constants.ts` has `DISCOVERY_SESSION_URL` (a Google Calendar booking link) — should the mentoring CTA use that instead of, or alongside, MentorCruise?
+- The free 15-minute discovery call is described but **not linked**. The v2 site booked it at <https://calendar.app.google/dETpNdfdug4LF81j7> (`DISCOVERY_SESSION_URL` in `lib/constants.ts`, a file v3 deleted — recover it with `git show main:lib/constants.ts`). Should the mentoring CTA use that link instead of, or alongside, MentorCruise?
 - `whoFor`, `topics` and `expectations` are written from the mentee testimonials and your background (React/React Native, design systems, code review, career switchers). They are plausible but not sourced from anything you wrote. **Read them and correct anything you would not say.**
 - "I take a handful of people at a time" — reflects the dossier's "no high-volume mentoring" goal, but is not a sourced fact. Confirm.
 - `h1` is plain text, not `{ship}` braces. The contract only specifies the brace syntax for the homepage hero `h1` and mentoring `h2`; if the mentoring page reuses the same accent renderer, add the braces back.
