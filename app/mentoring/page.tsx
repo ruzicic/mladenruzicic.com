@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 import { getMentoring, getTestimonials } from "@/lib/content"
-import { jsonLdScript, personJsonLd, webPageJsonLd } from "@/lib/seo/jsonld"
+import { jsonLdScript, webPageJsonLd } from "@/lib/seo/jsonld"
 import { pageMetadata } from "@/lib/seo/metadata"
 
 import {
@@ -43,14 +43,13 @@ export default function MentoringPage() {
       <div>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={jsonLdScript([
+          dangerouslySetInnerHTML={jsonLdScript(
             webPageJsonLd({
               name: copy.seo.title,
               description: copy.seo.description,
               path: "/mentoring",
-            }),
-            personJsonLd(),
-          ])}
+            })
+          )}
         />
 
         <header className="relative isolate overflow-hidden border-b border-line-soft">
