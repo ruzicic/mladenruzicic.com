@@ -1,5 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <text x="256" y="256" text-anchor="middle" dominant-baseline="central"
-    fill="#ffffff" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
-    font-weight="700" font-size="280" letter-spacing="0">N</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2.31 -3.033 23.865 23.865" width="23.865" height="23.865"><g fill="#fff"><polygon points="10.9 0.63 10.9 11.57 4.01 0.63 0.24 0.63 3.22 5.45 3.22 5.44 10.73 17.17 14.12 17.17 14.12 0.63 10.9 0.63"/><polygon points="0 3.65 0 17.17 3.22 17.17 3.22 8.8 0 3.65"/><circle cx="17.795" cy="15.717" r="1.451"/></g></svg>
