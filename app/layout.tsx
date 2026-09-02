@@ -1,92 +1,83 @@
 import { Suspense, type ReactNode } from "react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
+import { getCompanies, getHome, getSite } from "@/lib/content"
 import { jsonLdScript, personJsonLd } from "@/lib/seo/jsonld"
-import { HOME } from "@/content/pages/home"
-import { SITE } from "@/content/site"
 
 import FathomAnalytics from "./components/FathomAnalytics"
-import { Container, SkipLink } from "./components/primitives"
-import { NavPending } from "./components/primitives/NavPending"
-import { TransitionLink } from "./components/primitives/TransitionLink"
+import { Preloader } from "./components/preloader/Preloader"
+import { SkipLink } from "./components/primitives/SkipLink"
+import { Footer, Header, MobilePill, ScrollHairline } from "./components/site"
+import type { PillCompany } from "./components/site"
+import { nowFraction } from "./components/site/now"
+import { resolveTo } from "./components/timeline/span"
 import { fontVariables } from "./fonts"
 
 import "./globals.css"
+import "./styles/shell.css"
 import "./styles/hero.css"
 
 export { baseMetadata as metadata } from "@/lib/seo/metadata"
 
-const NAV = [
-  { href: "/work", label: "Work" },
-  { href: "/mentoring", label: "Mentoring" },
-  { href: "/about", label: "About" },
-] as const
+/**
+ * Runs before first paint. If this session has already seen the preloader we
+ * stamp `data-preloader="off"` on `<html>` and shell.css hides the overlay, so
+ * it never flashes on a reload. `suppressHydrationWarning` covers the attribute
+ * the script adds. See docs/v3-redesign-plan.md §5.4.
+ */
+const PRELOADER_BOOTSTRAP =
+  "try{if(sessionStorage.getItem('mr:preloaded')){document.documentElement.setAttribute('data-preloader','off')}}catch(e){}"
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+/** Same guard for a visitor with JavaScript disabled: never a black screen. */
+const PRELOADER_NOSCRIPT = '[data-testid="preloader"]{display:none!important}'
+
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode
+}) {
+  const site = getSite()
+  const home = getHome()
+  const now = await nowFraction()
+
+  // The mobile sheet's employer colour scrubber: one segment per band, sized in
+  // years. Only these fields cross into the client bundle.
+  const pillCompanies: PillCompany[] = getCompanies().map((company) => ({
+    id: company.id,
+    short: company.short,
+    color: company.color,
+    yearsLabel: company.yearsLabel,
+    years: Number((resolveTo(company.to, now) - company.from).toFixed(2)),
+  }))
+
   return (
-    <html lang="en" className={fontVariables}>
+    <html lang="en" className={fontVariables} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: PRELOADER_BOOTSTRAP }} />
+      </head>
       <body>
         <SkipLink />
+
+        <Preloader
+          verbs={home.preloader.verbs}
+          finalVerb={home.preloader.finalVerb}
+        />
+        <noscript>
+          <style dangerouslySetInnerHTML={{ __html: PRELOADER_NOSCRIPT }} />
+        </noscript>
+
+        <Header siteName={site.name} />
+
+        <main id="main">{children}</main>
+
+        <Footer />
+        <MobilePill companies={pillCompanies} />
+        <ScrollHairline />
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={jsonLdScript(personJsonLd())}
         />
-
-        {/* TEMPORARY shell. Owned by the site-shell agent:
-            app/components/site/** replaces this header and footer. */}
-        <header className="border-b border-line-soft">
-          <Container className="flex items-center justify-between gap-6 py-5">
-            <TransitionLink
-              href="/"
-              className="font-display text-[22px] leading-none tracking-[-0.04em]"
-            >
-              MR
-              <NavPending />
-            </TransitionLink>
-            <nav
-              aria-label="Primary"
-              className="flex items-center gap-7 font-mono text-[12px] uppercase tracking-[0.06em]"
-            >
-              {NAV.map((item) => (
-                <TransitionLink key={item.href} href={item.href}>
-                  {item.label}
-                  <NavPending />
-                </TransitionLink>
-              ))}
-            </nav>
-          </Container>
-        </header>
-
-        {children}
-
-        <footer className="border-t border-line-soft">
-          <Container className="flex flex-wrap items-center justify-between gap-4 py-10 font-mono text-[12px] uppercase tracking-[0.06em] text-muted">
-            <p className="m-0">{HOME.footer.copyright}</p>
-            <ul className="m-0 flex list-none flex-wrap gap-6 p-0">
-              <li>
-                <a href={SITE.links.github} rel="noreferrer noopener">
-                  GitHub
-                </a>
-              </li>
-              <li>
-                <a href={SITE.links.linkedin} rel="noreferrer noopener">
-                  LinkedIn
-                </a>
-              </li>
-              <li>
-                <a href={SITE.links.mentorcruise} rel="noreferrer noopener">
-                  MentorCruise
-                </a>
-              </li>
-              <li>
-                <TransitionLink href="/uses">Uses</TransitionLink>
-              </li>
-              <li>
-                <a href={SITE.links.cv}>CV</a>
-              </li>
-            </ul>
-          </Container>
-        </footer>
 
         <Suspense fallback={null}>
           <FathomAnalytics />
