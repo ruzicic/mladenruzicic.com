@@ -1,7 +1,6 @@
 import { Button, Container, Display, Eyebrow } from "./components/primitives"
 import { GrainSurface } from "./components/shaders"
 
-
 /**
  * 404 — docs/v3-redesign-plan.md §5.2 (`GrainSurface`, very slow).
  *

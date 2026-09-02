@@ -6,8 +6,7 @@ import { expect, test } from "@playwright/test"
  */
 test.use({ javaScriptEnabled: false })
 
-const HERO_H1 =
-  "I build products, platforms and the systems around them."
+const HERO_H1 = "I build products, platforms and the systems around them."
 
 test.describe("/ renders without JS", () => {
   test("hero h1, work rows, timeline bands and mentoring bubbles are present", async ({
@@ -29,9 +28,10 @@ test.describe("/ renders without JS", () => {
       '[data-testid="work-rows"] container is present without JS'
     ).toHaveCount(1)
     const rowCount = await workRows.locator(":scope > *").count()
-    expect(rowCount, "at least 5 work rows render without JS").toBeGreaterThanOrEqual(
-      5
-    )
+    expect(
+      rowCount,
+      "at least 5 work rows render without JS"
+    ).toBeGreaterThanOrEqual(5)
 
     // Work-history timeline bands.
     const bands = page.locator('[data-testid="timeline-band"]')

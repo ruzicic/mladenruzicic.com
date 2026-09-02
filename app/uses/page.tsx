@@ -13,7 +13,6 @@ import {
 } from "../components/primitives"
 import { Prose } from "../components/work-system"
 
-
 const page = getPage("uses")
 
 export const metadata: Metadata = pageMetadata({

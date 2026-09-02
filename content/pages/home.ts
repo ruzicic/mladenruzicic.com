@@ -2,12 +2,7 @@ import type { Home } from "@/lib/content/schema"
 
 export const HOME = {
   hero: {
-    eyebrow: [
-      "Technical product owner",
-      "Founder",
-      "Builder",
-      "Lausanne, CH",
-    ],
+    eyebrow: ["Technical product owner", "Founder", "Builder", "Lausanne, CH"],
     // {systems} renders in Instrument Serif Italic.
     h1: "I build products, platforms and the {systems} around them.",
     // [[zf-scalar]] and [[tenderlift]] render as inline chips.

@@ -68,7 +68,10 @@ test.describe("sitemap routes", () => {
 })
 
 test.describe("redirects and error routes", () => {
-  test("/mentorship redirects 308 to /mentoring", async ({ request, baseURL }) => {
+  test("/mentorship redirects 308 to /mentoring", async ({
+    request,
+    baseURL,
+  }) => {
     const redirect = await request.get(`${baseURL}/mentorship`, {
       maxRedirects: 0,
     })

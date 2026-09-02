@@ -16,7 +16,6 @@ import {
 import { Prose } from "../components/work-system"
 import { CompanyTimeline } from "./CompanyTimeline"
 
-
 const page = getPage("about")
 
 export const metadata: Metadata = pageMetadata({

@@ -34,10 +34,9 @@ test("clicking the first work row's link navigates to its case study with a matc
   const h1 = page.getByRole("heading", { level: 1 })
   await expect(h1).toHaveCount(1)
   if (rowTitle) {
-    await expect(
-      h1,
-      "case-study h1 matches the work row's title"
-    ).toHaveText(rowTitle)
+    await expect(h1, "case-study h1 matches the work row's title").toHaveText(
+      rowTitle
+    )
   }
 
   await page.goBack()

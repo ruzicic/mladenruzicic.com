@@ -22,7 +22,6 @@ import {
   type FilterId,
 } from "../components/work-system"
 
-
 export const metadata: Metadata = pageMetadata({
   title: "Work",
   description:

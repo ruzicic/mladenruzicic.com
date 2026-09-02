@@ -1,4 +1,4 @@
-import type { CompanyId, Company, HeroLogoId } from "@/lib/content/schema"
+import type { Company, CompanyId, HeroLogoId } from "@/lib/content/schema"
 
 /**
  * Timeline bands, newest first. `approx: true` marks a date range the dossier

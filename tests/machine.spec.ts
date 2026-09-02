@@ -72,7 +72,9 @@ test('JSON-LD on / parses and declares a Person named "Mladen Ružičić"', asyn
     "at least one application/ld+json script is present"
   ).toBeGreaterThan(0)
 
-  const parsed = jsonLdTexts.map((text) => JSON.parse(text) as Record<string, unknown>)
+  const parsed = jsonLdTexts.map(
+    (text) => JSON.parse(text) as Record<string, unknown>
+  )
   const person = parsed.find((entry) => entry["@type"] === "Person")
 
   expect(person, "a Person JSON-LD block exists on /").toBeTruthy()

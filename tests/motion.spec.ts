@@ -34,10 +34,10 @@ test("preloader shows on first visit and detaches within 2s; hero canvas mounts 
   const preloader = page.locator('[data-testid="preloader"]')
   // Tolerate the preloader having already come and gone before this check
   // runs; the hard requirement is that it is gone within 2s of navigation.
-  await expect(preloader, "preloader detaches within 2s of first visit").toHaveCount(
-    0,
-    { timeout: 2_000 }
-  )
+  await expect(
+    preloader,
+    "preloader detaches within 2s of first visit"
+  ).toHaveCount(0, { timeout: 2_000 })
 
   const heroCanvas = page.locator('[data-testid="hero-canvas"]')
   await expect(

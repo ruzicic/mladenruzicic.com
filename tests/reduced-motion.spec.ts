@@ -48,7 +48,8 @@ test("/ skips the preloader, three.js and all running animations under reduced m
 
   await page.waitForTimeout(2000)
   const runningAnimations = await page.evaluate(
-    () => document.getAnimations().filter((a) => a.playState === "running").length
+    () =>
+      document.getAnimations().filter((a) => a.playState === "running").length
   )
   expect(
     runningAnimations,

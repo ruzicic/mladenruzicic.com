@@ -18,9 +18,11 @@ async function tabUntil(
     await page.keyboard.press("Tab")
     const focused = page.locator(":focus")
     if ((await focused.count()) === 0) continue
-    const name = ((await focused.getAttribute("aria-label")) ??
+    const name = (
+      (await focused.getAttribute("aria-label")) ??
       (await focused.textContent()) ??
-      "").trim()
+      ""
+    ).trim()
     if (pattern.test(name)) return focused
   }
   return undefined
@@ -40,7 +42,10 @@ test("Tab reaches the skip link, then header nav links, then the sound toggle", 
 
   for (const label of [/work/i, /mentoring/i, /about/i]) {
     const link = await tabUntil(page, label)
-    expect(link, `header nav link matching ${label} is Tab-reachable`).toBeTruthy()
+    expect(
+      link,
+      `header nav link matching ${label} is Tab-reachable`
+    ).toBeTruthy()
   }
 
   const soundToggle = await tabUntil(page, /sound/i)
@@ -92,16 +97,16 @@ test("timeline band: Enter expands, Escape collapses, ArrowRight scrolls the rai
   await expect(band).toBeFocused()
 
   await page.keyboard.press("Enter")
-  await expect(
-    band,
-    "aria-expanded=true after Enter"
-  ).toHaveAttribute("aria-expanded", "true")
+  await expect(band, "aria-expanded=true after Enter").toHaveAttribute(
+    "aria-expanded",
+    "true"
+  )
 
   await page.keyboard.press("Escape")
-  await expect(
-    band,
-    "aria-expanded=false after Escape"
-  ).toHaveAttribute("aria-expanded", "false")
+  await expect(band, "aria-expanded=false after Escape").toHaveAttribute(
+    "aria-expanded",
+    "false"
+  )
 
   const rail = page.locator('[data-testid="timeline"]')
   const scrollBefore = await rail.evaluate((el) => el.scrollLeft)
@@ -132,19 +137,19 @@ test('"worked alongside" popover opens with Enter and closes with Escape', async
   // unbounded document-order scan, so this can't accidentally focus an
   // unrelated interactive element further down the page (e.g. the footer).
   const trigger = alongsideHeading
-    .locator(
-      "xpath=./parent::*//*[self::button or self::a or @role='button']"
-    )
+    .locator("xpath=./parent::*//*[self::button or self::a or @role='button']")
     .first()
   test.skip(
     (await trigger.count()) === 0,
-    "no focusable person trigger found near \"Worked alongside\" — popover not built yet"
+    'no focusable person trigger found near "Worked alongside" — popover not built yet'
   )
   await trigger.focus()
   await page.keyboard.press("Enter")
 
   const popover = page.locator('[popover], [role="dialog"]').first()
-  await expect(popover, "popover opens on Enter").toBeVisible({ timeout: 2_000 })
+  await expect(popover, "popover opens on Enter").toBeVisible({
+    timeout: 2_000,
+  })
 
   await page.keyboard.press("Escape")
   await expect(popover, "popover closes on Escape").toBeHidden()

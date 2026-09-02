@@ -17,7 +17,6 @@ import {
 import { GrainSurface } from "../components/shaders"
 import { TestimonialGrid } from "./TestimonialGrid"
 
-
 const mentoring = getMentoring()
 
 export const metadata: Metadata = pageMetadata({

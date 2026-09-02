@@ -24,7 +24,6 @@ import {
 /** Opt out of instant-navigation validation: `dynamicParams` is rejected under cacheComponents. */
 export const instant = false
 
-
 type Params = { slug: string }
 
 export function generateStaticParams(): Params[] {

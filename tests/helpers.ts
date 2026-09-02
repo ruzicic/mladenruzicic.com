@@ -156,7 +156,9 @@ export interface ResourceTiming {
 }
 
 /** All `PerformanceResourceTiming` entries recorded so far in `page`. */
-export async function getResourceTimings(page: Page): Promise<ResourceTiming[]> {
+export async function getResourceTimings(
+  page: Page
+): Promise<ResourceTiming[]> {
   return page.evaluate(() =>
     performance.getEntriesByType("resource").map((entry) => {
       const r = entry as PerformanceResourceTiming
