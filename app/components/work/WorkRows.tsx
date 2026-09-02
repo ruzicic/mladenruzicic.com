@@ -104,7 +104,8 @@ export function WorkRows() {
       id="work"
       data-section="Work"
       aria-labelledby="work-heading"
-      className="relative pb-20 pt-[120px]"
+      // scroll-mt: clears the 70px fixed header when #work is followed.
+      className="relative scroll-mt-[80px] pb-20 pt-[120px]"
     >
       <Container id={ROOT_ID}>
         <SectionHeader

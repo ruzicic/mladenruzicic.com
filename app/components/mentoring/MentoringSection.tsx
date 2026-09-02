@@ -28,7 +28,8 @@ export function MentoringSection() {
       data-section="Mentoring"
       data-testid="mentoring"
       aria-labelledby="mentoring-heading"
-      className="relative border-t border-line-soft py-24"
+      // scroll-mt: clears the 70px fixed header when #mentoring is followed.
+      className="relative scroll-mt-[80px] border-t border-line-soft py-24"
     >
       <Container>
         <div className="mr-mentoring-grid">
