@@ -358,6 +358,36 @@ html[data-preloader="off"] [data-testid="preloader"] {
 }
 
 /* ---------------------------------------------------------------------------
+   Employer scrubber — WCAG 2.5.8 (target size, minimum).
+
+   Segments are sized in years, and ten months of HEGIAS came to 14px of the
+   323px row: a target no thumb can hit, and too close to its neighbours for the
+   spacing exception. `min-width` floors every segment at the 24px minimum (the
+   flex algorithm freezes the floored one and re-divides the rest, so the row
+   still fits and the other five stay proportional), and the overlay grows the
+   6px bar to a 24px tall hit area without changing how the bar reads.
+   --------------------------------------------------------------------------- */
+[data-pill-scrubber] {
+  --pill-target-min: 24px;
+}
+
+[data-pill-scrubber] > li {
+  min-width: var(--pill-target-min);
+}
+
+[data-pill-segment] {
+  position: relative;
+}
+
+[data-pill-segment]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  /* Negative: the bar is 6px tall, so this reaches 9px past each edge. */
+  inset-block: calc((100% - var(--pill-target-min)) / 2);
+}
+
+/* ---------------------------------------------------------------------------
    Reduced motion — §5.3, §9. Everything the shell animates goes quiet.
    (globals.css already zeroes the ::view-transition-* pseudo-elements.)
    --------------------------------------------------------------------------- */
