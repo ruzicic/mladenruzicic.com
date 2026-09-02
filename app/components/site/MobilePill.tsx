@@ -49,7 +49,15 @@ function closeSheet(target: EventTarget | null) {
 const NAV_LINK =
   "block border-b border-line py-[6px] font-display text-[34px] leading-tight tracking-[-0.02em]"
 
-const SEGMENT = "block h-full w-full rounded-[2px]"
+/**
+ * Colour is the only affordance a scrubber segment has, and two of the six
+ * brand colours fall below WCAG 1.4.11's 3:1 against `bg-surface-2` — ZF
+ * `#0057B8` at 2.47:1 and HEGIAS `#6F246F` at 1.75:1 — so those two bars are
+ * effectively invisible. A 1px `line-strong` outline gives every segment a
+ * boundary that does not depend on its fill.
+ */
+const SEGMENT =
+  "block h-full w-full rounded-[2px] outline outline-[var(--color-line-strong)]"
 
 export function MobilePill({ companies }: { companies: PillCompany[] }) {
   const [section, setSection] = useState("Intro")
