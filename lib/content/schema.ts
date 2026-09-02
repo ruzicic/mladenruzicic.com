@@ -198,6 +198,15 @@ export const workFrontmatterSchema = z.object({
   role: z.string().min(1),
   location: z.string().min(1).optional(),
   accent: hex,
+  /**
+   * The entry's own monochrome mark, under `public/static/logos/work/`. Every
+   * file there is white-filled geometry in a square viewBox, so consumers paint
+   * it with `mask-image` and pick the ink themselves — see the sourcing notes
+   * in `public/static/logos/work/SOURCES.md`.
+   */
+  logo: z.string().startsWith("/static/logos/").optional(),
+  /** 1–2 character fallback for an entry with no mark, or a mark that 404s. */
+  mark: z.string().min(1).max(2).optional(),
   tech: z.array(z.string().min(1)),
   line: z.string().min(1).max(120),
   detail: z.string().min(1),

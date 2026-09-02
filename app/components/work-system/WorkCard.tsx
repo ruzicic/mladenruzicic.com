@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 
 import { Chip, Display, TransitionLink } from "../primitives"
 import { StatusBadge } from "./StatusBadge"
+import { WorkMark } from "./WorkMark"
 import { formatYears } from "./taxonomy"
 import { MORPH_CLASS, workTitleTransitionName } from "./transitions"
 import { WorkArt } from "./WorkArt"
@@ -40,6 +41,7 @@ export function WorkCard({ entry, className }: WorkCardProps) {
             <Chip
               variant="brand"
               color={company.color}
+              logo={company.logo}
               mark={company.mark}
               className="bg-bg/75 backdrop-blur-[6px]"
             >
@@ -58,19 +60,22 @@ export function WorkCard({ entry, className }: WorkCardProps) {
         {entry.period.approx ? <span>≈ approximate</span> : null}
       </p>
 
-      <ViewTransition
-        name={workTitleTransitionName(entry.slug)}
-        share={MORPH_CLASS}
-        default="none"
-      >
-        <Display
-          as="h3"
-          size="sub"
-          className="mt-3 transition-colors duration-fast group-hover:text-accent"
+      <div className="mt-3 flex items-center gap-3">
+        <WorkMark entry={entry} size={22} />
+        <ViewTransition
+          name={workTitleTransitionName(entry.slug)}
+          share={MORPH_CLASS}
+          default="none"
         >
-          {entry.title}
-        </Display>
-      </ViewTransition>
+          <Display
+            as="h3"
+            size="sub"
+            className="transition-colors duration-fast group-hover:text-accent"
+          >
+            {entry.title}
+          </Display>
+        </ViewTransition>
+      </div>
 
       <p className="mt-3 mb-0 max-w-[44ch] text-[17px] leading-[1.5] text-dim">
         {entry.line}
