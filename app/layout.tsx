@@ -2,7 +2,7 @@ import { Suspense, type ReactNode } from "react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
 import { getCompanies, getHome, getSite } from "@/lib/content"
-import { jsonLdScript, personJsonLd } from "@/lib/seo/jsonld"
+import { jsonLdScript, personJsonLd, webSiteJsonLd } from "@/lib/seo/jsonld"
 
 import FathomAnalytics from "./components/FathomAnalytics"
 import { Preloader } from "./components/preloader/Preloader"
@@ -75,9 +75,12 @@ export default async function RootLayout({
         <MobilePill companies={pillCompanies} />
         <ScrollHairline />
 
+        {/* Person + WebSite, emitted once for the whole site: every page-level
+            graph references `#person` and `#website` by `@id`, so both nodes
+            have to exist somewhere in the document. */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={jsonLdScript(personJsonLd())}
+          dangerouslySetInnerHTML={jsonLdScript([personJsonLd(), webSiteJsonLd()])}
         />
 
         <Suspense fallback={null}>
