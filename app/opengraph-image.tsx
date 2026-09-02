@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og"
 
-import { gloock, OG_CONTENT_TYPE, OG_SIZE, OgCard } from "@/lib/seo/og"
+import { OG_CONTENT_TYPE, OG_SIZE, OgCard, ogFonts } from "@/lib/seo/og"
 import { SITE } from "@/content/site"
 
 export const size = OG_SIZE
@@ -18,11 +18,6 @@ export default async function Image() {
         meta={`${SITE.location.city}, ${SITE.location.country}`}
       />
     ),
-    {
-      ...size,
-      fonts: [
-        { name: "Gloock", data: await gloock(), style: "normal", weight: 400 },
-      ],
-    }
+    { ...size, fonts: await ogFonts() }
   )
 }

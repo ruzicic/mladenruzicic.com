@@ -26,11 +26,48 @@
 ::view-transition-group(site-header),
 ::view-transition-old(site-header),
 ::view-transition-new(site-header),
+::view-transition-group(site-header-scrim),
+::view-transition-old(site-header-scrim),
+::view-transition-new(site-header-scrim),
 ::view-transition-group(site-pill),
 ::view-transition-old(site-pill),
 ::view-transition-new(site-pill) {
   animation: none !important;
   mix-blend-mode: normal;
+}
+
+/* ---------------------------------------------------------------------------
+   Header scrim — decision §10.6 ("verify difference over yellow surfaces").
+
+   `mix-blend-mode: difference` is only legible against a decisively dark or
+   decisively light backdrop. Over the accent yellow the off-white ink inverts
+   to a saturated blue, and over a mid-tone employer band (or the hero headline
+   scrolling past) it all but vanishes. Rather than drop the blend mode, we
+   guarantee the backdrop: a fixed gradient in the page background, painted
+   BELOW the header (z-40 against the header's z-50) so it is part of what the
+   header differences against.
+
+   Invisible over the dark ground — `--color-bg` over `--color-bg` — it only
+   shows where something bright scrolls into the header zone. The ramp is held
+   near-opaque past the ink (the header box is ~68px tall) and only then
+   released, because a HALF-darkened yellow is the one backdrop difference
+   cannot cope with.
+   --------------------------------------------------------------------------- */
+.header-scrim {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 40;
+  height: 116px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-bg) 95%, transparent) 0%,
+    color-mix(in srgb, var(--color-bg) 93%, transparent) 46%,
+    color-mix(in srgb, var(--color-bg) 78%, transparent) 62%,
+    color-mix(in srgb, var(--color-bg) 34%, transparent) 82%,
+    color-mix(in srgb, var(--color-bg) 0%, transparent) 100%
+  );
 }
 
 /* ---------------------------------------------------------------------------

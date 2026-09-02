@@ -6,7 +6,9 @@ export const MENTORING = {
     description:
       "One-to-one mentoring for engineers who want to ship: architecture, code review, career decisions and the habits behind senior work.",
   },
-  h1: "Mentoring engineers who want to ship.",
+  eyebrow: ["Mentoring", "One to one", "Since 2021"],
+  // {ship} renders in Instrument Serif Italic, as on the homepage section.
+  h1: "Mentoring engineers who want to {ship}.",
   lede: "I have mentored more than thirty engineers through MentorCruise, mostly mid-level developers pushing toward senior and career switchers who need someone to be straight with them. It is a small, deliberate part of what I do. I take a handful of people at a time, because anything more stops being useful.",
   whoFor: [
     "Mid-level engineers who can build features and want to know what separates them from the senior people around them.",
@@ -56,5 +58,9 @@ export const MENTORING = {
     label: "Start on MentorCruise",
     url: "https://mentors.to/ruzicic",
     note: "Availability, plans and reviews live on MentorCruise. Start with the free discovery call.",
+  },
+  closing: {
+    // {specific} renders in Instrument Serif Italic.
+    h2: "Bring something {specific} and we will start there.",
   },
 } satisfies Mentoring

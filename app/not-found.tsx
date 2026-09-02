@@ -1,6 +1,8 @@
 // Direct module paths, not the barrel: `not-found` is part of every route's
 // server graph, so a barrel import here would put `Dialog` in every page's
 // client bundle. See `tests/budgets.spec.ts`.
+import { getNotFound } from "@/lib/content"
+
 import { Button } from "./components/primitives/Button"
 import { Container } from "./components/primitives/Container"
 import { Display } from "./components/primitives/Display"
@@ -14,27 +16,28 @@ import { GrainSurface } from "./components/shaders"
  * missed, and pairing it with a page transition would double-animate.
  */
 export default function NotFound() {
+  const copy = getNotFound()
+
   return (
     <div className="relative isolate overflow-hidden">
       <GrainSurface />
       <div aria-hidden className="scrim-header" />
       <Container className="relative z-[2] flex min-h-[60dvh] flex-col justify-center py-[96px] md:py-[128px]">
-        <Eyebrow items={["404", "Not found"]} />
+        <Eyebrow items={copy.eyebrow} />
 
         <p
           aria-hidden
           className="m-0 mt-6 font-display text-[clamp(96px,22vw,260px)] leading-[0.85] tracking-[-0.04em] text-fg"
         >
-          404
+          {copy.code}
         </p>
 
         <Display as="h1" size="sub" className="mt-8 max-w-[18ch]">
-          {"That page does not {exist}."}
+          {copy.h1}
         </Display>
 
         <p className="mt-6 mb-0 max-w-[46ch] text-[18px] leading-[1.5] text-dim">
-          It may have moved, or it may never have existed. The work index is a
-          good place to start.
+          {copy.lede}
         </p>
 
         <div className="mt-10 flex flex-wrap gap-3">

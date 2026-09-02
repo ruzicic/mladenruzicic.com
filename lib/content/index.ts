@@ -5,6 +5,8 @@ import matter from "gray-matter"
 import { COMPANIES, HERO_LOGOS } from "@/content/companies"
 import { HOME } from "@/content/pages/home"
 import { MENTORING } from "@/content/pages/mentoring"
+import { NOT_FOUND } from "@/content/pages/not-found"
+import { WORK_PAGE } from "@/content/pages/work"
 import { PEOPLE } from "@/content/people"
 import { SITE } from "@/content/site"
 import { TESTIMONIALS } from "@/content/testimonials"
@@ -17,11 +19,13 @@ import {
   type HeroLogo,
   type Home,
   type Mentoring,
+  type NotFound,
   type PageEntry,
   type Person,
   type Site,
   type Testimonial,
   type WorkEntry,
+  type WorkPage,
   type WorkSlug,
 } from "./schema"
 
@@ -69,12 +73,82 @@ function periodSortKey(entry: WorkEntry): number {
   return Number(to.slice(0, 4)) * 100 + Number(to.slice(5, 7) || "0")
 }
 
+/** 0–99 spelled out, so a headline never hardcodes a figure content owns. */
+const ONES = [
+  "zero",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven",
+  "twelve",
+  "thirteen",
+  "fourteen",
+  "fifteen",
+  "sixteen",
+  "seventeen",
+  "eighteen",
+  "nineteen",
+]
+const TENS = [
+  "",
+  "",
+  "twenty",
+  "thirty",
+  "forty",
+  "fifty",
+  "sixty",
+  "seventy",
+  "eighty",
+  "ninety",
+]
+
+export function spellOut(value: number): string {
+  if (!Number.isInteger(value) || value < 0 || value > 99) return String(value)
+  if (value < 20) return ONES[value]
+  const tens = TENS[Math.floor(value / 10)]
+  const ones = value % 10
+  return ones === 0 ? tens : `${tens}-${ONES[ones]}`
+}
+
+function capitalise(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+/**
+ * Expands the page-header tokens documented on `pageFrontmatterSchema`:
+ * `[years]` / `[Years]` from `SITE.yearsShipping`, `{updated}` from the page's
+ * own date. Everything downstream — the page, the metadata, the mirrors — then
+ * sees a finished string.
+ */
+function expandTokens(value: string, updated: string): string {
+  const years = spellOut(SITE.yearsShipping)
+  return value
+    .replaceAll("[Years]", capitalise(years))
+    .replaceAll("[years]", years)
+    .replaceAll("{updated}", updated)
+}
+
 function loadPage(slug: PageEntry["slug"]): PageEntry {
   const source = join("content", "pages", `${slug}.mdx`)
   const raw = readFileSync(join(PAGES_DIR, `${slug}.mdx`), "utf8")
   const { data, content } = matter(raw)
   const frontmatter = parseOrThrow(pageFrontmatterSchema, data, source)
-  return { ...frontmatter, slug, body: content.trim() }
+  return {
+    ...frontmatter,
+    h1: expandTokens(frontmatter.h1, frontmatter.updated),
+    eyebrow: frontmatter.eyebrow.map((item) =>
+      expandTokens(item, frontmatter.updated)
+    ),
+    slug,
+    body: content.trim(),
+  }
 }
 
 const WORK = loadWork()
@@ -145,9 +219,45 @@ export function getSite(): Site {
   return SITE
 }
 
+/** `/work` index copy. */
+export function getWorkPage(): WorkPage {
+  return WORK_PAGE
+}
+
+/** 404 copy. */
+export function getNotFound(): NotFound {
+  return NOT_FOUND
+}
+
 /** `/about` or `/uses`: frontmatter plus the raw MDX body. */
 export function getPage(slug: PageEntry["slug"]): PageEntry {
   return PAGES[slug]
+}
+
+/**
+ * `content/pages/about.mdx` ends with a `## Links` list. `/about` renders those
+ * links as a designed block from `SITE.links` instead, so the narrative stops
+ * just before that heading — and the markdown mirrors have to make the same cut
+ * or they publish claims (an email address, for one) the HTML page does not.
+ *
+ * If the heading is ever removed from the MDX this is a no-op.
+ */
+export function aboutNarrative(body: string = getPage("about").body): string {
+  const index = body.search(/^##\s+Links\s*$/m)
+  return index === -1 ? body : body.slice(0, index).trimEnd()
+}
+
+/** The designed `/about` links block, resolved against `SITE.links`. */
+export function getAboutLinks(): {
+  label: string
+  href: string
+  note: string
+}[] {
+  return (getPage("about").links ?? []).map((link) => ({
+    label: link.label,
+    href: SITE.links[link.key],
+    note: link.note,
+  }))
 }
 
 /**
@@ -177,15 +287,18 @@ export type {
   HeroLogoId,
   Home,
   Mentoring,
+  NotFound,
   PageEntry,
   PageFrontmatter,
   Person,
   PersonId,
   Site,
+  SiteLinkKey,
   Testimonial,
   WorkEntry,
   WorkFrontmatter,
   WorkKind,
+  WorkPage,
   WorkSlug,
   WorkStatus,
 } from "./schema"

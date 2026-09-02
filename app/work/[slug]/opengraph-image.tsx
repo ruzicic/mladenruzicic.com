@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og"
 
 import { getWorkBySlug, getWorkSlugs } from "@/lib/content"
-import { gloock, OG_CONTENT_TYPE, OG_SIZE, OgCard } from "@/lib/seo/og"
+import { OG_CONTENT_TYPE, OG_SIZE, OgCard, ogFonts } from "@/lib/seo/og"
 
 import {
   formatPeriod,
@@ -24,7 +24,7 @@ export function generateStaticParams() {
 
 /**
  * Per-case-study OG card, tinted with the project accent. Node runtime (the
- * default in Next 16) because Satori needs the Gloock TTF from `assets/fonts`.
+ * default in Next 16) because Satori needs the TTFs from `assets/fonts`.
  */
 export default async function Image({
   params,
@@ -48,11 +48,6 @@ export default async function Image({
         accent={entry?.accent}
       />
     ),
-    {
-      ...size,
-      fonts: [
-        { name: "Gloock", data: await gloock(), style: "normal", weight: 400 },
-      ],
-    }
+    { ...size, fonts: await ogFonts() }
   )
 }

@@ -1,4 +1,6 @@
 import {
+  aboutNarrative,
+  getAboutLinks,
   getCompanies,
   getMentoring,
   getPage,
@@ -6,6 +8,7 @@ import {
   getTestimonials,
   getWork,
   getWorkBySlug,
+  getWorkPage,
 } from "./index"
 import type { WorkEntry } from "./schema"
 
@@ -199,14 +202,14 @@ export function workMarkdown(slug: string): string | undefined {
 
 export function workIndexMarkdown(): string {
   const work = getWork()
+  const copy = getWorkPage()
   const lines = [
     header({
-      title: "Work",
-      description:
-        "Case studies and products: companies worked for, products built independently, and experiments worth keeping.",
+      title: copy.seo.title,
+      description: copy.mirror.description,
       path: "/work",
     }),
-    `${work.length} entries. Featured first, then most recent.`,
+    copy.mirror.intro.replace("{count}", String(work.length)),
     "",
   ]
 
@@ -245,7 +248,17 @@ export function aboutMarkdown(): string {
     }),
     page.description,
     "",
-    page.body,
+    // The same cut `/about` makes: the MDX `## Links` list is replaced by the
+    // designed block below, so the mirror never publishes a claim the page
+    // withholds.
+    aboutNarrative(page.body),
+    "",
+    "## Links",
+    "",
+    ...getAboutLinks().map(
+      (link) =>
+        `- [${link.label}](${/^https?:/.test(link.href) ? link.href : `${site.url}${link.href}`}) — ${link.note}`
+    ),
     "",
     "## Timeline",
     "",

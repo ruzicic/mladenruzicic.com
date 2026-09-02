@@ -287,6 +287,8 @@ export const mentoringSchema = z.object({
     title: z.string().min(1),
     description: z.string().min(1).max(160),
   }),
+  eyebrow: z.array(z.string().min(1)).min(1),
+  /** `{braces}` mark the italic accent word. */
   h1: z.string().min(1),
   lede: z.string().min(1),
   whoFor: z.array(z.string().min(1)),
@@ -300,13 +302,77 @@ export const mentoringSchema = z.object({
     url: z.string().min(1),
     note: z.string().min(1).optional(),
   }),
+  closing: z.object({
+    /** `{braces}` mark the italic accent word. */
+    h2: z.string().min(1),
+  }),
 })
 export type Mentoring = z.infer<typeof mentoringSchema>
+
+/**
+ * `/work` index copy. `{count}` in `eyebrow` and `mirror.intro` is replaced
+ * with the number of entries; `{braces}` in `h1` mark the italic accent word.
+ */
+export const workPageSchema = z.object({
+  seo: z.object({
+    title: z.string().min(1),
+    description: z.string().min(1).max(160),
+  }),
+  eyebrow: z.array(z.string().min(1)).min(1),
+  h1: z.string().min(1),
+  lede: z.string().min(1),
+  /** The `/md/work` mirror, which introduces the list rather than the page. */
+  mirror: z.object({
+    description: z.string().min(1).max(160),
+    intro: z.string().min(1),
+  }),
+})
+export type WorkPage = z.infer<typeof workPageSchema>
+
+/** `app/not-found.tsx`. `{braces}` in `h1` mark the italic accent word. */
+export const notFoundSchema = z.object({
+  eyebrow: z.array(z.string().min(1)).min(1),
+  /** The oversized numeral. `aria-hidden`; the eyebrow carries it for AT. */
+  code: z.string().min(1),
+  h1: z.string().min(1),
+  lede: z.string().min(1),
+})
+export type NotFound = z.infer<typeof notFoundSchema>
+
+export const SITE_LINK_KEYS = [
+  "github",
+  "linkedin",
+  "mentorcruise",
+  "calendar",
+  "cv",
+] as const
+export type SiteLinkKey = (typeof SITE_LINK_KEYS)[number]
 
 export const pageFrontmatterSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1).max(160),
   updated: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "expected YYYY-MM-DD"),
+  /**
+   * Page header copy. `{braces}` mark the italic accent word in `h1`;
+   * `[years]` / `[Years]` expands to `SITE.yearsShipping` spelled out, and
+   * `{updated}` in an eyebrow item expands to the `updated` date. Both are
+   * resolved by the loader, so consumers only ever see finished strings.
+   */
+  h1: z.string().min(1),
+  eyebrow: z.array(z.string().min(1)).min(1),
+  /**
+   * The designed links block. `key` points at `SITE.links`, so a URL is never
+   * written twice; `note` is the right-hand hint.
+   */
+  links: z
+    .array(
+      z.object({
+        key: z.enum(SITE_LINK_KEYS),
+        label: z.string().min(1),
+        note: z.string().min(1),
+      })
+    )
+    .optional(),
 })
 export type PageFrontmatter = z.infer<typeof pageFrontmatterSchema>
 
