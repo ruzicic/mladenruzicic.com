@@ -2,7 +2,11 @@ import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { getWork } from "@/lib/content"
-import { breadcrumbJsonLd, itemListJsonLd, jsonLdScript } from "@/lib/seo/jsonld"
+import {
+  breadcrumbJsonLd,
+  itemListJsonLd,
+  jsonLdScript,
+} from "@/lib/seo/jsonld"
 import { pageMetadata } from "@/lib/seo/metadata"
 
 import {

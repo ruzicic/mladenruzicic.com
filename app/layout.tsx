@@ -80,7 +80,10 @@ export default async function RootLayout({
             have to exist somewhere in the document. */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={jsonLdScript([personJsonLd(), webSiteJsonLd()])}
+          dangerouslySetInnerHTML={jsonLdScript([
+            personJsonLd(),
+            webSiteJsonLd(),
+          ])}
         />
 
         <Suspense fallback={null}>
