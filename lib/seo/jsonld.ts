@@ -189,7 +189,9 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
       "@type": "ListItem",
       position: i + 1,
       name: item.name,
-      item: `${SITE.url}${item.path}`,
+      // `/` would give a trailing slash the home `<link rel=canonical>` and the
+      // sitemap `<loc>` do not have. Same document, same spelling everywhere.
+      item: item.path === "/" ? SITE.url : `${SITE.url}${item.path}`,
     })),
   }
 }

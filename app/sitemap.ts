@@ -18,7 +18,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
-      url: `${site.url}/`,
+      // No trailing slash: Next resolves the home `alternates.canonical` to
+      // the bare origin, and a `<loc>` that disagrees with the `<link
+      // rel=canonical>` on the same document is a needless mismatch. The
+      // breadcrumb and the markdown mirrors spell it the same way.
+      url: site.url,
       changeFrequency: "weekly",
       priority: 1,
       lastModified: LAST_UPDATED,
