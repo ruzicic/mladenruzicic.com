@@ -14,7 +14,7 @@ are trying to enforce.
 | `no-js.spec.ts` | `javaScriptEnabled: false` — hero, work rows, timeline, mentoring bubbles, and a case study still render. |
 | `reduced-motion.spec.ts` | `reduced-motion` project only — no preloader, no three.js request, hero still (not canvas), zero running animations. |
 | `motion.spec.ts` | Desktop Chrome + Desktop Safari — preloader lifecycle (once per session via `sessionStorage`), hero canvas mount, CLS budget. |
-| `keyboard.spec.ts` | Tab order (skip link → nav → sound toggle) and visible focus, both Chromium-only; `keyboardControls` covers the same controls on every engine by focusing them directly; timeline band Enter/Escape/ArrowRight; "worked alongside" popover. |
+| `keyboard.spec.ts` | Tab order (skip link → nav → sound toggle) and visible focus, both Chromium-only; `keyboardControls` covers the same controls on every engine by focusing them directly; timeline band Enter/Escape/ArrowRight; the "worked alongside" people block inside an expanded band (open the band, open a person's card, Escape closes the card and then the band). |
 | `transitions.spec.ts` | Desktop Chrome + Desktop Safari — work row → case study navigation, back navigation, timeline-band state across Cache Components route retention. |
 | `mobile.spec.ts` | Mobile Safari only — no horizontal overflow, mobile pill and its sheet. |
 | `machine.spec.ts` | `/llms.txt`, `/llms-full.txt`, `/*.md` mirrors, `Accept: text/markdown` negotiation, `Person` JSON-LD. |
@@ -112,7 +112,7 @@ ones; if you see a fifth, find out why before shipping.
 
 | Skip | Where | Why |
 |---|---|---|
-| `"worked alongside" popover` | `Desktop Chrome`, `Desktop Safari` | `content/people.ts` intentionally ships without people until real LinkedIn URLs and notes exist (see the TODO list in `CLAUDE.md`). Self-skips on the missing heading and starts running the moment the content lands. |
+| `"worked alongside" popover` | `Desktop Chrome`, `Desktop Safari` | Runs today: `content/people.ts` has entries and two bands list them. It still self-skips if every `Company.people` empties out, since then no band renders a `[data-band-people]` block at all. |
 | `Tab reaches the skip link…` | `Desktop Safari` | The WebKit caveat above. `keyboardControls` covers the same six controls there. |
 | `focused elements keep a visible focus indicator` | `Desktop Safari` | Same. |
 

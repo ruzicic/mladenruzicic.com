@@ -23,6 +23,10 @@ const ROUTES = [
   "/",
   "/work",
   "/work/tenderlift",
+  // The one case study with a full "Worked alongside" section (four people,
+  // portraits and outbound links) — the row that used to live under the
+  // timeline rail, audited where it now renders.
+  "/work/wolkabout",
   "/mentoring",
   "/about",
   "/uses",
