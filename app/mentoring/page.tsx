@@ -161,6 +161,23 @@ export default function MentoringPage() {
             meta={`${testimonials.length} public quotes`}
           />
           <TestimonialGrid testimonials={testimonials} />
+          {copy.proof ? (
+            <p
+              data-testid="mentoring-proof"
+              className="mt-8 font-mono text-[11px] uppercase leading-none tracking-[0.08em] text-muted"
+            >
+              <a
+                href={copy.proof.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                data-hover
+                className="text-fg"
+              >
+                {`${copy.proof.label}\u00A0`}
+                <span aria-hidden>↗</span>
+              </a>
+            </p>
+          ) : null}
         </Section>
 
         <Section label="Start" divider className="py-[72px] md:py-[96px]">

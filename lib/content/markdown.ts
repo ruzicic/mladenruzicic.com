@@ -443,6 +443,10 @@ export function mentoringMarkdown(): string {
     lines.push(`> ${t.quote}`, ">", `> — ${t.author}, via ${t.source}`, "")
   }
 
+  if (copy.proof) {
+    lines.push(`[${copy.proof.label}](${copy.proof.href})`, "")
+  }
+
   return lines.join("\n")
 }
 

@@ -59,6 +59,10 @@ export const MENTORING = {
     url: "https://mentors.to/ruzicic",
     note: "Availability, plans and reviews live on MentorCruise. Start with the free discovery call.",
   },
+  proof: {
+    label: "See 50+ five-star ratings on mentors.to/ruzicic",
+    href: "https://mentors.to/ruzicic",
+  },
   closing: {
     // {specific} renders in Instrument Serif Italic.
     h2: "Bring something {specific} and we will start there.",
