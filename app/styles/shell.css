@@ -196,14 +196,244 @@ html[data-preloader="off"] [data-testid="preloader"] {
     left 500ms var(--ease-geometry),
     width 500ms var(--ease-geometry),
     transform 250ms var(--ease-reveal),
+    opacity 250ms var(--ease-reveal),
     background-color 300ms var(--ease-reveal),
     box-shadow 400ms var(--ease-reveal);
 }
 
+/* ---------------------------------------------------------------------------
+   Band focus — one band forward, the rest back.
+
+   The same idea as the work rows: the thing you are pointing at comes up, its
+   neighbours drop back. `transform` and `opacity` only, so nothing here can
+   reflow the rail or move a year tick; the bands are absolutely positioned and
+   the ticks are siblings, not children.
+
+   `transform-origin: center` is set by the component: a band scales in place
+   rather than growing off its left edge.
+   --------------------------------------------------------------------------- */
+[data-rail-band] {
+  z-index: var(--band-z, 1);
+}
+
 @media (hover: hover) {
   [data-rail-band]:not([data-expanded]):hover {
-    transform: scale(1.03);
+    z-index: 3;
+    transform: scale(1.06);
   }
+}
+
+[data-rail-band]:not([data-expanded]):has(:focus-visible) {
+  z-index: 3;
+  transform: scale(1.06);
+}
+
+/* While one band is open, the others stay back until it closes. */
+[data-rail-inner]:has([data-rail-band][data-expanded])
+  [data-rail-band]:not([data-expanded]) {
+  opacity: 0.3;
+}
+
+/* …and while one is merely hovered or focused, the same, more gently. Scoped
+   away from the expanded case so hovering a dimmed neighbour cannot dim the
+   open card. */
+[data-rail-inner]:not(:has([data-rail-band][data-expanded])):has(
+    [data-rail-band]:has(:focus-visible)
+  )
+  [data-rail-band]:not(:has(:focus-visible)) {
+  opacity: 0.4;
+}
+
+@media (hover: hover) {
+  [data-rail-inner]:not(:has([data-rail-band][data-expanded])):has(
+      [data-rail-band]:hover
+    )
+    [data-rail-band]:not(:hover) {
+    opacity: 0.4;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The open card — §5.8, redesigned.
+
+   Its ground is `--color-bg`, the page's own: the brand colour carries the card
+   instead, through the border, this ring, the scaled title, the labels and the
+   rules between sections. `--band-brand` and `--band-ink` are published by the
+   component; the ink is `brandInkOnDark(color)`, which is measured against this
+   exact ground.
+   --------------------------------------------------------------------------- */
+[data-rail-band][data-expanded] {
+  box-shadow:
+    0 40px 100px -20px rgba(0, 0, 0, 0.95),
+    0 0 0 1px var(--band-brand);
+}
+
+[data-rail-band][data-expanded]:hover,
+[data-rail-band][data-expanded]:focus-within {
+  box-shadow:
+    0 40px 100px -20px rgba(0, 0, 0, 0.95),
+    0 0 0 2px var(--band-brand),
+    0 0 0 7px color-mix(in oklab, var(--band-brand) 20%, transparent);
+}
+
+/* The hairline between an open card's sections. Brand, not the generic line
+   token, so the card reads as one company's page. */
+[data-band-rule] {
+  border-top: 1px solid color-mix(in oklab, var(--band-brand) 55%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   Title scaling — the band's mark, name and dates ARE the card's title.
+
+   Nothing is drawn twice: expanding grows these same nodes. `--band-mark` sizes
+   the mark (and, for a band with no logo, its letter), and the name grows into
+   the display face. Both ride the 500ms geometry easing the band's own
+   left/width use, so the title arrives with the card rather than after it.
+   --------------------------------------------------------------------------- */
+[data-band-head] {
+  --band-mark: 18px;
+}
+
+[data-rail-band][data-expanded] [data-band-head] {
+  --band-mark: 52px;
+}
+
+[data-band-mark] {
+  transition:
+    width 500ms var(--ease-geometry),
+    height 500ms var(--ease-geometry),
+    border-radius 500ms var(--ease-geometry),
+    font-size 500ms var(--ease-geometry);
+}
+
+[data-band-text] {
+  transition:
+    font-size 500ms var(--ease-geometry),
+    letter-spacing 500ms var(--ease-geometry),
+    color 300ms var(--ease-reveal);
+}
+
+[data-band-dates] > span:first-child {
+  transition: color 300ms var(--ease-reveal);
+}
+
+[data-rail-band][data-expanded] [data-band-button] {
+  height: auto;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 20px 22px 0;
+}
+
+[data-rail-band][data-expanded] [data-band-name] {
+  gap: 14px;
+  padding-right: 34px;
+  white-space: normal;
+}
+
+[data-rail-band][data-expanded] [data-band-text] {
+  overflow: visible;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--band-ink);
+}
+
+[data-rail-band][data-expanded] [data-band-dates] {
+  font-size: 11px;
+}
+
+/* ---------------------------------------------------------------------------
+   The expand affordance — one icon, two states (§10 decision: calm).
+
+   The ⤢ and the ✕ are the same three strokes. `transform-origin: 0 0` on the
+   two heads so `translate() rotate()` behaves exactly like the SVG transform
+   attribute would; the shaft rotates about the box centre instead.
+
+   The idle cue is a single outward nudge every 5.5s — the arrowheads pull apart
+   and settle. It exists so a first-time visitor learns the band is openable
+   without a tooltip, and it is deliberately small and rare so it never competes
+   with the hero. Hover and focus make it quicker and wider.
+   --------------------------------------------------------------------------- */
+[data-band-toggle-icon] [data-toggle-shaft],
+[data-band-toggle-icon] [data-toggle-head] {
+  transform-origin: 0 0;
+  transition: transform var(--duration-slow) var(--ease-pill);
+}
+
+[data-band-toggle-icon] [data-toggle-shaft] {
+  transform-origin: 8px 8px;
+}
+
+[data-toggle-head="ne"] {
+  --hint-x: 1px;
+  --hint-y: -1px;
+
+  transform: translate(12.5px, 3.5px) rotate(0deg);
+}
+
+[data-toggle-head="sw"] {
+  --hint-x: -1px;
+  --hint-y: 1px;
+
+  transform: translate(3.5px, 12.5px) rotate(180deg);
+}
+
+/* Closed: the heads meet in the middle at 45°, where their outward arms are the
+   ✕'s second diagonal and their inward arms lie on the shaft — which shortens
+   to 0.72 so all four arms of the ✕ match. */
+[data-rail-band][data-expanded] [data-toggle-head="ne"] {
+  transform: translate(8px, 8px) rotate(45deg);
+}
+
+[data-rail-band][data-expanded] [data-toggle-head="sw"] {
+  transform: translate(8px, 8px) rotate(225deg);
+}
+
+[data-rail-band][data-expanded] [data-toggle-shaft] {
+  transform: scale(0.72);
+}
+
+@keyframes band-toggle-hint {
+  0%,
+  74%,
+  100% {
+    translate: 0 0;
+  }
+
+  84%,
+  90% {
+    translate: var(--hint-x) var(--hint-y);
+  }
+}
+
+[data-rail-band]:not([data-expanded]) [data-toggle-head] {
+  animation: band-toggle-hint 5.5s var(--ease-pill) infinite;
+}
+
+[data-rail-band]:not([data-expanded]):hover [data-toggle-head],
+[data-rail-band]:not([data-expanded]):has(:focus-visible) [data-toggle-head] {
+  --hint-x: 1.8px;
+  --hint-y: -1.8px;
+
+  animation-duration: 1.6s;
+}
+
+[data-rail-band]:not([data-expanded]):hover [data-toggle-head="sw"],
+[data-rail-band]:not([data-expanded]):has(:focus-visible)
+  [data-toggle-head="sw"] {
+  --hint-x: -1.8px;
+  --hint-y: 1.8px;
+}
+
+[data-band-toggle] {
+  transition: border-color var(--duration-base) var(--ease-reveal);
+}
+
+[data-rail-band]:not([data-expanded]):hover [data-band-toggle],
+[data-rail-band]:not([data-expanded]):has(:focus-visible) [data-band-toggle] {
+  border-color: currentcolor;
 }
 
 /* ---------------------------------------------------------------------------
@@ -396,8 +626,20 @@ html[data-preloader="off"] [data-testid="preloader"] {
   [data-rail-inner],
   [data-rail-band],
   [data-band-tip],
+  [data-band-mark],
+  [data-band-text],
+  [data-band-toggle],
+  [data-band-toggle-icon] [data-toggle-shaft],
+  [data-band-toggle-icon] [data-toggle-head],
   .mr-pill-sheet {
     transition: none !important;
+  }
+
+  /* The "click me" cue is the one thing here that moves on its own. It goes
+     first. The icon still reads as ⤢ and ✕ — those are transforms, not the
+     animation. */
+  [data-rail-band] [data-toggle-head] {
+    animation: none !important;
   }
 
   /* Selector kept in lockstep with the dim rule above: it has to tie on
@@ -407,8 +649,23 @@ html[data-preloader="off"] [data-testid="preloader"] {
     transform: none;
   }
 
-  [data-rail-band]:not([data-expanded]):hover {
+  /* No scale, and no hover/focus dimming: with transitions off, a pointer
+     crossing the rail would flash five bands at 40% on every entry and exit.
+     The open card keeps its dim — that is a state, not a hover effect. */
+  [data-rail-band]:not([data-expanded]):hover,
+  [data-rail-band]:not([data-expanded]):has(:focus-visible) {
     transform: none;
+  }
+
+  [data-rail-inner]:not(:has([data-rail-band][data-expanded])):has(
+      [data-rail-band]:hover
+    )
+    [data-rail-band]:not(:hover),
+  [data-rail-inner]:not(:has([data-rail-band][data-expanded])):has(
+      [data-rail-band]:has(:focus-visible)
+    )
+    [data-rail-band]:not(:has(:focus-visible)) {
+    opacity: 1;
   }
 
   [data-scroll-hairline] > span {

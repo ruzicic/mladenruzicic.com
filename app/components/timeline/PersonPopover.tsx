@@ -1,7 +1,7 @@
 "use client"
 
-import Image from "next/image"
 import { useRef } from "react"
+import Image from "next/image"
 
 import type { CompanyId, Person } from "@/lib/content/schema"
 
@@ -10,6 +10,10 @@ import { hueFromId, initialsOf } from "./span"
 
 /**
  * A "worked alongside" avatar and its card — docs/v3-redesign-plan.md §5.6.
+ *
+ * It lives inside an expanded band's people block. The block itself prints the
+ * name, the `why` line and the LinkedIn link; this card is what carries the
+ * longer `note`, which is too much prose for the 480px panel.
  *
  * The card is a `popover="auto"` panel in the top layer: click (or Enter/Space
  * via `popovertarget`) opens it everywhere, so keyboard and touch have full
@@ -22,12 +26,22 @@ import { hueFromId, initialsOf } from "./span"
 
 export interface PersonPopoverProps {
   person: Person
-  /** The band this person belongs to, if any. */
+  /**
+   * The band this person belongs to, when it is a band *other* than the one
+   * the trigger sits in. Inside their own band's card the jump is a no-op, so
+   * the card omits it and the "Where:" control does not render.
+   */
   companyId?: CompanyId
-  /** Opens that band on the rail and scrolls to it. */
-  onGoToBand: (id: CompanyId) => void
-  /** Avatar diameter in px. 36 in the "worked alongside" row, 32 in a band. */
+  /** Opens that band on the rail and scrolls to it. Required with `companyId`. */
+  onGoToBand?: (id: CompanyId) => void
+  /** Avatar diameter in px. 36 in a card's people block, 32 in a tighter row. */
   size?: 32 | 36
+  /**
+   * Accessible name for the trigger. Defaults to the person's name; the card
+   * block passes "More about <name>" because the name is already printed next
+   * to the avatar and would otherwise be announced twice.
+   */
+  triggerLabel?: string
 }
 
 const HOVER_DELAY = 220
@@ -37,6 +51,7 @@ export function PersonPopover({
   companyId,
   onGoToBand,
   size = 36,
+  triggerLabel,
 }: PersonPopoverProps) {
   const timer = useRef(0)
   const hue = hueFromId(person.id)
@@ -96,7 +111,7 @@ export function PersonPopover({
           id={id}
           popoverTarget={popoverTarget}
           data-hover
-          aria-label={person.name}
+          aria-label={triggerLabel ?? person.name}
           onPointerEnter={() => hoverOpen(popoverTarget)}
           onPointerLeave={() => hoverClose(popoverTarget)}
           style={{
@@ -127,8 +142,9 @@ export function PersonPopover({
         </button>
       )}
     >
-      {/* The trigger sits inside the mono, uppercase "Worked alongside" row and
-          the panel inherits from it in the DOM, so reset type here. */}
+      {/* The trigger sits inside an expanded band's people block, under a mono,
+          uppercase heading whose type the panel inherits in the DOM. Reset it
+          here so the card reads as body copy. */}
       <div
         className="grid gap-4 p-6 font-sans normal-case tracking-normal"
         onPointerEnter={() => window.clearTimeout(timer.current)}
@@ -172,7 +188,7 @@ export function PersonPopover({
           </p>
         ) : null}
 
-        {person.linkedin || companyId ? (
+        {person.linkedin || (companyId && onGoToBand) ? (
           <div className="flex flex-wrap gap-[18px] font-mono text-[12px] uppercase tracking-[0.08em]">
             {person.linkedin ? (
               <a
@@ -185,7 +201,7 @@ export function PersonPopover({
                 LinkedIn ↗
               </a>
             ) : null}
-            {companyId ? (
+            {companyId && onGoToBand ? (
               <button
                 type="button"
                 data-hover
