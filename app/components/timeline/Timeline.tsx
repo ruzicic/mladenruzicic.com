@@ -69,10 +69,27 @@ const KEY_STEP = 140
  * out of the accessible name with them — a ten-month band would announce as
  * "HEGIAS logo" and nothing else. No `title`: it is unreachable by keyboard and
  * duplicates the name for a screen reader.
+ *
+ * The verb is part of the name — "Expand HEGIAS, Jul 2020 – Apr 2021" and
+ * "Close HEGIAS" — because the ✕ that replaces the ⤢ is decorative and would
+ * otherwise leave the control unnamed as a close control. The dates stay in the
+ * expand label so a mark-only band still announces its span.
  */
-function bandLabel(company: Company): string {
-  const label = `${company.name}, ${company.yearsLabel}`
+function bandLabel(company: Company, expanded: boolean): string {
+  if (expanded) return `Close ${company.name}`
+  const label = `Expand ${company.name}, ${company.yearsLabel}`
   return company.approx ? `${label}, dates approximate` : label
+}
+
+/** True while a person card (or any other popover) is open inside `root`. */
+function openPopoverInside(root: HTMLElement): boolean {
+  try {
+    return Boolean(root.querySelector(":popover-open"))
+  } catch {
+    // `:popover-open` is a syntax error in an engine without the Popover API,
+    // and `querySelector` throws rather than returning null.
+    return false
+  }
 }
 
 /**
@@ -92,6 +109,15 @@ export function TimelineRail({
 }: TimelineRailProps) {
   const [expanded, setExpanded] = useState<CompanyId | null>(null)
   const [pongOn, setPongOn] = useState(false)
+  /*
+   * The measured height of the open card. The rail is a fixed-height box with
+   * absolutely positioned bands, so it cannot grow with its contents on its
+   * own — and now that the people live inside the cards, a four-person band is
+   * several hundred pixels taller than a band with none. `RAIL_HEIGHT_EXPANDED`
+   * stays the floor (and the server value: nothing is expanded before
+   * hydration, so there is no mismatch to reconcile).
+   */
+  const [openCardHeight, setOpenCardHeight] = useState(0)
   const { highlight, expandRequest } = useHeroHighlight()
 
   const scrollerRef = useRef<HTMLDivElement>(null)
@@ -114,21 +140,16 @@ export function TimelineRail({
     return out
   }, [nowFraction])
 
-  /** id → the band that lists this person, for the "Where:" link. */
-  const bandOfPerson = useMemo(() => {
-    const map = new Map<string, CompanyId>()
-    for (const company of companies) {
-      for (const id of company.people) map.set(id, company.id)
-    }
-    return map
-  }, [companies])
-
   const peopleById = useMemo(
     () => new Map(people.map((person) => [person.id, person])),
     [people]
   )
 
   const openBand = useCallback((id: CompanyId) => {
+    // Drop the previous card's measurement here rather than in the effect
+    // below: setting state from an effect body is a cascading render, and this
+    // is the moment the old height stops being true.
+    setOpenCardHeight(0)
     setExpanded(id)
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
@@ -144,13 +165,27 @@ export function TimelineRail({
     })
   }, [])
 
-  const toggleBand = useCallback((id: CompanyId) => {
-    setExpanded((current) => {
-      if (current === id) return null
+  const toggleBand = useCallback(
+    (id: CompanyId) => {
+      setOpenCardHeight(0)
+      if (expanded === id) {
+        setExpanded(null)
+        return
+      }
       play("expand")
-      return id
-    })
-  }, [])
+      /*
+       * Opening goes through `openBand`, which also centres the band in the
+       * rail. That matters more than it used to: the card is centred on the
+       * band's own centre, so half of it now grows to the LEFT of where the
+       * band was, and on a phone — where the rail is 1400px wide inside a
+       * 390px window — a card opened at the scroll position you were at would
+       * hang off the left edge. Centring the band centres the card, because
+       * they share a centre by construction (except at the clamped ends).
+       */
+      openBand(id)
+    },
+    [expanded, openBand]
+  )
 
   // The hero's logo shards (and the mobile scrubber) ask for a band to open
   // (§5.1). Deferred a frame so the store update never renders synchronously
@@ -161,6 +196,20 @@ export function TimelineRail({
     const frame = requestAnimationFrame(() => openBand(request.id))
     return () => cancelAnimationFrame(frame)
   }, [expandRequest, openBand])
+
+  // Measure the open card so the rail can make room for it. A ResizeObserver
+  // rather than a one-off read: the panel's copy reflows when the viewport
+  // changes, and a font swapping in after paint changes its height too.
+  useEffect(() => {
+    if (!expanded) return
+    const card = document.getElementById(`band-${expanded}`)
+    if (!card) return
+    const observer = new ResizeObserver(() => {
+      setOpenCardHeight(card.offsetHeight)
+    })
+    observer.observe(card)
+    return () => observer.disconnect()
+  }, [expanded])
 
   // `hidden="until-found"` keeps a collapsed panel's copy reachable by
   // find-in-page; `beforematch` opens the band the browser landed in.
@@ -239,6 +288,10 @@ export function TimelineRail({
       event.preventDefault()
       element.scrollLeft -= KEY_STEP
     } else if (event.key === "Escape") {
+      // A person card is open in the top layer. It is a DOM descendant of the
+      // rail, so its own Escape bubbles here; collapsing the band as well would
+      // dismiss two things on one keystroke and lose the reader's place.
+      if (openPopoverInside(element)) return
       setExpanded(null)
     }
     /*
@@ -251,7 +304,9 @@ export function TimelineRail({
      */
   }
 
-  const railHeight = expanded ? RAIL_HEIGHT_EXPANDED : RAIL_HEIGHT
+  const railHeight = expanded
+    ? Math.max(RAIL_HEIGHT_EXPANDED, ROW.bands + openCardHeight + 24)
+    : RAIL_HEIGHT
   const markerRows = assignMarkerRows(markers)
 
   return (
@@ -272,7 +327,19 @@ export function TimelineRail({
         <div
           data-rail-inner
           className="relative w-[1400px] min-w-full min-[720px]:w-[1800px]"
-          style={{ height: railHeight }}
+          style={
+            {
+              height: railHeight,
+              /*
+               * The open card's width, published once so the width and the
+               * centring clamp below cannot drift apart. `EXPANDED_WIDTH` is
+               * the design figure; on a 390px phone it would be wider than the
+               * screen, and the rail scrolls horizontally, so a card that never
+               * fits can never be fully read. The gutter is 20px a side.
+               */
+              "--card-w": `min(${EXPANDED_WIDTH}px, calc(100vw - 40px))`,
+            } as CSSProperties
+          }
         >
           {ticks.map((year) => (
             <div
@@ -321,33 +388,69 @@ export function TimelineRail({
                 itemScope
                 itemType="https://schema.org/Organization"
                 className="absolute box-border overflow-hidden rounded-xs border text-fg"
-                style={{
-                  top: ROW.bands,
-                  left: isExpanded
-                    ? `clamp(0px, ${pct(to)}%, calc(100% - ${EXPANDED_WIDTH}px))`
-                    : `${pct(to)}%`,
-                  width: isExpanded
-                    ? `${EXPANDED_WIDTH}px`
-                    : `calc(${widthPct}% - ${BAND_GAP}px)`,
-                  zIndex: isExpanded ? 5 : isHighlighted ? 4 : 1,
-                  transformOrigin: "left top",
-                  borderColor: company.color,
-                  backgroundColor: isExpanded
-                    ? "var(--color-surface-3)"
-                    : `${company.color}42`,
-                  boxShadow: isExpanded
-                    ? `0 40px 100px -20px rgba(0,0,0,.95), 0 0 0 6px ${company.color}1A`
-                    : isHighlighted
-                      ? /*
-                         * Two rings: the brand one, then a token-coloured one
-                         * outside it. The brand colour alone is 2.86:1 for ZF
-                         * and 2.02:1 for HEGIAS against `--color-bg`, so on
-                         * those two bands a hero-driven highlight was a state
-                         * change no low-vision reader could see.
-                         */
-                        `0 0 0 2px ${company.color}, 0 0 0 4px var(--color-muted), 0 0 32px 0 ${company.color}80`
-                      : "none",
-                }}
+                style={
+                  {
+                    /*
+                     * The brand colour and its readable ink, published to CSS so
+                     * `app/styles/shell.css` can paint the expanded card's rings
+                     * and rules with them. `brandInkOnDark` is measured against
+                     * `--color-bg`, which is exactly the expanded card's ground
+                     * — ZF blue goes 2.86:1 → 4.63:1, HEGIAS purple 2.02:1 →
+                     * 4.69:1; the other four already pass and come back
+                     * untouched.
+                     */
+                    "--band-brand": company.color,
+                    "--band-ink": brandInkOnDark(company.color),
+                    top: ROW.bands,
+                    /*
+                     * The card grows out of the band's own centre, not its left
+                     * edge: anchoring top-left made a two-year band appear to
+                     * shoot rightwards across three other spans. The clamp keeps
+                     * a card near either end of the axis inside the rail rather
+                     * than letting it hang off it.
+                     */
+                    left: isExpanded
+                      ? `clamp(0px, calc(${(pct(to) + widthPct / 2).toFixed(3)}% - var(--card-w) / 2), calc(100% - var(--card-w)))`
+                      : `${pct(to)}%`,
+                    width: isExpanded
+                      ? "var(--card-w)"
+                      : `calc(${widthPct}% - ${BAND_GAP}px)`,
+                    // A custom property rather than `z-index` directly, so the
+                    // hover/focus rule in shell.css can lift the scaled band
+                    // over its neighbours — an inline `z-index` would outrank
+                    // it and the growth would slide under the next span.
+                    "--band-z": isExpanded ? 5 : isHighlighted ? 4 : 1,
+                    // The hover state scales in place; growing from the centre is
+                    // the same gesture the expansion makes, one step smaller.
+                    transformOrigin: "center",
+                    borderColor: company.color,
+                    /*
+                     * Expanded, the card drops the tint and sits on the page's
+                     * own ground: the brand colour carries the card through its
+                     * border, ring, title, labels and rules instead of through a
+                     * wash that dulls every one of them. Collapsed bands keep the
+                     * 26%-alpha tint they have always had.
+                     */
+                    backgroundColor: isExpanded
+                      ? "var(--color-bg)"
+                      : `${company.color}42`,
+                    // Expanded: shell.css owns the shadow, so `:hover` and
+                    // `:focus-within` can thicken the brand ring (an inline
+                    // box-shadow would outrank them).
+                    boxShadow: isExpanded
+                      ? undefined
+                      : isHighlighted
+                        ? /*
+                           * Two rings: the brand one, then a token-coloured one
+                           * outside it. The brand colour alone is 2.86:1 for ZF
+                           * and 2.02:1 for HEGIAS against `--color-bg`, so on
+                           * those two bands a hero-driven highlight was a state
+                           * change no low-vision reader could see.
+                           */
+                          `0 0 0 2px ${company.color}, 0 0 0 4px var(--color-muted), 0 0 32px 0 ${company.color}80`
+                        : "none",
+                  } as CSSProperties
+                }
               >
                 {/*
                  * The months this band shares with the one underneath it.
@@ -391,18 +494,26 @@ export function TimelineRail({
                     data-hover
                     aria-expanded={isExpanded}
                     aria-controls={`band-panel-${company.id}`}
-                    aria-label={bandLabel(company)}
+                    aria-label={bandLabel(company, isExpanded)}
                     onClick={() => toggleBand(company.id)}
                     className={[
                       "relative flex h-[72px] w-full flex-col justify-between gap-1",
                       "border-0 bg-transparent px-[14px] py-3 text-left text-fg",
                     ].join(" ")}
                   >
+                    {/*
+                     * The card's title IS the band's title. Expanding scales
+                     * these same nodes up — `--band-mark` grows the mark,
+                     * `[data-band-text]` grows into the display face, both on
+                     * the same 500ms geometry easing as the band's own
+                     * left/width — so nothing is drawn twice and there is no
+                     * second header strip to close.
+                     */}
                     <span
                       data-band-name
                       className="flex items-center gap-2 pr-7 text-[14px] font-semibold tracking-[-0.01em] whitespace-nowrap"
                     >
-                      <BandMark company={company} size={18} />
+                      <BandMark company={company} />
                       <span
                         itemProp="name"
                         data-band-text
@@ -415,7 +526,16 @@ export function TimelineRail({
                       data-band-dates
                       className="flex items-center gap-2 overflow-hidden font-mono text-[10px] tracking-[0.06em] whitespace-nowrap"
                     >
-                      <span style={{ color: inkOnTint(company.color) }}>
+                      <span
+                        style={{
+                          // Collapsed the ink sits on the band's own tint;
+                          // expanded it sits on `--color-bg`, and the two need
+                          // different lifts to clear 4.5:1.
+                          color: isExpanded
+                            ? "var(--band-ink)"
+                            : inkOnTint(company.color),
+                        }}
+                      >
                         {company.yearsLabel}
                       </span>
                       {company.approx ? (
@@ -427,9 +547,9 @@ export function TimelineRail({
                     <span
                       aria-hidden
                       data-band-toggle
-                      className="absolute right-[10px] top-[10px] grid h-[26px] w-[26px] place-items-center rounded-xs border border-[var(--color-line-strong)] text-[13px] leading-none"
+                      className="absolute right-[10px] top-[10px] grid h-[26px] w-[26px] place-items-center rounded-xs border border-[var(--color-line-strong)] leading-none"
                     >
-                      {isExpanded ? "✕" : "⤢"}
+                      <BandToggleIcon />
                     </span>
                   </button>
 
@@ -451,70 +571,130 @@ export function TimelineRail({
                   // without JavaScript needs) and the effect above upgrades it
                   // to `until-found` (§5.6).
                   hidden={!isExpanded}
-                  className="grid gap-5 px-[22px] pb-6 pt-[6px]"
-                  style={{
-                    background: `linear-gradient(160deg, ${company.color}2E, rgba(20,20,22,0) 55%)`,
-                  }}
+                  /*
+                   * No padding and no background on the panel element itself.
+                   * `hidden="until-found"` is `content-visibility: hidden`,
+                   * which skips the contents but still lays out this box — so
+                   * padding here made every *collapsed* band 30px taller than
+                   * its 72px head, which is what pushed the bands down into the
+                   * "Side track" label. The padding lives on the inner grid,
+                   * whose layout is skipped with the rest.
+                   *
+                   * No background either: the card is one surface, the page
+                   * ground, from the scaled title down. The gradient that used
+                   * to sit here made the panel read as a second, darker block
+                   * bolted under a header strip.
+                   */
                 >
-                  <div className="flex items-center gap-[14px]">
-                    <BandMark company={company} size={52} />
-                    <strong className="font-display text-[32px] font-normal leading-none tracking-[-0.025em]">
-                      {company.name}
-                    </strong>
-                  </div>
-
-                  <p className="m-0 font-serif-italic text-[23px] italic leading-[1.2] tracking-[-0.01em]">
-                    {company.role}
-                  </p>
-                  {company.prev ? (
-                    <p className="m-0 font-mono text-[11px] uppercase tracking-[0.08em] text-muted">
-                      {company.prev}
+                  <div className="grid gap-5 px-[22px] pb-6 pt-[6px]">
+                    <p className="m-0 font-serif-italic text-[23px] italic leading-[1.2] tracking-[-0.01em]">
+                      {company.role}
                     </p>
-                  ) : null}
-                  <p className="m-0 text-[16px] leading-[1.5] text-dim">
-                    {company.summary}
-                  </p>
+                    {company.prev ? (
+                      <p className="m-0 font-mono text-[11px] uppercase tracking-[0.08em] text-muted">
+                        {company.prev}
+                      </p>
+                    ) : null}
+                    <p className="m-0 text-[16px] leading-[1.5] text-dim">
+                      {company.summary}
+                    </p>
 
-                  {company.fact ? (
-                    <p className="m-0 border-t border-line pt-4 text-[15px] leading-[1.5]">
-                      <span
-                        className="mb-[6px] block font-mono text-[11px] uppercase tracking-[0.1em]"
-                        style={{ color: brandInkOnDark(company.color) }}
+                    {company.fact ? (
+                      <p
+                        data-band-rule
+                        className="m-0 pt-4 text-[15px] leading-[1.5]"
                       >
-                        Worth knowing
-                      </span>
-                      {company.fact}
-                    </p>
-                  ) : null}
+                        <span
+                          className="mb-[6px] block font-mono text-[11px] uppercase tracking-[0.1em]"
+                          style={{ color: "var(--band-ink)" }}
+                        >
+                          Worth knowing
+                        </span>
+                        {company.fact}
+                      </p>
+                    ) : null}
 
-                  <div className="flex flex-wrap items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted">
+                    {/*
+                     * The people belong to the chapter they were part of, not to
+                     * a strip of avatars under the whole rail. Each one gets a
+                     * name, the line that says what we did together and a link;
+                     * the avatar is still the popover trigger, because `note` is
+                     * a paragraph of prose and 480px of panel cannot hold four of
+                     * them.
+                     */}
                     {bandPeople.length > 0 ? (
-                      <span className="flex items-center gap-3">
-                        With
-                        <span className="flex">
+                      <section
+                        data-band-people
+                        data-band-rule
+                        aria-labelledby={`band-people-${company.id}`}
+                        className="pt-4"
+                      >
+                        <h3
+                          id={`band-people-${company.id}`}
+                          className="m-0 font-mono text-[11px] uppercase tracking-[0.1em]"
+                          style={{ color: "var(--band-ink)" }}
+                        >
+                          {labels.alongsideLabel}
+                        </h3>
+                        {/* role="list": Safari/VoiceOver drops list semantics on
+                          `list-style: none`. */}
+                        <ul
+                          role="list"
+                          className="m-0 mt-[14px] grid list-none gap-[14px] p-0"
+                        >
                           {bandPeople.map((person) => (
-                            <span key={person.id} className="-ml-2 first:ml-0">
+                            <li
+                              key={person.id}
+                              className="flex items-start gap-[12px]"
+                            >
                               <PersonPopover
                                 person={person}
-                                size={32}
-                                companyId={bandOfPerson.get(person.id)}
-                                onGoToBand={openBand}
+                                size={36}
+                                triggerLabel={`More about ${person.name}`}
                               />
-                            </span>
+                              <span className="grid min-w-0 gap-[3px] pt-[2px]">
+                                <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                                  <strong className="text-[14px] font-semibold tracking-[-0.01em]">
+                                    {person.name}
+                                  </strong>
+                                  {person.linkedin ? (
+                                    <a
+                                      href={person.linkedin}
+                                      target="_blank"
+                                      rel="noreferrer noopener"
+                                      data-hover
+                                      className="font-mono text-[10px] uppercase tracking-[0.08em]"
+                                      style={{ color: "var(--band-ink)" }}
+                                    >
+                                      LinkedIn ↗
+                                    </a>
+                                  ) : null}
+                                </span>
+                                <span className="text-[13px] leading-[1.45] text-dim-2">
+                                  {person.why}
+                                </span>
+                              </span>
+                            </li>
                           ))}
-                        </span>
-                      </span>
+                        </ul>
+                      </section>
                     ) : null}
 
                     {company.workSlug ? (
-                      <TransitionLink
-                        href={`/work/${company.workSlug}`}
-                        data-hover
-                        className="ml-auto inline-flex items-center gap-2 text-fg"
+                      <p
+                        data-band-rule
+                        className="m-0 pt-4 font-mono text-[11px] uppercase tracking-[0.08em]"
                       >
-                        Case study <span aria-hidden>→</span>
-                        <NavPending />
-                      </TransitionLink>
+                        <TransitionLink
+                          href={`/work/${company.workSlug}`}
+                          data-hover
+                          className="inline-flex items-center gap-2"
+                          style={{ color: "var(--band-ink)" }}
+                        >
+                          Case study <span aria-hidden>→</span>
+                          <NavPending />
+                        </TransitionLink>
+                      </p>
                     ) : null}
                   </div>
                 </div>
@@ -569,34 +749,15 @@ export function TimelineRail({
         ) : null}
       </div>
 
-      <Container className="flex flex-wrap items-center justify-between gap-6 pt-4">
-        {people.length > 0 ? (
-          <div className="flex items-center gap-[14px] font-mono text-[11px] uppercase tracking-[0.08em] text-muted">
-            {/* A heading, not a span: it names the list of people below it, it
-                is the `aria-labelledby` target, and it sits under the section's
-                own `h2`. Preflight resets size and weight to inherit, so it
-                still renders as the designed mono eyebrow. */}
-            <h3 id="alongside-label" className="m-0">
-              {labels.alongsideLabel}
-            </h3>
-            <ul
-              role="list"
-              aria-labelledby="alongside-label"
-              className="m-0 flex list-none p-0"
-            >
-              {people.map((person) => (
-                <li key={person.id} className="-ml-2 first:ml-0">
-                  <PersonPopover
-                    person={person}
-                    companyId={bandOfPerson.get(person.id)}
-                    onGoToBand={openBand}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-
+      {/*
+       * The "Worked alongside" row that used to sit here is gone: every person
+       * now reads inside the band they belong to (and on that chapter's case
+       * study), where the years and the work are already on screen. What is
+       * left under the rail is the Pong control, which is what the "space"
+       * shortcut has always addressed — it keeps its place at the end of the
+       * rail, now as the only thing there.
+       */}
+      <Container className="flex flex-wrap items-center justify-end gap-6 pt-4">
         <button
           type="button"
           data-hover
@@ -614,14 +775,70 @@ export function TimelineRail({
   )
 }
 
-/** The band's logo, or its coloured initial square when there is no mark yet. */
-function BandMark({ company, size }: { company: Company; size: number }) {
-  const radius = size >= 40 ? "6px" : "4px"
+/**
+ * The expand affordance and the close control, as one icon.
+ *
+ * Three strokes in a 16-unit box: a shaft on the anti-diagonal and two
+ * arrowheads at its ends. Expanding does not swap this for a second glyph — the
+ * two heads slide to the centre and rotate 45°, where their outward arms form
+ * the missing diagonal of an ✕ and their inward arms lie along the shaft, which
+ * scales down to match. Every step is a `transform` on the same three elements,
+ * so it interpolates on the shell's own easing (see `app/styles/shell.css`).
+ *
+ * `aria-hidden`: the button around it carries "Expand …" / "Close …" and
+ * `aria-expanded`, so the icon has nothing of its own to announce.
+ */
+function BandToggleIcon() {
+  const stroke = {
+    stroke: "currentColor",
+    strokeWidth: 1.6,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+  } as const
+  return (
+    <svg
+      aria-hidden
+      focusable="false"
+      data-band-toggle-icon
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+    >
+      <line
+        data-toggle-shaft
+        x1="3.5"
+        y1="12.5"
+        x2="12.5"
+        y2="3.5"
+        vectorEffect="non-scaling-stroke"
+        {...stroke}
+      />
+      {/* Both heads are the same corner, drawn at the origin: one arm back
+          along -x, one down +y. Placement and rotation live in CSS, because
+          that is what has to animate. */}
+      <path data-toggle-head="ne" d="M-4.6 0H0v4.6" {...stroke} />
+      <path data-toggle-head="sw" d="M-4.6 0H0v4.6" {...stroke} />
+    </svg>
+  )
+}
+
+/**
+ * The band's logo, or its coloured initial square when there is no mark yet.
+ *
+ * Sized entirely off `--band-mark` (18px in a collapsed band, 52px in an open
+ * card — see `app/styles/shell.css`), because this is the *same element* in
+ * both states: expanding scales it rather than swapping it for a bigger copy.
+ */
+function BandMark({ company }: { company: Company }) {
+  const size = "var(--band-mark, 18px)"
+  const radius = "calc(var(--band-mark, 18px) * 0.115)"
   if (company.logo) {
     return (
       <span
         role="img"
         aria-label={`${company.name} logo`}
+        data-band-mark
         className="block flex-none bg-cover bg-center"
         style={{
           width: size,
@@ -635,6 +852,7 @@ function BandMark({ company, size }: { company: Company; size: number }) {
   return (
     <span
       aria-hidden
+      data-band-mark
       className="grid flex-none place-items-center font-mono font-semibold"
       style={{
         width: size,
@@ -642,7 +860,8 @@ function BandMark({ company, size }: { company: Company; size: number }) {
         borderRadius: radius,
         background: company.color,
         color: inkOn(company.color),
-        fontSize: size >= 40 ? 20 : 9,
+        // 9px at 18, 26px at 52 — the two sizes the design calls for.
+        fontSize: "calc(var(--band-mark, 18px) * 0.5)",
       }}
     >
       {company.mark ?? initialsOf(company.short)}

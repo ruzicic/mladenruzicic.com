@@ -197,33 +197,50 @@ test('"worked alongside" popover opens with Enter and closes with Escape', async
 }) => {
   await page.goto("/")
 
-  const alongsideHeading = page.getByRole("heading", {
-    name: /worked alongside/i,
-  })
+  /*
+   * The people used to sit in a standalone row under the rail. They now live
+   * inside the band they belong to, so the path is: find a band that has any,
+   * open it from the keyboard, and work the person block inside it. Same
+   * intent as before — keyboard-reachable trigger, operable popover, Escape
+   * closes it.
+   *
+   * `:has()` against the panel works while the panel is still `hidden`: the
+   * markup is server-rendered for every band, expanded or not.
+   */
+  const band = page.locator("[data-rail-band]:has([data-band-people])").first()
   test.skip(
-    (await alongsideHeading.count()) === 0,
-    '"Worked alongside" heading not found — the row only renders when content/people.ts has entries'
+    (await band.count()) === 0,
+    "no band renders a people block — content/people.ts ships empty, or no company lists anybody"
   )
-  await alongsideHeading.scrollIntoViewIfNeeded()
 
-  // Scope to the heading's own wrapping block (its parent container), not an
-  // unbounded document-order scan, so this can't accidentally focus an
-  // unrelated interactive element further down the page (e.g. the footer).
-  const trigger = alongsideHeading
-    .locator("xpath=./parent::*//*[self::button or self::a or @role='button']")
-    .first()
+  const bandButton = band.locator('[data-testid="timeline-band"]')
+  await bandButton.scrollIntoViewIfNeeded()
+  await bandButton.focus()
+  await page.keyboard.press("Enter")
+  await expect(bandButton, "the band opens on Enter").toHaveAttribute(
+    "aria-expanded",
+    "true"
+  )
+
+  const people = band.locator("[data-band-people]")
+  await expect(
+    people,
+    "the people block is visible in the open card"
+  ).toBeVisible()
+
+  const trigger = people.locator("button[popovertarget]").first()
   test.skip(
     (await trigger.count()) === 0,
-    'no focusable person trigger near "Worked alongside" — content/people.ts ships empty'
+    "no focusable person trigger inside the band's people block"
   )
   await trigger.focus()
+  await expect(trigger, "the person trigger takes focus").toBeFocused()
   await page.keyboard.press("Enter")
 
   /*
    * Target the panel this trigger owns, not the first `[popover]` in the
-   * document. Every expanded band also renders a person popover, and those
-   * come earlier in DOM order while staying closed — `.first()` would assert
-   * on somebody else's card and always fail.
+   * document: every other band renders its own people block, closed, earlier
+   * or later in DOM order.
    */
   const panelId = await trigger.getAttribute("popovertarget")
   expect(panelId, "person trigger names the panel it opens").toBeTruthy()
@@ -232,6 +249,26 @@ test('"worked alongside" popover opens with Enter and closes with Escape', async
     timeout: 2_000,
   })
 
+  // The LinkedIn link inside the card is reachable and is a real link.
+  const link = popover.locator('a[href*="linkedin.com"]').first()
+  if ((await link.count()) > 0) {
+    await expect(link, "the LinkedIn link is operable").toHaveAttribute(
+      "href",
+      /^https:\/\//
+    )
+  }
+
   await page.keyboard.press("Escape")
   await expect(popover, "popover closes on Escape").toBeHidden()
+  // Escape dismissed the card, not the band underneath it.
+  await expect(
+    bandButton,
+    "the band stays open when Escape closes a person card"
+  ).toHaveAttribute("aria-expanded", "true")
+
+  await page.keyboard.press("Escape")
+  await expect(
+    bandButton,
+    "a second Escape collapses the band"
+  ).toHaveAttribute("aria-expanded", "false")
 })
