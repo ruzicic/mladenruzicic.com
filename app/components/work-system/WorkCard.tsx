@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils"
 
 import { Chip, Display, TransitionLink } from "../primitives"
 import { StatusBadge } from "./StatusBadge"
-import { WorkMark } from "./WorkMark"
 import { formatYears } from "./taxonomy"
 import { MORPH_CLASS, workTitleTransitionName } from "./transitions"
 import { WorkArt } from "./WorkArt"
+import { WorkMark } from "./WorkMark"
 
 const ART_SIZES = "(min-width: 1080px) 44vw, (min-width: 720px) 46vw, 92vw"
 

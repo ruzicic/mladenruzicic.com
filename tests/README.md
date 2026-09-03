@@ -7,28 +7,28 @@ are trying to enforce.
 
 ## Layout
 
-| File | Covers |
-|---|---|
-| `routes.spec.ts` | Every `/sitemap.xml` URL: 200, one `<h1>`, `<title>`, meta description, canonical, zero console errors. `/mentorship` → 308 → `/mentoring`, `/cv` → `/cv.pdf`, `/work/does-not-exist` → 404. |
-| `a11y.spec.ts` | axe on the core routes — no `serious`/`critical` violations. |
-| `no-js.spec.ts` | `javaScriptEnabled: false` — hero, work rows, timeline, mentoring bubbles, and a case study still render. |
-| `reduced-motion.spec.ts` | `reduced-motion` project only — no preloader, no three.js request, hero still (not canvas), zero running animations. |
-| `motion.spec.ts` | Desktop Chrome + Desktop Safari — preloader lifecycle (once per session via `sessionStorage`), hero canvas mount, CLS budget. |
-| `keyboard.spec.ts` | Tab order (skip link → nav → sound toggle) and visible focus, both Chromium-only; `keyboardControls` covers the same controls on every engine by focusing them directly; timeline band Enter/Escape/ArrowRight; the "worked alongside" people block inside an expanded band (open the band, open a person's card, Escape closes the card and then the band). |
-| `transitions.spec.ts` | Desktop Chrome + Desktop Safari — work row → case study navigation, back navigation, timeline-band state across Cache Components route retention. |
-| `mobile.spec.ts` | Mobile Safari only — no horizontal overflow, mobile pill and its sheet. |
-| `machine.spec.ts` | `/llms.txt`, `/llms-full.txt`, `/*.md` mirrors, `Accept: text/markdown` negotiation, `Person` JSON-LD. |
-| `budgets.spec.ts` | Initial route JS on `/` (the document's own `<script src>` set) against 200 KB gz, font-file count, three.js chunk timing relative to LCP. |
-| `helpers.ts` | Console-error collector, sitemap reader, CLS/LCP `PerformanceObserver` injection, resource-timing and request-tracking helpers, and the `waitForPreloaderGone` / `waitForRouteReady` settle waits. Shared by the specs above. |
+| File                     | Covers                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `routes.spec.ts`         | Every `/sitemap.xml` URL: 200, one `<h1>`, `<title>`, meta description, canonical, zero console errors. `/mentorship` → 308 → `/mentoring`, `/cv` → `/cv.pdf`, `/work/does-not-exist` → 404.                                                                                                                                                                 |
+| `a11y.spec.ts`           | axe on the core routes — no `serious`/`critical` violations.                                                                                                                                                                                                                                                                                                 |
+| `no-js.spec.ts`          | `javaScriptEnabled: false` — hero, work rows, timeline, mentoring bubbles, and a case study still render.                                                                                                                                                                                                                                                    |
+| `reduced-motion.spec.ts` | `reduced-motion` project only — no preloader, no three.js request, hero still (not canvas), zero running animations.                                                                                                                                                                                                                                         |
+| `motion.spec.ts`         | Desktop Chrome + Desktop Safari — preloader lifecycle (once per session via `sessionStorage`), hero canvas mount, CLS budget.                                                                                                                                                                                                                                |
+| `keyboard.spec.ts`       | Tab order (skip link → nav → sound toggle) and visible focus, both Chromium-only; `keyboardControls` covers the same controls on every engine by focusing them directly; timeline band Enter/Escape/ArrowRight; the "worked alongside" people block inside an expanded band (open the band, open a person's card, Escape closes the card and then the band). |
+| `transitions.spec.ts`    | Desktop Chrome + Desktop Safari — work row → case study navigation, back navigation, timeline-band state across Cache Components route retention.                                                                                                                                                                                                            |
+| `mobile.spec.ts`         | Mobile Safari only — no horizontal overflow, mobile pill and its sheet.                                                                                                                                                                                                                                                                                      |
+| `machine.spec.ts`        | `/llms.txt`, `/llms-full.txt`, `/*.md` mirrors, `Accept: text/markdown` negotiation, `Person` JSON-LD.                                                                                                                                                                                                                                                       |
+| `budgets.spec.ts`        | Initial route JS on `/` (the document's own `<script src>` set) against 200 KB gz, font-file count, three.js chunk timing relative to LCP.                                                                                                                                                                                                                   |
+| `helpers.ts`             | Console-error collector, sitemap reader, CLS/LCP `PerformanceObserver` injection, resource-timing and request-tracking helpers, and the `waitForPreloaderGone` / `waitForRouteReady` settle waits. Shared by the specs above.                                                                                                                                |
 
 ## Projects
 
-| Project | Engine | Specs |
-|---|---|---|
-| `Desktop Chrome` | Chromium 1440×900 | everything except `mobile.spec.ts` and `reduced-motion.spec.ts` |
-| `Mobile Safari` | WebKit, iPhone 14 390×844 | `mobile.spec.ts` |
-| `Desktop Safari` | WebKit 1440×900 | `transitions`, `keyboard`, `a11y`, `motion` |
-| `reduced-motion` | Chromium with `reducedMotion: "reduce"` | `reduced-motion.spec.ts` |
+| Project          | Engine                                  | Specs                                                           |
+| ---------------- | --------------------------------------- | --------------------------------------------------------------- |
+| `Desktop Chrome` | Chromium 1440×900                       | everything except `mobile.spec.ts` and `reduced-motion.spec.ts` |
+| `Mobile Safari`  | WebKit, iPhone 14 390×844               | `mobile.spec.ts`                                                |
+| `Desktop Safari` | WebKit 1440×900                         | `transitions`, `keyboard`, `a11y`, `motion`                     |
+| `reduced-motion` | Chromium with `reducedMotion: "reduce"` | `reduced-motion.spec.ts`                                        |
 
 ### The one WebKit caveat
 
@@ -110,11 +110,11 @@ The suite is green: **45 passed, 4 skipped, 0 flaky** in ~37 s across all four
 projects. Treat any failure as real. Those four skips are the only expected
 ones; if you see a fifth, find out why before shipping.
 
-| Skip | Where | Why |
-|---|---|---|
-| `"worked alongside" popover` | `Desktop Chrome`, `Desktop Safari` | Runs today: `content/people.ts` has entries and two bands list them. It still self-skips if every `Company.people` empties out, since then no band renders a `[data-band-people]` block at all. |
-| `Tab reaches the skip link…` | `Desktop Safari` | The WebKit caveat above. `keyboardControls` covers the same six controls there. |
-| `focused elements keep a visible focus indicator` | `Desktop Safari` | Same. |
+| Skip                                              | Where                              | Why                                                                                                                                                                                             |
+| ------------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"worked alongside" popover`                      | `Desktop Chrome`, `Desktop Safari` | Runs today: `content/people.ts` has entries and two bands list them. It still self-skips if every `Company.people` empties out, since then no band renders a `[data-band-people]` block at all. |
+| `Tab reaches the skip link…`                      | `Desktop Safari`                   | The WebKit caveat above. `keyboardControls` covers the same six controls there.                                                                                                                 |
+| `focused elements keep a visible focus indicator` | `Desktop Safari`                   | Same.                                                                                                                                                                                           |
 
 Tests that self-skip on a missing `data-testid` (`timeline-band`,
 `mobile-pill`, …) are a deliberate escape hatch from when the redesign was

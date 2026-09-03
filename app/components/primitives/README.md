@@ -75,8 +75,7 @@ top.
 
 ```tsx
 <Section id="work" label="Selected work" divider>
-  <SectionHeader title="Selected work" meta="5 of many · most recent first" />
-  …
+  <SectionHeader title="Selected work" meta="5 of many · most recent first" />…
 </Section>
 ```
 

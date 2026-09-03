@@ -49,13 +49,13 @@ was retrieved on **2026-09-03** and says so in its own entry.
 
 Byte-identical copies, so the work surfaces and the timeline never drift:
 
-| file | copied from | why |
-|---|---|---|
-| `zf-scalar.svg` | `../mono/zf-scalar.svg` | the `zf-scalar` entry is ZF |
+| file            | copied from             | why                                                                                                             |
+| --------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `zf-scalar.svg` | `../mono/zf-scalar.svg` | the `zf-scalar` entry is ZF                                                                                     |
 | `evo-touch.svg` | `../mono/zf-scalar.svg` | EVO Touch is `confidentiality: limited` ZF work; the ZF ring stands in for product art that cannot be published |
-| `shopify.svg` | `../mono/shopify.svg` | the Shopify bag glyph, per decision 8 in `CLAUDE.md` |
-| `hegias.svg` | `../mono/hegias.svg` | |
-| `wolkabout.svg` | `../mono/wolkabout.svg` | |
+| `shopify.svg`   | `../mono/shopify.svg`   | the Shopify bag glyph, per decision 8 in `CLAUDE.md`                                                            |
+| `hegias.svg`    | `../mono/hegias.svg`    |                                                                                                                 |
+| `wolkabout.svg` | `../mono/wolkabout.svg` |                                                                                                                 |
 
 See `../mono/SOURCES.md` for those five sources.
 
@@ -211,7 +211,7 @@ See "Live products" above — it is the FontSwap Chrome listing icon.
 
 - **Source:** `https://internxt.com/favicon.ico` (HTTP 200, a 216 px PNG inside
   the ICO) — the Internxt "X". `internxt.com` publishes no SVG of it, and
-  `../internxt.svg` in this repo is the *wordmark*, unusable in a square.
+  `../internxt.svg` in this repo is the _wordmark_, unusable in a square.
 - **Changed:** the X is a straight 12-corner polygon, so rather than trace the
   bitmap its corners were measured off the favicon's alpha mask (outer half-
   width 53, arm width 27, half-height 59, notches at ±20.17 and ±13.5 — the
@@ -237,10 +237,10 @@ See "Live products" above — it is the FontSwap Chrome listing icon.
 Two entries ship the text `mark` fallback in their frontmatter instead of a
 file here, because no published mark exists to source:
 
-| entry | `mark` | why |
-|---|---|---|
-| `flexmatch` | `FM` | flexmatch.com is a third party's domain behind Cloudflare; both 200-status captures (Oct 2024, Apr 2025) are the "One moment, please…" challenge page. |
-| `hi-fam` | `HF` | no URL for the project exists in `content/`, in git history, or in the dossier. `hifam.app` was captured twice in 2024 showing only a "Coming Soon" placeholder, and `hifam.com` is an unrelated business running since 2009. |
+| entry       | `mark` | why                                                                                                                                                                                                                           |
+| ----------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `flexmatch` | `FM`   | flexmatch.com is a third party's domain behind Cloudflare; both 200-status captures (Oct 2024, Apr 2025) are the "One moment, please…" challenge page.                                                                        |
+| `hi-fam`    | `HF`   | no URL for the project exists in `content/`, in git history, or in the dossier. `hifam.app` was captured twice in 2024 showing only a "Coming Soon" placeholder, and `hifam.com` is an unrelated business running since 2009. |
 
 If the owner can supply artwork — or a repository — for either of the two, drop
 a mark in here and add the `logo` field; nothing else changes.
@@ -255,21 +255,21 @@ The paddings below were tuned by rendering the whole set at 18 / 28 / 52 px on
 the site's dark ground and levelling them by eye
 (`scratchpad .../sheet.js` writes the contact sheet).
 
-| mark | padding | why |
-|---|---|---|
-| studenti-rs | 0.02 | thinnest outline in the set |
-| amada | 0.04 | a thin rule and a small arc |
-| avataurus | 0.04 | three small features, mostly empty square |
-| montepop | 0.04 | three small features |
-| panciona | 0.06 | open chevron outline |
-| tenderlift | 0.10 | mid-weight letterform |
-| boxium | 0.12 | dense isometric solid |
-| fontalternatives | 0.12 | solid brackets |
-| fontswap | 0.14 | solid letterform |
-| internxt | 0.14 | solid, full-bleed diagonal |
-| mladenruzicic-com | 0.14 | solid arrow |
-| nunium | 0.16 | heavy slab letterform |
-| trello-boosted-boards | 0.18 | a filled square — the heaviest silhouette |
+| mark                  | padding | why                                       |
+| --------------------- | ------- | ----------------------------------------- |
+| studenti-rs           | 0.02    | thinnest outline in the set               |
+| amada                 | 0.04    | a thin rule and a small arc               |
+| avataurus             | 0.04    | three small features, mostly empty square |
+| montepop              | 0.04    | three small features                      |
+| panciona              | 0.06    | open chevron outline                      |
+| tenderlift            | 0.10    | mid-weight letterform                     |
+| boxium                | 0.12    | dense isometric solid                     |
+| fontalternatives      | 0.12    | solid brackets                            |
+| fontswap              | 0.14    | solid letterform                          |
+| internxt              | 0.14    | solid, full-bleed diagonal                |
+| mladenruzicic-com     | 0.14    | solid arrow                               |
+| nunium                | 0.16    | heavy slab letterform                     |
+| trello-boosted-boards | 0.18    | a filled square — the heaviest silhouette |
 
 The five marks copied from `../mono/` keep the paddings tuned there, so the
 same file renders identically in the hero, the timeline and the work system.

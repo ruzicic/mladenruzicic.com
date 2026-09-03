@@ -140,14 +140,14 @@ its square, so a mark's apparent size is set entirely by the padding baked into
 its `viewBox`. The paddings below were tuned by rendering all six at 18 / 28 /
 52 / 120 px on the site's dark ground and levelling them by eye:
 
-| mark | padding (fraction of the long side) | why |
-|---|---|---|
-| zf-scalar | 0.05 | thin ring, needs the size |
-| shopify | 0.10 | solid, tall silhouette |
-| hegias | 0.02 | widest aspect (1.7 : 1), loses the most height in a square |
-| wolkabout | 0.05 | thin stroke |
-| execom | 0.15 | heaviest solid of the six |
-| nemestic | 0.12 | heavy slab letterform |
+| mark      | padding (fraction of the long side) | why                                                        |
+| --------- | ----------------------------------- | ---------------------------------------------------------- |
+| zf-scalar | 0.05                                | thin ring, needs the size                                  |
+| shopify   | 0.10                                | solid, tall silhouette                                     |
+| hegias    | 0.02                                | widest aspect (1.7 : 1), loses the most height in a square |
+| wolkabout | 0.05                                | thin stroke                                                |
+| execom    | 0.15                                | heaviest solid of the six                                  |
+| nemestic  | 0.12                                | heavy slab letterform                                      |
 
 ## Legacy paths
 

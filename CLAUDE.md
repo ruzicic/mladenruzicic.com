@@ -10,22 +10,22 @@ JetBrains Mono, three.js glass-shard hero, content-driven. The full plan lives i
 
 ## Stack
 
-| Package | Version | Note |
-|---|---|---|
-| next | 16.3.4 | Turbopack, Cache Components, Partial Prefetching, React Compiler |
-| react / react-dom | 19.2.8 | `ViewTransition` and `Activity` come from Next's bundled React |
-| typescript | ^5.9.3 | **not 7.0.2** — `typescript-eslint@8` peers on `typescript <6.1.0` |
-| tailwindcss / @tailwindcss/postcss | 4.3.3 | CSS-first config, no `tailwind.config.ts` |
-| @tailwindcss/typography | ^0.5.19 | loaded with `@plugin` in `app/globals.css` |
-| eslint-config-next | 16.3.4 | flat config, core-web-vitals + typescript |
-| babel-plugin-react-compiler | 1.0.0 | enabled via `reactCompiler: true` |
-| three / @react-three/fiber | 0.185.1 / 9.7.0 | hero only, lazy, after LCP. 233 KB gz: r3f's `extend(THREE)` keeps the whole namespace, so three does not tree-shake |
-| @paper-design/shaders-react | 0.0.80 (exact pin) | breaking changes ship under 0.0.x |
-| @oddbird/css-anchor-positioning | 0.10.2 | dynamically imported only when `!CSS.supports('anchor-name: --a')` |
-| zod | ^4.5.4 | content schemas |
-| gray-matter + next-mdx-remote | ^4.0.3 / ^5.0.0 | MDX in `content/` |
-| @vercel/speed-insights | 2.0.0 | `sampleRate={0.3}` |
-| fathom-client | ^3.5.0 | App Router pattern, inside a Suspense boundary |
+| Package                            | Version            | Note                                                                                                                 |
+| ---------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| next                               | 16.3.4             | Turbopack, Cache Components, Partial Prefetching, React Compiler                                                     |
+| react / react-dom                  | 19.2.8             | `ViewTransition` and `Activity` come from Next's bundled React                                                       |
+| typescript                         | ^5.9.3             | **not 7.0.2** — `typescript-eslint@8` peers on `typescript <6.1.0`                                                   |
+| tailwindcss / @tailwindcss/postcss | 4.3.3              | CSS-first config, no `tailwind.config.ts`                                                                            |
+| @tailwindcss/typography            | ^0.5.19            | loaded with `@plugin` in `app/globals.css`                                                                           |
+| eslint-config-next                 | 16.3.4             | flat config, core-web-vitals + typescript                                                                            |
+| babel-plugin-react-compiler        | 1.0.0              | enabled via `reactCompiler: true`                                                                                    |
+| three / @react-three/fiber         | 0.185.1 / 9.7.0    | hero only, lazy, after LCP. 233 KB gz: r3f's `extend(THREE)` keeps the whole namespace, so three does not tree-shake |
+| @paper-design/shaders-react        | 0.0.80 (exact pin) | breaking changes ship under 0.0.x                                                                                    |
+| @oddbird/css-anchor-positioning    | 0.10.2             | dynamically imported only when `!CSS.supports('anchor-name: --a')`                                                   |
+| zod                                | ^4.5.4             | content schemas                                                                                                      |
+| gray-matter + next-mdx-remote      | ^4.0.3 / ^5.0.0    | MDX in `content/`                                                                                                    |
+| @vercel/speed-insights             | 2.0.0              | `sampleRate={0.3}`                                                                                                   |
+| fathom-client                      | ^3.5.0             | App Router pattern, inside a Suspense boundary                                                                       |
 
 Removed for v3: framer-motion, date-fns, next-sitemap, contentlayer leftovers,
 @mdx-js/react, @next/mdx, eslint-plugin-react, eslint-plugin-tailwindcss,
@@ -59,12 +59,12 @@ and then the Playwright suite against `pnpm start -p 3104`.
 
 Parallel agents must stay inside their own paths.
 
-| Area | Owns |
-|---|---|
-| **hero** | `app/components/hero/**`, `app/components/shaders/**` |
-| **shell** | `app/components/{site,timeline,work,mentoring,preloader,sound}/**`, `app/layout.tsx`, `app/page.tsx` |
-| **work-system** | `app/work/**`, `app/mentoring/**`, `app/about/**`, `app/uses/**`, `lib/seo/**`, `app/md/**`, `app/llms*` |
-| **copy** | everything under `content/` |
+| Area                  | Owns                                                                                                                                                    |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **hero**              | `app/components/hero/**`, `app/components/shaders/**`                                                                                                   |
+| **shell**             | `app/components/{site,timeline,work,mentoring,preloader,sound}/**`, `app/layout.tsx`, `app/page.tsx`                                                    |
+| **work-system**       | `app/work/**`, `app/mentoring/**`, `app/about/**`, `app/uses/**`, `lib/seo/**`, `app/md/**`, `app/llms*`                                                |
+| **copy**              | everything under `content/`                                                                                                                             |
 | **foundation (done)** | `app/components/primitives/**`, `app/globals.css`, `app/fonts.ts`, `lib/content/**`, `next.config.ts`, `eslint.config.mjs`, `tsconfig.json`, `types/**` |
 
 Shared, low-churn: `lib/utils.ts` (`cn`),
