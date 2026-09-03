@@ -27,6 +27,10 @@ export const HOME = {
     lede: "Forty-plus engineers, mostly mid-level people trying to get to senior, and career switchers who need someone to be honest with them. Work between sessions, code review, real projects. Teaching is the fastest way I know to find out whether I actually understand something.",
     pageLink: "How mentoring works",
     externalLink: "MentorCruise",
+    proof: {
+      label: "See 50+ five-star ratings on mentors.to/ruzicic",
+      href: "https://mentors.to/ruzicic",
+    },
   },
   footer: {
     copyright: "© 2026 Mladen Ružičić",

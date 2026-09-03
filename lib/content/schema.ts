@@ -317,6 +317,12 @@ export const homeSchema = z.object({
     lede: z.string().min(1),
     pageLink: z.string().min(1),
     externalLink: z.string().min(1),
+    /**
+     * A social-proof line under the testimonial bubbles ("See 50+ five-star
+     * ratings on mentors.to/ruzicic"). Optional: the section renders without
+     * it until copy exists.
+     */
+    proof: z.object({ label: z.string().min(1), href: z.url() }).optional(),
   }),
   footer: z.object({ copyright: z.string().min(1) }),
   preloader: z.object({
@@ -346,6 +352,12 @@ export const mentoringSchema = z.object({
     url: z.string().min(1),
     note: z.string().min(1).optional(),
   }),
+  /**
+   * A social-proof line under the testimonial grid ("See 50+ five-star
+   * ratings on mentors.to/ruzicic"). Optional: the section renders without
+   * it until copy exists.
+   */
+  proof: z.object({ label: z.string().min(1), href: z.url() }).optional(),
   closing: z.object({
     /** `{braces}` mark the italic accent word. */
     h2: z.string().min(1),

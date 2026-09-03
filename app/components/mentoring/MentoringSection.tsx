@@ -66,59 +66,79 @@ export function MentoringSection() {
             </div>
           </div>
 
-          <ol role="list" className="m-0 grid list-none gap-[22px] p-0">
-            {testimonials.map((testimonial, index) => {
-              const mirrored = index % 2 === 1
-              return (
-                <li
-                  key={testimonial.id}
-                  className={cn(
-                    "flex items-end gap-3",
-                    mirrored && "flex-row-reverse"
-                  )}
-                >
-                  {testimonial.avatar ? (
-                    <Image
-                      src={testimonial.avatar}
-                      alt=""
-                      width={36}
-                      height={36}
-                      sizes="36px"
-                      className="h-9 w-9 flex-none rounded-full border border-line object-cover"
-                    />
-                  ) : (
-                    <span
-                      aria-hidden
-                      className="grid h-9 w-9 flex-none place-items-center rounded-full border border-line bg-surface-2 text-[11px] font-semibold text-dim"
-                    >
-                      {initialsOf(testimonial.author)}
-                    </span>
-                  )}
+          <div className="grid gap-7">
+            <ol role="list" className="m-0 grid list-none gap-[22px] p-0">
+              {testimonials.map((testimonial, index) => {
+                const mirrored = index % 2 === 1
+                return (
+                  <li
+                    key={testimonial.id}
+                    className={cn(
+                      "flex items-end gap-3",
+                      mirrored && "flex-row-reverse"
+                    )}
+                  >
+                    {testimonial.avatar ? (
+                      <Image
+                        src={testimonial.avatar}
+                        alt=""
+                        width={36}
+                        height={36}
+                        sizes="36px"
+                        className="h-9 w-9 flex-none rounded-full border border-line object-cover"
+                      />
+                    ) : (
+                      <span
+                        aria-hidden
+                        className="grid h-9 w-9 flex-none place-items-center rounded-full border border-line bg-surface-2 text-[11px] font-semibold text-dim"
+                      >
+                        {initialsOf(testimonial.author)}
+                      </span>
+                    )}
 
-                  <div className="grid max-w-[520px] gap-[6px]">
-                    <blockquote
-                      className={cn(
-                        "m-0 px-5 py-4 text-[16.5px] leading-[1.5]",
-                        mirrored
-                          ? "rounded-[16px_16px_4px_16px] bg-accent text-bg"
-                          : "rounded-[16px_16px_16px_4px] bg-surface-2 text-fg"
-                      )}
-                    >
-                      {testimonial.quote}
-                    </blockquote>
-                    <cite
-                      className={cn(
-                        "font-mono text-[10px] uppercase not-italic tracking-[0.08em] text-muted",
-                        mirrored ? "text-right" : "text-left"
-                      )}
-                    >
-                      {testimonial.author} · mentors.to
-                    </cite>
-                  </div>
-                </li>
-              )
-            })}
-          </ol>
+                    <div className="grid max-w-[520px] gap-[6px]">
+                      <blockquote
+                        className={cn(
+                          "m-0 px-5 py-4 text-[16.5px] leading-[1.5]",
+                          mirrored
+                            ? "rounded-[16px_16px_4px_16px] bg-accent text-bg"
+                            : "rounded-[16px_16px_16px_4px] bg-surface-2 text-fg"
+                        )}
+                      >
+                        {testimonial.quote}
+                      </blockquote>
+                      <cite
+                        className={cn(
+                          "font-mono text-[10px] uppercase not-italic tracking-[0.08em] text-muted",
+                          mirrored ? "text-right" : "text-left"
+                        )}
+                      >
+                        {testimonial.author} · mentors.to
+                      </cite>
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
+
+            {home.mentoring.proof ? (
+              <p
+                data-testid="mentoring-proof"
+                className="m-0 font-mono text-[11px] uppercase leading-none tracking-[0.08em] text-muted"
+              >
+                <a
+                  href={home.mentoring.proof.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  data-hover
+                  className="text-fg"
+                >
+                  {`${home.mentoring.proof.label}\u00A0`}
+                  <span aria-hidden>↗</span>
+                </a>
+              </p>
+            ) : null}
+          </div>
         </div>
       </Container>
     </section>
