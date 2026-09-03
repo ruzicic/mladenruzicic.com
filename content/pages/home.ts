@@ -16,8 +16,11 @@ export const HOME = {
   history: {
     eyebrow: "Work history",
     rangeLabel: "2008 – 2026",
-    employedLabel: "Employed",
-    independentLabel: "Independent",
+    // The rail's two lanes. "Employed" / "Independent" described a contract;
+    // "Main track" / "Side track" describes what the reader is looking at —
+    // the run of jobs along the top, the products that ran beside them.
+    employedLabel: "Main track",
+    independentLabel: "Side track",
     alongsideLabel: "Worked alongside",
   },
   mentoring: {
