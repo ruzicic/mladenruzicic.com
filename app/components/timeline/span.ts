@@ -41,7 +41,16 @@ export const ROW = {
   markerA: 184,
   divider: 178,
   markerB: 212,
+  /**
+   * A third marker row, used only when two cannot hold the set without one
+   * label painting over another — see `assignMarkerRows`. It is still inside
+   * `RAIL_HEIGHT`: a 13px label on this baseline ends around 258 of 270.
+   */
+  markerC: 240,
 } as const
+
+/** The marker rows, top to bottom, in the order `assignMarkerRows` fills them. */
+export const MARKER_ROWS = [ROW.markerA, ROW.markerB, ROW.markerC] as const
 
 /** Position of a year on the axis, as a percentage from the left edge. */
 export function pct(year: number): number {
@@ -74,6 +83,55 @@ export function overlapWithNewer(
   const span = band.to - band.from
   if (overlap < MIN_OVERLAP_YEARS || span <= 0) return 0
   return Math.min(overlap / span, 1)
+}
+
+/**
+ * Roughly how wide a marker's label is, expressed in axis years.
+ *
+ * The rail is a fixed 1400px (1800px from 720px up), so pixels convert to
+ * years exactly. A label is a 12px dot, an 8px gap, the title at the 13px sans
+ * face (~7.2px average advance), another 8px gap, a four-digit mono year and
+ * 8px of right padding. The narrow rail is used because that is where a label
+ * covers the most years.
+ */
+export function markerLabelYears(title: string): number {
+  const px = 12 + 8 + title.length * 7.2 + 8 + 24 + 8
+  return px / (1400 / SPAN_YEARS)
+}
+
+/**
+ * Which row each independent-project marker sits on, as an index into
+ * `MARKER_ROWS`.
+ *
+ * Markers arrive oldest-first and are painted right-to-left (2008 is the right
+ * edge), with each label flowing rightwards from its dot — so a marker's label
+ * runs back towards the marker placed before it on the same row. Simple
+ * `index % 2` alternation was enough while the four projects were spread over
+ * the axis, but TenderLift (2025), Amada (2025) and FontAlternatives (2026)
+ * now sit inside one year of each other, and three labels that wide cannot
+ * share two rows: the last one painted covers the others, because each marker
+ * carries an opaque background.
+ *
+ * So rows are filled greedily instead: a marker takes the topmost row whose
+ * previous marker its label does not reach. When every row is taken it falls
+ * back to the row whose previous marker is oldest — the least bad overlap —
+ * rather than dropping the marker.
+ */
+export function assignMarkerRows(
+  markers: { title: string; year: number }[],
+  rowCount: number = MARKER_ROWS.length
+): number[] {
+  const lastYear = Array.from({ length: rowCount }, () => -Infinity)
+
+  return markers.map((marker) => {
+    const reachesBackTo = marker.year - markerLabelYears(marker.title)
+    let row = lastYear.findIndex((year) => reachesBackTo >= year)
+    if (row === -1) {
+      row = lastYear.indexOf(Math.min(...lastYear))
+    }
+    lastYear[row] = marker.year
+    return row
+  })
 }
 
 /** Stable 0–359 hue from an id, so an avatar keeps its colour across renders. */
