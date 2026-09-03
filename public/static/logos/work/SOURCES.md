@@ -18,7 +18,7 @@ legible on TenderLift yellow and on ZF blue alike. The literal `fill="#fff"`
 in each file is still what makes the marks work in the hero's and the
 timeline's isolated-image-document loaders, so it stays.
 
-House rules applied to all seventeen:
+House rules applied to all eighteen:
 
 - geometry only — `<path>`, `<polygon>`, `<circle>`, `<rect>`; no `<text>`, no
   `<image>`, no embedded raster, no `<style>`, no editor metadata, no strokes
@@ -40,7 +40,8 @@ mark removed can have it removed: delete the file and the `logo` field in that
 entry's frontmatter, and the `mark` text fallback takes over automatically.
 The remaining marks belong to Mladen's own products.
 
-Retrieval date for everything below: **2026-09-02**.
+Retrieval date for everything below: **2026-09-02**, except `boxium.svg`, which
+was retrieved on **2026-09-03** and says so in its own entry.
 
 ---
 
@@ -142,6 +143,21 @@ See `../mono/SOURCES.md` for those five sources.
 - The favicon (`montepop.com/favicon.ico`, 48 px maximum) is the whole lockup
   and is unusable at any size this site renders.
 
+### boxium.svg
+
+- **Source:** `https://boxium.ch/favicon-dark.svg` (HTTP 200) — the isometric
+  box the site also sets to the left of the "Boxium" wordmark in
+  `https://boxium.ch/boxium-logo.svg`, where it is the same three-subpath
+  geometry. Retrieved 2026-09-03, alongside the screenshots.
+- **Changed:** nothing but the frame. The single `<path>` already ships
+  `fill="#ffffff"`, so it was moved onto the house wrapping `<g>` and the
+  21 × 22 viewBox was recomputed as a square around the ink (12 % padding — it
+  is a dense solid, and at 0.12 it levels with `nunium.svg` and `internxt.svg`
+  on the contact sheet). One `<path>`, 660 B. Geometry is byte-for-byte the
+  official artwork.
+- The product's domain is `boxium.ch`; `boxium.com` is parked and belongs to
+  someone else.
+
 ### nunium.svg
 
 - **Source:** `https://nunium.com/logo.svg` (HTTP 200) — the official 500²
@@ -149,8 +165,10 @@ See `../mono/SOURCES.md` for those five sources.
 - **Changed:** `fill="black"` → white, square `viewBox` (16 % padding — it is a
   heavy slab letterform). 351 B. Geometry is byte-for-byte the official
   artwork.
-- nunium.com resolves again as of 2026-09-02 and still lists Mladen on its team
-  page, so this is the live mark, not an archived one.
+- Retrieved from the live site on 2026-09-02, but nunium.com is being taken
+  down. The mark is therefore an archived one: re-derive it from
+  `https://web.archive.org/web/20250221232540/https://nunium.com/` if it ever
+  needs rebuilding.
 
 ### mladenruzicic-com.svg
 
@@ -216,16 +234,15 @@ See "Live products" above — it is the FontSwap Chrome listing icon.
 
 ## Entries with no mark
 
-Three entries ship the text `mark` fallback in their frontmatter instead of a
+Two entries ship the text `mark` fallback in their frontmatter instead of a
 file here, because no published mark exists to source:
 
 | entry | `mark` | why |
 |---|---|---|
-| `boxium` | `BX` | boxium.com no longer serves the product, and the Web Archive has **no** capture of it after 2020 — every capture on that domain predates the 2024 product and belongs to an earlier owner. |
 | `flexmatch` | `FM` | flexmatch.com is a third party's domain behind Cloudflare; both 200-status captures (Oct 2024, Apr 2025) are the "One moment, please…" challenge page. |
 | `hi-fam` | `HF` | no URL for the project exists in `content/`, in git history, or in the dossier. `hifam.app` was captured twice in 2024 showing only a "Coming Soon" placeholder, and `hifam.com` is an unrelated business running since 2009. |
 
-If the owner can supply artwork — or a repository — for any of the three, drop
+If the owner can supply artwork — or a repository — for either of the two, drop
 a mark in here and add the `logo` field; nothing else changes.
 
 ---
@@ -246,6 +263,7 @@ the site's dark ground and levelling them by eye
 | montepop | 0.04 | three small features |
 | panciona | 0.06 | open chevron outline |
 | tenderlift | 0.10 | mid-weight letterform |
+| boxium | 0.12 | dense isometric solid |
 | fontalternatives | 0.12 | solid brackets |
 | fontswap | 0.14 | solid letterform |
 | internxt | 0.14 | solid, full-bleed diagonal |

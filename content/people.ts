@@ -4,15 +4,13 @@ import type { Person } from "@/lib/content/schema"
  * "Worked alongside" — people attached to a timeline band.
  *
  * Names, LinkedIn URLs, shared employers and overlap years come from their own
- * public profiles (captured 2026-09-02). Surnames carry Serbian diacritics even
- * where LinkedIn prints them stripped, because the rest of the site does.
+ * public profiles (captured 2026-09-02). Surnames carry Serbian and Croatian
+ * diacritics even where LinkedIn prints them stripped; Mladen confirmed every
+ * spelling on 2026-09-03.
  *
  * `note` is grounded in what each profile actually says — the current role and
  * the work we shared — and nothing else. No invented anecdotes. Mladen should
  * replace these with his own sentences; see content/OPEN-QUESTIONS.md.
- *
- * Josip has no public profile URL on file, so he ships with `why` alone. That
- * is the intended fallback, not an oversight.
  */
 export const PEOPLE = [
   {
@@ -46,7 +44,10 @@ export const PEOPLE = [
     id: "josip",
     name: "Josip Kozić",
     where: "HEGIAS",
-    why: "We worked together at HEGIAS, moving an AR/VR MVP toward a production-ready product.",
+    avatar: "/static/people/josip.webp",
+    linkedin: "https://www.linkedin.com/in/josipkozic/",
+    why: "HEGIAS, 2020 to 2021 — frontend developer there for five years, so my whole ten months sat inside his.",
+    note: "He designed the REST APIs with the backend, wrote the Node and Express endpoints behind them, and worked with the VR and pipeline teams on getting models into scenes, while I rebuilt the frontend in React and TypeScript; most of what I wrote went past him in review. Now a senior software engineer at Fincons Group in Lugano.",
   },
   {
     id: "igor",

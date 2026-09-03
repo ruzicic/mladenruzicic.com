@@ -23,9 +23,11 @@ import { TransitionLink } from "../primitives/TransitionLink"
 import { play } from "../sound/sound"
 import { PersonPopover } from "./PersonPopover"
 import {
+  assignMarkerRows,
   BAND_GAP,
   EXPANDED_WIDTH,
   initialsOf,
+  MARKER_ROWS,
   overlapWithNewer,
   pct,
   RAIL_HEIGHT,
@@ -250,6 +252,7 @@ export function TimelineRail({
   }
 
   const railHeight = expanded ? RAIL_HEIGHT_EXPANDED : RAIL_HEIGHT
+  const markerRows = assignMarkerRows(markers)
 
   return (
     <>
@@ -533,7 +536,7 @@ export function TimelineRail({
               data-hover
               className="absolute flex translate-x-[-6px] items-center gap-2 bg-bg pr-2 text-[13px] whitespace-nowrap text-fg"
               style={{
-                top: index % 2 ? ROW.markerB : ROW.markerA,
+                top: MARKER_ROWS[markerRows[index]],
                 left: `${pct(marker.year + 0.8)}%`,
               }}
             >
