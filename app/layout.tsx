@@ -1,105 +1,117 @@
-import type { Metadata } from "next"
-import localFont from "next/font/local"
-import FathomAnalytics from "app/components/FathomAnalytics"
-import Footer from "app/components/Footer"
+import { Suspense, type ReactNode } from "react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
-import { structuredData } from "./structured-data"
+import { getCompanies, getHome, getSite } from "@/lib/content"
+import { jsonLdScript, personJsonLd, webSiteJsonLd } from "@/lib/seo/jsonld"
+
+import FathomAnalytics from "./components/FathomAnalytics"
+import { Preloader } from "./components/preloader/Preloader"
+import { SkipLink } from "./components/primitives/SkipLink"
+import { Footer, Header, MobilePill, ScrollHairline } from "./components/site"
+import type { PillCompany } from "./components/site"
+import { nowFraction } from "./components/site/now"
+import { resolveTo } from "./components/timeline/span"
+import { fontVariables } from "./fonts"
 
 import "./globals.css"
+import "./styles/shell.css"
+import "./styles/hero.css"
+import "./styles/pages.css"
 
-import { Suspense } from "react"
+export { baseMetadata as metadata } from "@/lib/seo/metadata"
 
-import Header from "./components/Header"
+/**
+ * Runs before first paint. If this session has already seen the preloader we
+ * stamp `data-preloader="off"` on `<html>` and shell.css hides the overlay, so
+ * it never flashes on a reload. `suppressHydrationWarning` covers the attribute
+ * the script adds. See docs/v3-redesign-plan.md §5.4.
+ */
+const PRELOADER_BOOTSTRAP =
+  "try{if(sessionStorage.getItem('mr:preloaded')){document.documentElement.setAttribute('data-preloader','off')}}catch(e){}"
 
-const title = "Mladen Ruzicic"
-const description = "Software developer, mentor, and entrepreneur"
-const imageUrl = "https://mladenruzicic.com/static/images/opengraph-image.png"
+/** Same guard for a visitor with JavaScript disabled: never a black screen. */
+const PRELOADER_NOSCRIPT = '[data-testid="preloader"]{display:none!important}'
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://mladenruzicic.com/"),
-  title: {
-    default: title,
-    template: `%s | ${title}`,
-  },
-  description,
-  manifest: "/manifest.json",
-  openGraph: {
-    title,
-    description,
-    url: imageUrl,
-    type: "website",
-    locale: "en_US",
-    siteName: title,
-    images: [
-      {
-        alt: `${title} - ${description}`,
-        url: imageUrl,
-        width: 1920,
-        height: 1080,
-      },
-    ],
-  },
-  twitter: {
-    title,
-    card: "summary_large_image",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-}
-
-const ibmPlexSansFont = localFont({
-  src: "./fonts/ibm-plex-sans-var.woff2",
-  display: "swap",
-  preload: true,
-})
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
+  const site = getSite()
+  const home = getHome()
+  const now = await nowFraction()
+
+  // The mobile sheet's employer colour scrubber: one segment per band, sized in
+  // years. Only these fields cross into the client bundle.
+  const pillCompanies: PillCompany[] = getCompanies().map((company) => ({
+    id: company.id,
+    short: company.short,
+    color: company.color,
+    yearsLabel: company.yearsLabel,
+    years: Number((resolveTo(company.to, now) - company.from).toFixed(2)),
+  }))
+
   return (
-    <html lang="en" className={ibmPlexSansFont.className}>
+    // `data-scroll-behavior="smooth"` is what tells the Next 16 router to
+    // temporarily force `scroll-behavior: auto` while it resets the scroll
+    // position for a new route. Without it the router's scroll-to-top is
+    // animated by `html { scroll-behavior: smooth }` in globals.css, so a fresh
+    // case study visibly slides up from the source page's offset — and any
+    // interruption leaves it parked under the fixed header. In-page `#hash`
+    // links keep their smooth scroll: the router opts out of the override for
+    // hash-only navigations.
+    <html
+      lang="en"
+      className={fontVariables}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
+        <script dangerouslySetInnerHTML={{ __html: PRELOADER_BOOTSTRAP }} />
+      </head>
+      <body>
+        <SkipLink />
+
+        <Preloader
+          verbs={home.preloader.verbs}
+          finalVerb={home.preloader.finalVerb}
+        />
+        <noscript>
+          <style dangerouslySetInnerHTML={{ __html: PRELOADER_NOSCRIPT }} />
+        </noscript>
+
+        <Header siteName={site.name} />
+
+        {/* tabIndex={-1} so the skip link actually moves focus: without it the
+            hash changes, Chromium's sequential-focus starting point puts the
+            next Tab inside, but activeElement stays on <body>, so a screen
+            reader's virtual cursor never moves and the main landmark is never
+            announced. `:focus-visible` scopes the ring, so a programmatic -1
+            focus paints nothing. */}
+        <main id="main" tabIndex={-1}>
+          {children}
+        </main>
+
+        <Footer />
+        <MobilePill companies={pillCompanies} />
+        <ScrollHairline />
+
+        {/* Person + WebSite, emitted once for the whole site: every page-level
+            graph references `#person` and `#website` by `@id`, so both nodes
+            have to exist somewhere in the document. */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={jsonLdScript([
+            personJsonLd(),
+            webSiteJsonLd(),
+          ])}
         />
-      </head>
-      <body className="p-0 sm:p-4 md:p-8 lg:p-16 xl:p-20">
-        <NoisyGradientBackground />
-        <main className="mx-auto flex w-full max-w-7xl flex-col bg-white">
-          <Header />
 
-          <div className="mx-4 mt-8 pb-16 sm:mx-8 lg:mx-16 lg:mt-16 xl:mx-20">
-            {children}
-          </div>
-          <Footer />
-
-          <Suspense fallback={null}>
-            <FathomAnalytics />
-          </Suspense>
-        </main>
+        <Suspense fallback={null}>
+          <FathomAnalytics />
+        </Suspense>
+        {process.env.VERCEL ? <SpeedInsights sampleRate={0.3} /> : null}
       </body>
     </html>
   )
 }
-
-const NoisyGradientBackground = () => (
-  <div className="fixed inset-0 -z-10 h-full w-full bg-[#cae9e3]">
-    <div className="blur-3xl">
-      <div className="absolute h-[100rem] w-[50rem] rotate-45 rounded-full bg-[#cae9e3]"></div>
-      <div className="absolute ml-auto h-[60rem] w-[60rem] rounded-full bg-[#b5cde6]"></div>
-    </div>
-    <div className="absolute inset-0 h-full w-full bg-noise bg-auto bg-repeat opacity-30"></div>
-  </div>
-)

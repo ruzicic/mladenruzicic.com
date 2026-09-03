@@ -1,15 +1,67 @@
-import { Metadata } from "next"
+import type { Metadata } from "next"
+import { MDXRemote } from "next-mdx-remote/rsc"
 
-import PageContent from "./page.mdx"
+import { getPage } from "@/lib/content"
+import { jsonLdScript, webPageJsonLd } from "@/lib/seo/jsonld"
+import { pageMetadata } from "@/lib/seo/metadata"
 
-export const metadata: Metadata = {
-  title: "Uses",
-}
+import {
+  Container,
+  Display,
+  Eyebrow,
+  PageTransition,
+} from "../components/primitives"
+import { Prose } from "../components/work-system"
 
-export default function Uses() {
+const page = getPage("uses")
+
+export const metadata: Metadata = pageMetadata({
+  title: page.title,
+  description: page.description,
+  path: "/uses",
+  type: "website",
+})
+
+export default function UsesPage() {
+  const { title, description, updated, body, h1, eyebrow } = getPage("uses")
+
   return (
-    <section className="mx-auto mb-16 flex w-full max-w-2xl flex-col items-start justify-center">
-      <PageContent />
-    </section>
+    <PageTransition>
+      <div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={jsonLdScript(
+            webPageJsonLd({
+              name: title,
+              description,
+              path: "/uses",
+              dateModified: updated,
+            })
+          )}
+        />
+
+        <Container className="py-[72px] md:py-[96px]">
+          <header className="max-w-[52ch]">
+            <Eyebrow items={eyebrow} />
+            <Display as="h1" size="section" className="mt-6">
+              {h1}
+            </Display>
+            <p className="mt-6 mb-0 text-[19px] leading-[1.5] text-dim">
+              {description}
+            </p>
+            <p className="mt-5 mb-0 font-mono text-[11px] uppercase tracking-[0.08em] text-muted">
+              Last updated{" "}
+              <time dateTime={updated} className="tabular-nums">
+                {updated}
+              </time>
+            </p>
+          </header>
+
+          <Prose className="mt-16">
+            <MDXRemote source={body} />
+          </Prose>
+        </Container>
+      </div>
+    </PageTransition>
   )
 }

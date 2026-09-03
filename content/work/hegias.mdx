@@ -1,0 +1,71 @@
+---
+slug: "hegias"
+title: "HEGIAS"
+shortTitle: "HEGIAS"
+kind: "company"
+status: "completed"
+featured: false
+company: "hegias"
+period:
+  from: "2020-07"
+  to: "2021-04"
+role: "Full-stack team lead, reporting to the CTO"
+accent: "#6F246F"
+logo: "/static/logos/work/hegias.svg"
+tech:
+  - "React"
+  - "TypeScript"
+  - "Node.js"
+  - "Express"
+  - "Microservices"
+  - "AWS"
+  - "Blender"
+  - "WebVR"
+line: "Moving an AR/VR MVP toward production: 3D pipelines, microservices on AWS, in-app voice."
+detail: "Joined a small team to turn a browser-based VR MVP into something that could carry real customers. Led full-stack work across a microservice backend on AWS, heavy 3D-model processing, and the frontend application that had to make all of it feel immediate."
+links:
+  - label: "HEGIAS"
+    url: "https://hegias.com"
+confidentiality: "limited"
+seo:
+  title: "HEGIAS — an AR/VR MVP toward production"
+  description: "Full-stack team lead at HEGIAS: 3D model processing pipelines, microservices on AWS, in-app voice, and the frontend of a browser-based VR product."
+---
+
+## Summary
+
+HEGIAS was where I moved to Switzerland and into the most technically demanding domain I have worked in: browser-delivered VR for interior and architectural spaces. The product existed as an MVP. My job was to help make it something a paying customer could depend on.
+
+## Role and scope
+
+Full-stack team lead, reporting directly to the CTO. Led work across the frontend application, the backend services and the architecture between them, with a particular focus on the 3D asset pipeline and real-time collaboration features.
+
+## Context
+
+A small team, a young product and a domain where the constraints are physical rather than negotiable. Users upload 3D models produced by other people's tools, in formats of wildly varying quality and size, and then expect to walk through the result in a browser or a headset within seconds. Everything between those two facts is engineering.
+
+## Problem
+
+An MVP proves a concept by taking shortcuts, and the shortcuts are load-bearing by the time you find them. The processing pipeline handled the models it had been tested against. Real customer assets were larger, dirtier and stranger. Meanwhile the frontend was carrying scene state, presence and the editing experience in one place, which made every new feature more expensive than the last.
+
+## Decisions
+
+We moved the heavy work into services that could fail and retry independently, on AWS, rather than keeping the pipeline in the request path. Model conversion and optimisation ran through Blender-based workflows offline, so a slow or malformed asset degraded one job instead of the whole application.
+
+For collaboration, in-app voice was improved rather than replaced. In a shared 3D space, voice is what makes a session feel like a meeting rather than a demo, and its quality determines whether people use the product together at all — which is the entire point.
+
+We built integrations with the popular third-party 3D model libraries instead of asking customers to source and prepare assets themselves. Supply is a product feature in a content-driven tool.
+
+## Contribution
+
+Led full-stack delivery: frontend architecture and application work, backend services, and the architectural decisions across them. Built and hardened the 3D processing path, worked on the real-time voice experience, and delivered the third-party model integrations. Worked closely with the CTO on the technical direction of the productionisation effort.
+
+## Outcome
+
+The product moved meaningfully from MVP toward a production-ready application: a processing path that survived real customer assets, a service architecture that could be operated, and collaboration features good enough to sell on. Specific figures and customer names are the company's to publish, not mine.
+
+## Learnings
+
+In 3D, the interesting engineering is upstream of the thing users see. Nobody notices a good asset pipeline; everybody notices a scene that takes forty seconds to load.
+
+Productionising an MVP is mostly a prioritisation exercise. The team knows what is fragile. The value a lead adds is deciding which fragility to fix first and defending that order when a customer demo argues otherwise.

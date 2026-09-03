@@ -1,5 +1,8 @@
-dist
 node_modules
 .next
+.claude
+dist
 build
-.contentlayer
+docs
+next-env.d.ts
+pnpm-lock.yaml

@@ -1,53 +1,239 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-@tailwind variants;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* ---------------------------------------------------------------------------
+   Design tokens — docs/v3-redesign-plan.md §2, §5.5, §5.7.
+   Single dark theme. Everything downstream reads these; do not hardcode hexes
+   in components.
+   --------------------------------------------------------------------------- */
+@theme inline {
+  /* Surfaces and ink */
+  --color-bg: #0b0b0c;
+  --color-fg: #f2f0ea;
+  --color-muted: #939597;
+  --color-dim: #c9c7c1;
+  --color-dim-2: #a8a6a0;
+  --color-accent: #f5df4d;
+  --color-surface: #141416;
+  --color-surface-2: #1c1c1f;
+  --color-surface-3: #111113;
+  --color-line: rgba(242, 240, 234, 0.12);
+  --color-line-soft: rgba(242, 240, 234, 0.07);
+
+  /* Type */
+  --font-display: var(--font-gloock), Georgia, "Times New Roman", serif;
+  --font-serif-italic:
+    var(--font-instrument-serif-italic), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
+  --font-mono:
+    var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Easings */
+  --ease-reveal: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-geometry: cubic-bezier(0.7, 0, 0.2, 1);
+  --ease-pill: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Durations */
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+  --duration-slow: 450ms;
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-pill: 999px;
+
+  /* Layout */
+  --spacing-gutter: 40px;
+  --container-page: 1400px;
+}
+
+:root {
+  color-scheme: dark;
+  scrollbar-width: thin;
+  scrollbar-color: #f5df4d transparent;
+  scrollbar-gutter: stable;
+  --gutter: 40px;
+}
+
+@media (max-width: 719px) {
+  :root {
+    --gutter: 24px;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
 
 ::selection {
-  @apply bg-accent text-primary;
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+/* Layered so Tailwind colour utilities (also layered) win on anchors. */
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--color-accent);
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
-code[class*="language-"],
-pre[class*="language-"] {
-  @apply text-gray-800;
+/* ---------------------------------------------------------------------------
+   View transitions — docs/v3-redesign-plan.md §5.3.
+   Classes are referenced by `app/components/primitives/PageTransition.tsx`.
+   --------------------------------------------------------------------------- */
+::view-transition {
+  pointer-events: none;
 }
 
-pre::-webkit-scrollbar {
-  display: none;
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
 }
 
-pre {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
 }
 
-/* Remove Safari input shadow on mobile */
-input[type="text"],
-input[type="email"] {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
+@keyframes vt-slide-in-forward {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
 }
 
-/* Responsive Masonry: https://codepen.io/iamsaief/pen/jObaoKo */
-.masonry-wrapper > article > img,
-.masonry-wrapper {
-  display: grid;
-  grid-gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  grid-auto-rows: 300px;
-  grid-auto-flow: dense;
+@keyframes vt-slide-out-forward {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
 }
-.masonry-wrapper .wide {
-  @apply col-span-1 row-span-1 md:col-span-2;
+
+@keyframes vt-slide-in-back {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
 }
-.masonry-wrapper .tall {
-  @apply row-span-1 md:row-span-2;
+
+@keyframes vt-slide-out-back {
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
 }
-.masonry-wrapper .big {
-  @apply col-span-1 row-span-1 lg:col-span-2 lg:row-span-2;
+
+::view-transition-old(.vt-fade) {
+  animation: vt-fade-out var(--duration-base) var(--ease-reveal) both;
+}
+
+::view-transition-new(.vt-fade) {
+  animation: vt-fade-in var(--duration-base) var(--ease-reveal) both;
+}
+
+::view-transition-new(.vt-in) {
+  animation: vt-slide-in-forward var(--duration-slow) var(--ease-reveal) both;
+}
+
+::view-transition-old(.vt-out) {
+  animation: vt-slide-out-forward var(--duration-base) var(--ease-reveal) both;
+}
+
+::view-transition-new(.vt-in-back) {
+  animation: vt-slide-in-back var(--duration-slow) var(--ease-reveal) both;
+}
+
+::view-transition-old(.vt-out-back) {
+  animation: vt-slide-out-back var(--duration-base) var(--ease-reveal) both;
+}
+
+/* Shared-element morph: work card art → case-study hero media. */
+::view-transition-group(.vt-morph) {
+  animation-duration: var(--duration-slow);
+  animation-timing-function: var(--ease-geometry);
+}
+
+::view-transition-image-pair(.vt-morph) {
+  isolation: auto;
+}
+
+::view-transition-old(.vt-morph),
+::view-transition-new(.vt-morph) {
+  animation: none;
+  mix-blend-mode: normal;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------------------------------------------------------------------------
+   Grain overlay — replaces public/static/images/background-noise.png.
+   Zero JS, zero network: an inline SVG feTurbulence data URI.
+   Apply `.grain` to a positioned element; the noise paints as an ::after.
+   --------------------------------------------------------------------------- */
+.grain {
+  position: relative;
+  isolation: isolate;
+}
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  background-repeat: repeat;
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
 }

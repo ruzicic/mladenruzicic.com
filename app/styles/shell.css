@@ -1,0 +1,712 @@
+/* ---------------------------------------------------------------------------
+   shell.css — the ONLY global stylesheet owned by the site-shell agent.
+   `app/globals.css` (tokens, base, vt-* classes, .grain) belongs to the
+   foundation agent and is never edited from here.
+
+   Imported once, from `app/layout.tsx`, immediately after `./globals.css`.
+   Everything below is either (a) something Tailwind utilities cannot express
+   (view-transition pseudo-elements, `@starting-style`, scroll-driven
+   animations, `auto-fit` track lists) or (b) a state rule that has to survive
+   with JavaScript disabled.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* The design's stronger hairline (rgba(242,240,234,.35)); `--color-line` in
+     globals.css is the 12% one. Kept here so no component hardcodes a hex. */
+  --color-line-strong: rgba(242, 240, 234, 0.35);
+  /* Scroll progress 0→1. Written by the rAF fallback in ScrollHairline. */
+  --mr-scroll: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Persistent chrome — docs/v3-redesign-plan.md §5.3.
+   The header and the mobile pill live in the layout and must never crossfade
+   with the page during a view transition.
+   --------------------------------------------------------------------------- */
+::view-transition-group(site-header),
+::view-transition-old(site-header),
+::view-transition-new(site-header),
+::view-transition-group(site-header-scrim),
+::view-transition-old(site-header-scrim),
+::view-transition-new(site-header-scrim),
+::view-transition-group(site-pill),
+::view-transition-old(site-pill),
+::view-transition-new(site-pill) {
+  animation: none !important;
+  mix-blend-mode: normal;
+}
+
+/* ---------------------------------------------------------------------------
+   Header scrim — decision §10.6 ("verify difference over yellow surfaces").
+
+   `mix-blend-mode: difference` is only legible against a decisively dark or
+   decisively light backdrop. Over the accent yellow the off-white ink inverts
+   to a saturated blue, and over a mid-tone employer band (or the hero headline
+   scrolling past) it all but vanishes. Rather than drop the blend mode, we
+   guarantee the backdrop: a fixed gradient in the page background, painted
+   BELOW the header (z-40 against the header's z-50) so it is part of what the
+   header differences against.
+
+   Invisible over the dark ground — `--color-bg` over `--color-bg` — it only
+   shows where something bright scrolls into the header zone. The ramp is held
+   near-opaque past the ink (the header box is ~68px tall) and only then
+   released, because a HALF-darkened yellow is the one backdrop difference
+   cannot cope with.
+   --------------------------------------------------------------------------- */
+.header-scrim {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 40;
+  height: 116px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-bg) 95%, transparent) 0%,
+    color-mix(in srgb, var(--color-bg) 93%, transparent) 46%,
+    color-mix(in srgb, var(--color-bg) 78%, transparent) 62%,
+    color-mix(in srgb, var(--color-bg) 34%, transparent) 82%,
+    color-mix(in srgb, var(--color-bg) 0%, transparent) 100%
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   Preloader — §5.4.
+   The overlay is server-rendered so hydration is clean; visibility is decided
+   before paint by the inline <script> in <head> (`data-preloader="off"`), by
+   the reduced-motion query, and by the <noscript> guard in the layout.
+   --------------------------------------------------------------------------- */
+[data-testid="preloader"] {
+  opacity: 1;
+  transition: opacity 500ms var(--ease-reveal);
+}
+
+[data-testid="preloader"][data-phase="out"] {
+  opacity: 0;
+}
+
+html[data-preloader="off"] [data-testid="preloader"] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="preloader"] {
+    display: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Right-edge scroll hairline — §5.7.
+   Scroll-driven animation where it exists; the rAF fallback writes --mr-scroll.
+   --------------------------------------------------------------------------- */
+@keyframes mr-scroll-progress {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+[data-scroll-hairline] > span {
+  transform-origin: top center;
+  transform: scaleY(var(--mr-scroll, 0));
+}
+
+@supports (animation-timeline: scroll()) {
+  [data-scroll-hairline] > span {
+    animation: mr-scroll-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-scroll-hairline] {
+    display: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Selected work — the design's two-column row and the project-focus effect.
+   CSS-first: the resting state is fully visible, so nothing is hidden before
+   JavaScript runs. `data-work-focus="on"` is only set once the
+   IntersectionObserver has picked an active row.
+   --------------------------------------------------------------------------- */
+.mr-work-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+  gap: 40px 64px;
+  align-items: center;
+}
+
+[data-project] {
+  transition:
+    opacity 600ms var(--ease-reveal),
+    transform 600ms var(--ease-reveal);
+}
+
+/* WorkFocus marks the *most visible* row `data-active`; tab order has no
+   relationship to visibility, so focus regularly lands in a dimmed row.
+   `:focus-within` restores it to full contrast. No `filter: blur()` here —
+   a filter on an ancestor smears the descendant's own focus ring, so no
+   child outline can escape it; opacity alone carries the effect. */
+[data-work-focus="on"] [data-project]:not([data-active]):not(:focus-within) {
+  opacity: 0.35;
+  transform: scale(0.96);
+}
+
+/* ---------------------------------------------------------------------------
+   Mentoring — sticky column + bubbles.
+   --------------------------------------------------------------------------- */
+.mr-mentoring-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: 56px;
+  align-items: start;
+}
+
+/* ---------------------------------------------------------------------------
+   Work-history rail — §5.7, §5.8.
+   --------------------------------------------------------------------------- */
+[data-rail-scroller] {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  cursor: grab;
+}
+
+[data-rail-scroller]::-webkit-scrollbar {
+  display: none;
+}
+
+[data-rail-scroller][data-dragging="1"] {
+  cursor: grabbing;
+  scroll-behavior: auto;
+  user-select: none;
+}
+
+[data-rail-inner] {
+  transition: height 500ms var(--ease-geometry);
+}
+
+[data-rail-band] {
+  transition:
+    left 500ms var(--ease-geometry),
+    width 500ms var(--ease-geometry),
+    transform 250ms var(--ease-reveal),
+    opacity 250ms var(--ease-reveal),
+    background-color 300ms var(--ease-reveal),
+    box-shadow 400ms var(--ease-reveal);
+}
+
+/* ---------------------------------------------------------------------------
+   Band focus — one band forward, the rest back.
+
+   The same idea as the work rows: the thing you are pointing at comes up, its
+   neighbours drop back. `transform` and `opacity` only, so nothing here can
+   reflow the rail or move a year tick; the bands are absolutely positioned and
+   the ticks are siblings, not children.
+
+   `transform-origin: center` is set by the component: a band scales in place
+   rather than growing off its left edge.
+   --------------------------------------------------------------------------- */
+[data-rail-band] {
+  z-index: var(--band-z, 1);
+}
+
+@media (hover: hover) {
+  [data-rail-band]:not([data-expanded]):hover {
+    z-index: 3;
+    transform: scale(1.06);
+  }
+}
+
+[data-rail-band]:not([data-expanded]):has(:focus-visible) {
+  z-index: 3;
+  transform: scale(1.06);
+}
+
+/* While one band is open, the others stay back until it closes. */
+[data-rail-inner]:has([data-rail-band][data-expanded])
+  [data-rail-band]:not([data-expanded]) {
+  opacity: 0.3;
+}
+
+/* …and while one is merely hovered or focused, the same, more gently. Scoped
+   away from the expanded case so hovering a dimmed neighbour cannot dim the
+   open card. */
+[data-rail-inner]:not(:has([data-rail-band][data-expanded])):has(
+    [data-rail-band]:has(:focus-visible)
+  )
+  [data-rail-band]:not(:has(:focus-visible)) {
+  opacity: 0.4;
+}
+
+@media (hover: hover) {
+  [data-rail-inner]:not(:has([data-rail-band][data-expanded])):has(
+      [data-rail-band]:hover
+    )
+    [data-rail-band]:not(:hover) {
+    opacity: 0.4;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The open card — §5.8, redesigned.
+
+   Its ground is `--color-bg`, the page's own: the brand colour carries the card
+   instead, through the border, this ring, the scaled title, the labels and the
+   rules between sections. `--band-brand` and `--band-ink` are published by the
+   component; the ink is `brandInkOnDark(color)`, which is measured against this
+   exact ground.
+   --------------------------------------------------------------------------- */
+[data-rail-band][data-expanded] {
+  box-shadow:
+    0 40px 100px -20px rgba(0, 0, 0, 0.95),
+    0 0 0 1px var(--band-brand);
+}
+
+[data-rail-band][data-expanded]:hover,
+[data-rail-band][data-expanded]:focus-within {
+  box-shadow:
+    0 40px 100px -20px rgba(0, 0, 0, 0.95),
+    0 0 0 2px var(--band-brand),
+    0 0 0 7px color-mix(in oklab, var(--band-brand) 20%, transparent);
+}
+
+/* The hairline between an open card's sections. Brand, not the generic line
+   token, so the card reads as one company's page. */
+[data-band-rule] {
+  border-top: 1px solid color-mix(in oklab, var(--band-brand) 55%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   Title scaling — the band's mark, name and dates ARE the card's title.
+
+   Nothing is drawn twice: expanding grows these same nodes. `--band-mark` sizes
+   the mark (and, for a band with no logo, its letter), and the name grows into
+   the display face. Both ride the 500ms geometry easing the band's own
+   left/width use, so the title arrives with the card rather than after it.
+   --------------------------------------------------------------------------- */
+[data-band-head] {
+  --band-mark: 18px;
+}
+
+[data-rail-band][data-expanded] [data-band-head] {
+  --band-mark: 52px;
+}
+
+[data-band-mark] {
+  transition:
+    width 500ms var(--ease-geometry),
+    height 500ms var(--ease-geometry),
+    border-radius 500ms var(--ease-geometry),
+    font-size 500ms var(--ease-geometry);
+}
+
+[data-band-text] {
+  transition:
+    font-size 500ms var(--ease-geometry),
+    letter-spacing 500ms var(--ease-geometry),
+    color 300ms var(--ease-reveal);
+}
+
+[data-band-dates] > span:first-child {
+  transition: color 300ms var(--ease-reveal);
+}
+
+[data-rail-band][data-expanded] [data-band-button] {
+  height: auto;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 20px 22px 0;
+}
+
+[data-rail-band][data-expanded] [data-band-name] {
+  gap: 14px;
+  padding-right: 34px;
+  white-space: normal;
+}
+
+[data-rail-band][data-expanded] [data-band-text] {
+  overflow: visible;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--band-ink);
+}
+
+[data-rail-band][data-expanded] [data-band-dates] {
+  font-size: 11px;
+}
+
+/* ---------------------------------------------------------------------------
+   The expand affordance — one icon, two states (§10 decision: calm).
+
+   The ⤢ and the ✕ are the same three strokes. `transform-origin: 0 0` on the
+   two heads so `translate() rotate()` behaves exactly like the SVG transform
+   attribute would; the shaft rotates about the box centre instead.
+
+   The idle cue is a single outward nudge every 5.5s — the arrowheads pull apart
+   and settle. It exists so a first-time visitor learns the band is openable
+   without a tooltip, and it is deliberately small and rare so it never competes
+   with the hero. Hover and focus make it quicker and wider.
+   --------------------------------------------------------------------------- */
+[data-band-toggle-icon] [data-toggle-shaft],
+[data-band-toggle-icon] [data-toggle-head] {
+  transform-origin: 0 0;
+  transition: transform var(--duration-slow) var(--ease-pill);
+}
+
+[data-band-toggle-icon] [data-toggle-shaft] {
+  transform-origin: 8px 8px;
+}
+
+[data-toggle-head="ne"] {
+  --hint-x: 1px;
+  --hint-y: -1px;
+
+  transform: translate(12.5px, 3.5px) rotate(0deg);
+}
+
+[data-toggle-head="sw"] {
+  --hint-x: -1px;
+  --hint-y: 1px;
+
+  transform: translate(3.5px, 12.5px) rotate(180deg);
+}
+
+/* Closed: the heads meet in the middle at 45°, where their outward arms are the
+   ✕'s second diagonal and their inward arms lie on the shaft — which shortens
+   to 0.72 so all four arms of the ✕ match. */
+[data-rail-band][data-expanded] [data-toggle-head="ne"] {
+  transform: translate(8px, 8px) rotate(45deg);
+}
+
+[data-rail-band][data-expanded] [data-toggle-head="sw"] {
+  transform: translate(8px, 8px) rotate(225deg);
+}
+
+[data-rail-band][data-expanded] [data-toggle-shaft] {
+  transform: scale(0.72);
+}
+
+@keyframes band-toggle-hint {
+  0%,
+  74%,
+  100% {
+    translate: 0 0;
+  }
+
+  84%,
+  90% {
+    translate: var(--hint-x) var(--hint-y);
+  }
+}
+
+[data-rail-band]:not([data-expanded]) [data-toggle-head] {
+  animation: band-toggle-hint 5.5s var(--ease-pill) infinite;
+}
+
+[data-rail-band]:not([data-expanded]):hover [data-toggle-head],
+[data-rail-band]:not([data-expanded]):has(:focus-visible) [data-toggle-head] {
+  --hint-x: 1.8px;
+  --hint-y: -1.8px;
+
+  animation-duration: 1.6s;
+}
+
+[data-rail-band]:not([data-expanded]):hover [data-toggle-head="sw"],
+[data-rail-band]:not([data-expanded]):has(:focus-visible)
+  [data-toggle-head="sw"] {
+  --hint-x: -1.8px;
+  --hint-y: 1.8px;
+}
+
+[data-band-toggle] {
+  transition: border-color var(--duration-base) var(--ease-reveal);
+}
+
+[data-rail-band]:not([data-expanded]):hover [data-band-toggle],
+[data-rail-band]:not([data-expanded]):has(:focus-visible) [data-band-toggle] {
+  border-color: currentcolor;
+}
+
+/* ---------------------------------------------------------------------------
+   Band head — the container the narrow state is measured against.
+
+   `container-type` sits here, on a wrapper around the button only, and not on
+   the band itself: it computes to `contain: layout style inline-size`, and
+   containing the whole band would make it the containing block for the person
+   popovers inside the expanded panel.
+   --------------------------------------------------------------------------- */
+[data-band-head] {
+  /* The narrow-band threshold. Kept in lockstep with the literal in the
+     `@container band` condition below, which cannot read it. */
+  --band-narrow: 150px;
+
+  container: band / inline-size;
+  position: relative;
+  display: block;
+}
+
+/* The months a band shares with the newer one it is painted over. A hatch in
+   the covered band's colour, closed by a dashed rule exactly where that band
+   starts — the one edge the stack hides. The wash recesses the strip, so what
+   shows through the top band's 26%-alpha fill (the covered band's own border,
+   and its expand affordance when the join lands on it) reads as underneath
+   rather than as a second control. Width comes from the component, because only
+   it knows the two spans. */
+[data-band-overlap] {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  border-right: 1px dashed;
+  background-color: color-mix(in oklab, var(--color-bg) 55%, transparent);
+  pointer-events: none;
+}
+
+/* An expanded band is 480px of panel at a position of its own: there is no
+   join left to describe. */
+[data-rail-band][data-expanded] [data-band-overlap] {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Narrow bands — §5.7.
+
+   A ten-month span (HEGIAS, Jul 2020 – Apr 2021) is ~70px wide at the rail's
+   full 1800px, which fits neither the name nor "Jul 2020 – Apr 2021": both used
+   to render clipped mid-word. Under the threshold the band drops to its mark
+   with the expand affordance beneath it, and the full label moves to
+   `[data-band-tip]` on hover/focus. The button keeps its size, its click target
+   and its `aria-label`, so nothing is lost to a pointer, a keyboard or a screen
+   reader.
+
+   150px is the narrow-band threshold — the widest band that cannot hold a
+   two-date mono line plus the 28px affordance. It is written as a literal
+   because a container query cannot read a custom property; `--band-narrow` on
+   `[data-band-head]` above is the same number, and the two have to move
+   together.
+   --------------------------------------------------------------------------- */
+/* The label a mark-only band shows on hover or focus. Hidden outright at full
+   width, where the band already spells it out. Sits above the band, in the tick
+   gutter, so it never covers the neighbouring spans. */
+[data-band-tip] {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 1;
+  display: none;
+  translate: -50% 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-2);
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  color: var(--color-dim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms var(--ease-reveal);
+}
+
+@container band (width <= 150px) {
+  [data-band-button] {
+    align-items: center;
+    justify-content: center;
+    /* `--band-lead` is the share of the band its neighbour covers, so the mark
+       centres in the part that is still this band's alone. */
+    padding-inline: calc(2px + var(--band-lead, 0%)) 2px;
+  }
+
+  [data-band-name] {
+    padding-right: 0;
+  }
+
+  [data-band-text],
+  [data-band-dates] {
+    display: none;
+  }
+
+  [data-band-toggle] {
+    position: static;
+    height: 20px;
+    width: 20px;
+    font-size: 11px;
+  }
+
+  [data-band-tip] {
+    display: block;
+  }
+
+  [data-band-head]:hover > [data-band-tip],
+  [data-band-head]:has(:focus-visible) > [data-band-tip] {
+    opacity: 1;
+  }
+}
+
+/* The band clips its expanded panel, which would also clip the tip. Lifted only
+   while a collapsed band is hovered or holds focus, so the expanded panel keeps
+   its rounded corners. */
+[data-rail-band]:not([data-expanded]):hover,
+[data-rail-band]:not([data-expanded]):has(:focus-visible) {
+  overflow: visible;
+}
+
+/* ---------------------------------------------------------------------------
+   Mobile pill sheet — §5.6.
+   The Popover panel morphs out of the 220px pill: 999px → 22px radius.
+   --------------------------------------------------------------------------- */
+.mr-pill-sheet {
+  transition:
+    width 350ms var(--ease-pill),
+    border-radius 350ms var(--ease-pill),
+    opacity 200ms var(--ease-pill),
+    display 350ms allow-discrete,
+    overlay 350ms allow-discrete;
+}
+
+@starting-style {
+  .mr-pill-sheet:popover-open {
+    width: 220px;
+    border-radius: var(--radius-pill);
+    opacity: 0;
+  }
+}
+
+.mr-pill-sheet:not(:popover-open) {
+  width: 220px;
+  border-radius: var(--radius-pill);
+  opacity: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Employer scrubber — WCAG 2.5.8 (target size, minimum).
+
+   Segments are sized in years, and ten months of HEGIAS came to 14px of the
+   323px row: a target no thumb can hit, and too close to its neighbours for the
+   spacing exception. `min-width` floors every segment at the 24px minimum (the
+   flex algorithm freezes the floored one and re-divides the rest, so the row
+   still fits and the other five stay proportional), and the overlay grows the
+   6px bar to a 24px tall hit area without changing how the bar reads.
+   --------------------------------------------------------------------------- */
+[data-pill-scrubber] {
+  --pill-target-min: 24px;
+}
+
+[data-pill-scrubber] > li {
+  min-width: var(--pill-target-min);
+}
+
+[data-pill-segment] {
+  position: relative;
+}
+
+[data-pill-segment]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  /* Negative: the bar is 6px tall, so this reaches 9px past each edge. */
+  inset-block: calc((100% - var(--pill-target-min)) / 2);
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion — §5.3, §9. Everything the shell animates goes quiet.
+   (globals.css already zeroes the ::view-transition-* pseudo-elements.)
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  [data-project],
+  [data-rail-inner],
+  [data-rail-band],
+  [data-band-tip],
+  [data-band-mark],
+  [data-band-text],
+  [data-band-toggle],
+  [data-band-toggle-icon] [data-toggle-shaft],
+  [data-band-toggle-icon] [data-toggle-head],
+  .mr-pill-sheet {
+    transition: none !important;
+  }
+
+  /* The "click me" cue is the one thing here that moves on its own. It goes
+     first. The icon still reads as ⤢ and ✕ — those are transforms, not the
+     animation. */
+  [data-rail-band] [data-toggle-head] {
+    animation: none !important;
+  }
+
+  /* Selector kept in lockstep with the dim rule above: it has to tie on
+     specificity for source order to win. */
+  [data-work-focus="on"] [data-project]:not([data-active]):not(:focus-within) {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* No scale, and no hover/focus dimming: with transitions off, a pointer
+     crossing the rail would flash five bands at 40% on every entry and exit.
+     The open card keeps its dim — that is a state, not a hover effect. */
+  [data-rail-band]:not([data-expanded]):hover,
+  [data-rail-band]:not([data-expanded]):has(:focus-visible) {
+    transform: none;
+  }
+
+  [data-rail-inner]:not(:has([data-rail-band][data-expanded])):has(
+      [data-rail-band]:hover
+    )
+    [data-rail-band]:not(:hover),
+  [data-rail-inner]:not(:has([data-rail-band][data-expanded])):has(
+      [data-rail-band]:has(:focus-visible)
+    )
+    [data-rail-band]:not(:has(:focus-visible)) {
+    opacity: 1;
+  }
+
+  [data-scroll-hairline] > span {
+    animation: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Nav-pending hairline — the styles for `primitives/NavPending`.
+
+   Lives here rather than in a `<style>` element the component renders, because
+   `NavPending` is a child of an `<a>`: a `<style>` there is invalid nesting
+   that browsers merely tolerate, and it was re-inserted on every pending
+   navigation. The 100ms delay is what keeps a prefetched (instant) navigation
+   from flashing it at all.
+   --------------------------------------------------------------------------- */
+@keyframes nav-pending {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes nav-pending-show {
+  to {
+    opacity: 1;
+  }
+}
+
+[data-nav-pending] {
+  opacity: 0;
+  animation:
+    nav-pending 1.4s var(--ease-reveal) 100ms forwards,
+    nav-pending-show 1ms linear 100ms forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-nav-pending] {
+    animation: nav-pending-show 1ms linear 100ms forwards;
+    transform: scaleX(1);
+  }
+}

@@ -1,0 +1,111 @@
+---
+slug: "studenti-rs"
+title: "studenti.rs"
+shortTitle: "studenti.rs"
+kind: "product"
+status: "active"
+featured: true
+highlightRank: 5
+# No `company`. studenti.rs is his own product: he built it in 2008 while
+# employed at Nemestic and acquired the platform from them in 2022, so
+# attributing the entry to the employer would be wrong. The Nemestic
+# connection is told in `detail` and in the body's "Role and scope", and the
+# Nemestic band on the homepage timeline still carries it in prose.
+period:
+  from: "2008"
+  to: "now"
+updated: "2026-09-03"
+role: "Original developer, later owner and operator"
+location: "Serbia"
+accent: "#E8622C"
+logo: "/static/logos/work/studenti-rs.svg"
+tech:
+  - "PHP"
+  - "WordPress"
+  - "Cloudflare"
+  - "Hetzner"
+  - "RAG"
+  - "Agents"
+line: "Serbian student platform, running since 2008. Built it as a student, bought it back in 2022."
+detail: "A long-running Serbian student community and document library. I built it in 2008 while working at Nemestic, my first job in tech, and acquired the platform from them in 2022 — then rebuilt it, monetised it with PRO subscriptions, and now run its moderation, payments and operations almost entirely on automation."
+url: "https://studenti.rs"
+links:
+  - label: "studenti.rs"
+    url: "https://studenti.rs"
+metrics:
+  - value: "250k"
+    label: "registered users"
+    confidence: "verified"
+  - value: "45k"
+    label: "documents"
+    confidence: "verified"
+  - value: "2008"
+    label: "running continuously since"
+    confidence: "verified"
+media:
+  - src: "/static/work/studenti-rs/1440x1000.webp"
+    alt: 'studenti.rs homepage in Serbian on a desktop browser: a green header with search, three pills reading "aktivni od 2008", "250.000+ studenata" and "40.000+ dokumenata", the headline "Uči brže uz materijale sa tvog fakulteta.", two call-to-action buttons, and a row of Serbian universities.'
+    caption: "studenti.rs homepage, 1440×1000 viewport."
+    width: 2880
+    height: 2000
+    kind: "image"
+    blurDataURL: "data:image/webp;base64,UklGRkYAAABXRUJQVlA4IDoAAACwAQCdASoQAAsAA4BaJYwAAugu9iDYAP7yFuC/4cTh8l58Q2Qxhyx8OhwDyrm6QnSkcy234TU6xAAA"
+  - src: "/static/work/studenti-rs/834x1112.webp"
+    alt: 'studenti.rs homepage at tablet width: the green header, the three pills, the headline "Uči brže uz materijale sa tvog fakulteta.", the two call-to-action buttons, the university list, and the start of the next section, "Jedna platforma. Svi studentski materijali."'
+    caption: "studenti.rs homepage, 834×1112 viewport."
+    width: 1668
+    height: 2224
+    kind: "image"
+    blurDataURL: "data:image/webp;base64,UklGRngAAABXRUJQVlA4IGwAAADwAwCdASoQABUAPu1iqU2ppaQiMAgBMB2JZQAAXKdZkIGDhwFjpBv4AP7VF7FsUSmKUYCWLij9K5fPPGF2UWvxjw2mj0kNuzhvwmrDaGFVGWQ+jDcu5It6RrA1klIw3wabGcev5w8P8klgAAA="
+  - src: "/static/work/studenti-rs/390x844.webp"
+    alt: 'studenti.rs homepage on a phone: the green header with a search field and menu button, the pills wrapped onto two lines, the headline "Uči brže uz materijale sa tvog fakulteta.", the two call-to-action buttons, and the university list.'
+    caption: "studenti.rs homepage, 390×844 viewport."
+    width: 780
+    height: 1688
+    kind: "image"
+    blurDataURL: "data:image/webp;base64,UklGRpQAAABXRUJQVlA4IIgAAACwBACdASoQACMAPulep02pJSOiNVgIASAdCWMAAD6jjqbhdg0HhrrgX3bF0RQAAOJmbxbAES9xQpmieufjBLsKAtPeTJYqtY7FZx0qqmG9WndZGCf1xZo/tNiDWy+WyTSN2NvWFucRXMy88HYhtAWKQXR1wihi9noSRG1zj5YcXP21s5JXmEAA"
+confidentiality: "public"
+seo:
+  title: "studenti.rs — a student platform, eighteen years running"
+  description: "A Serbian student community and document library built in 2008, bought back in 2022, rebuilt and monetised, with operations run largely by agents."
+---
+
+## Summary
+
+studenti.rs is a Serbian student platform I built in 2008, as a student, for the company I worked at. It kept running. In 2022 I bought it back, rebuilt it, and turned it into a small business I operate almost entirely through automation. It is the longest feedback loop I have on any decision I have ever made.
+
+## Role and scope
+
+Original developer in 2008, while working at [Nemestic](/#band-nemestic) — my first job in tech, taken while I was still studying. Owner and sole operator since 2022, when I acquired the platform from them: product, rebuild, infrastructure, moderation policy, monetisation, support and the agent systems that run the day-to-day.
+
+## Context
+
+Students need material — notes, past exams, documents — and a place to ask each other things. The platform accumulated both for well over a decade, along with the search visibility that comes from being the thing that was there first and never went away. That audience is the asset. It is also a moderation liability, because a user-generated document library attracts exactly what you would expect.
+
+## Problem
+
+An old platform carries two debts. The technical one is obvious and boring. The operational one is the real constraint: user-generated content needs review, payments need handling, reports need answering, and a single owner with a full-time job cannot be the queue. Before 2022 the site survived on neglect, which caps what it can be.
+
+## Decisions
+
+Buying it back was the first decision, and the reasoning was simple: the audience and the archive were real and irreplaceable, and the code was not. So the code got replaced.
+
+Monetisation went to PRO subscriptions rather than to more advertising. Ads on a student site pay badly and make the product worse for the people using it most.
+
+Operations were automated rather than staffed. Content approval, triage, scheduling, payments, reimbursements and report handling run through an agent system on infrastructure split between Cloudflare and self-hosted machines at Hetzner. An internal RAG layer with hybrid search gives it the platform's own history to answer from, so decisions are consistent with precedent rather than reinvented each time.
+
+Automation runs on policy, not on vibes. The rules for what is acceptable are written down, the agent applies them, and edge cases escalate to me. Automating a judgment you have not made yourself only produces a faster wrong answer.
+
+## Contribution
+
+Built the original platform in 2008. Bought it, rebuilt it and now run it: architecture, infrastructure, subscriptions, moderation policy, and the operational agents that handle approvals, payments, infrastructure health, dependency updates, bug fixes and analytics.
+
+## Outcome
+
+Eighteen years live, a quarter of a million registered users, tens of thousands of documents, and a subscription product — all operated part-time by one person. Revenue figures stay private.
+
+## Learnings
+
+Longevity is a strategy. A product that simply keeps working for a decade accumulates an audience and a search position that money cannot easily buy.
+
+Operational load, not feature work, is what kills solo products. Every hour of manual review is an hour the product cannot grow, which makes automating operations a product decision rather than an engineering indulgence.
