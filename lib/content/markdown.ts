@@ -5,6 +5,7 @@ import {
   getHome,
   getMentoring,
   getPage,
+  getPeopleForCompany,
   getSite,
   getTestimonials,
   getWork,
@@ -203,6 +204,23 @@ export function workMarkdown(slug: string): string | undefined {
       "## Links",
       "",
       ...entry.links.map((l) => `- [${l.label}](${l.url})`),
+      ""
+    )
+  }
+
+  // Mirrors the `WorkedAlongside` section on the HTML page. Name, the line that
+  // says what we did together, and the profile — the `note` stays on the page,
+  // because it is the owner's read of someone else's career and does not belong
+  // in a file an aggregator will quote out of context.
+  const alongside = getPeopleForCompany(entry.company)
+  if (alongside.length > 0) {
+    lines.push(
+      "## Worked alongside",
+      "",
+      ...alongside.map(
+        (person) =>
+          `- **${person.name}** — ${person.why}${person.linkedin ? ` <${person.linkedin}>` : ""}`
+      ),
       ""
     )
   }

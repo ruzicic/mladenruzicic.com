@@ -19,6 +19,7 @@ import {
   PrevNextWork,
   Prose,
   RelatedWork,
+  WorkedAlongside,
 } from "../../components/work-system"
 
 type Params = { slug: string }
@@ -124,6 +125,9 @@ export default async function WorkDetailPage({
 
         <Container className="pb-[72px] md:pb-[96px]">
           <div className="grid gap-16">
+            {/* After the body, before the neighbours: the people are part of
+                this chapter, not a suggestion of where to go next. */}
+            <WorkedAlongside entry={entry} />
             <RelatedWork entry={entry} />
             <PrevNextWork entry={entry} />
           </div>

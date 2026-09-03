@@ -196,6 +196,25 @@ export function getPeople(): Person[] {
   return PEOPLE
 }
 
+/**
+ * The people attached to one timeline band, in the order that band lists them.
+ *
+ * The association lives on the company (`Company.people`), not on the person, so
+ * this is the only correct direction to read it from. A work entry reaches it
+ * through its own `company` field: `/work/wolkabout` and `/work/hegias` are the
+ * two case studies that have anybody today. Unknown ids and unknown companies
+ * both yield an empty list, which is the signal to render no section at all.
+ */
+export function getPeopleForCompany(id: string | undefined): Person[] {
+  if (!id) return []
+  const company = getCompany(id)
+  if (!company) return []
+  const people = getPeople()
+  return company.people
+    .map((personId) => people.find((person) => person.id === personId))
+    .filter((person): person is Person => Boolean(person))
+}
+
 /** Mentee feedback. Pass `{ featured: true }` for the six homepage bubbles. */
 export function getTestimonials(options?: {
   featured?: boolean

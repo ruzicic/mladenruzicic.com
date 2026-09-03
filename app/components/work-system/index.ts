@@ -44,6 +44,7 @@ export {
 } from "./taxonomy"
 export { WorkArt, type WorkArtProps } from "./WorkArt"
 export { WorkCard, type WorkCardProps } from "./WorkCard"
+export { WorkedAlongside, type WorkedAlongsideProps } from "./WorkedAlongside"
 export {
   WorkExplorer,
   type ExplorerGroup,
