@@ -4,7 +4,7 @@ Everything in `content/` that is flagged `needs-verification`, deliberately left
 
 Rule applied throughout: no placeholder strings, no private metrics, and no invented facts. Where a required field had no source, it carries `approx: true` and appears below.
 
-**Last closed:** 2026-09-02, against the owner's LinkedIn profile, the live studenti.rs / Chrome Web Store / Mozilla Add-ons listings and Google Search Console. Every employment date, the ZF, Shopify, studenti.rs, FontAlternatives and FontSwap metrics, and the "worked alongside" entries came out of that pass; what is left below is what those sources could not settle.
+**Last closed:** 2026-09-03, on the owner's own answers. That pass settled the Boxium domain (`boxium.ch`, live, with a mark and screenshots), Nunium (screenshots taken before the site comes down, the live link replaced with a Wayback capture), the FontAlternatives start date (January 2026), the three Serbian surnames, the ZF adoption percentages, Josip Kozić's profile and photo, and studenti.rs's attribution (his own product, not Nemestic's). The 2026-09-02 pass before it settled the employment dates, the ZF / Shopify / studenti.rs / FontAlternatives / FontSwap metrics and the "worked alongside" entries against LinkedIn, the live listings and Search Console. What is left below is what neither pass could settle.
 
 ---
 
@@ -12,7 +12,7 @@ Rule applied throughout: no placeholder strings, no private metrics, and no inve
 
 **studenti.rs predates the Nemestic band by two years.** Nemestic now runs Feb 2010 – Jul 2011, but studenti.rs went live in 2008 and the case study calls you its original developer. The band summary says so plainly ("it went live in 2008; the contract dates on this band start later, in 2010"), and `SITE.yearsShipping` is anchored on the product rather than on employment. Confirm that is the right story — were you building for the studio before you were formally on its books, or did studenti.rs start somewhere else?
 
-**Logos.** `public/static/logos/mono/` now holds all six employer marks (ZF SCALAR, Shopify, HEGIAS, WolkAbout, Execom, Nemestic), and `public/static/logos/work/` holds seventeen project marks — see the provenance and licensing notes in each directory's `SOURCES.md`. `content/companies.ts` and every `content/work/*.mdx` `logo` field point at real files. Decide only whether you are comfortable with third-party trademarks (ZF, Shopify, HEGIAS, WolkAbout, Trello, Internxt) being etched on the hero shards under nominative fair use — the sourcing notes lay out the reasoning.
+**Logos.** `public/static/logos/mono/` now holds all six employer marks (ZF SCALAR, Shopify, HEGIAS, WolkAbout, Execom, Nemestic), and `public/static/logos/work/` holds eighteen project marks — see the provenance and licensing notes in each directory's `SOURCES.md`. `content/companies.ts` and every `content/work/*.mdx` `logo` field point at real files. Decide only whether you are comfortable with third-party trademarks (ZF, Shopify, HEGIAS, WolkAbout, Trello, Internxt) being etched on the hero shards under nominative fair use — the sourcing notes lay out the reasoning.
 
 **Shopify colour, resolved.** The band is `#95BF47`, sampled from the official bag asset (`shopify_glyph.svg` in Shopify's own brand-assets zip). `content/companies.ts` and `content/work/shopify.mdx` both carry it now; the old `#96BF48` placeholder is gone.
 
@@ -20,16 +20,14 @@ Rule applied throughout: no placeholder strings, no private metrics, and no inve
 
 ## content/people.ts
 
-- **The `note` lines are mine, not yours.** Each one is assembled from the person's own public profile — current role, shared employers, overlap years — because that is all a profile supports. They read as accurate rather than as warm. **Replace them with your own sentences before launch;** this is the one place on the site where a generic line is worse than none.
-- **Diacritics on three surnames.** LinkedIn prints "Tamara Radic", "Milena Pajic" and "Radovan Skendzic" stripped. The site ships Radić, Pajić and Skendžić, consistent with its own spelling of Ružičić and Šćekić. Confirm with each of them, or drop the diacritics — spelling somebody's name for them is a choice worth being sure about.
-- **Josip Kozić has no profile URL and no `note`.** He ships with `why` alone, which is the intended fallback. Send a URL and a sentence if you want him at parity with the other four.
-- **Photos are LinkedIn screenshots.** `public/static/people/*.webp` are 320×320 crops of 570px profile images, captured 2026-09-02, not originals. They are fine at the sizes the popover uses. Worth asking the four of them whether they mind their photo being here at all.
+- **All five now have a LinkedIn URL, a photo, a `why` and a `note`.** Josip Kozić came to parity on 2026-09-03, on the owner's supplied profile link. Nothing structural is missing from this file any more.
+- **The `note` lines are mine, not yours.** Each one is assembled from the person's own public profile — current role, shared employers, overlap years — because that is all a profile supports. They read as accurate rather than as warm. **Replace all five with your own sentences before launch;** this is the one place on the site where a generic line is worse than none.
+- **Photos are LinkedIn screenshots.** `public/static/people/*.webp` are 320×320 crops of 570px profile images, captured 2026-09-02 (Josip's on 2026-09-03), not originals. They are fine at the sizes the popover uses. Worth asking the five of them whether they mind their photo being here at all.
 
 ---
 
 ## content/work/zf-scalar.mdx
 
-- **ZF sign-off.** The adoption numbers are back as deliberately coarse public shapes — `~45%` of product teams at handover and `~50` components at full adoption, both `verified` on your say-so. Team headcount is dropped for good. If ZF has actually cleared these, say so here; if nobody has been asked, that is the last thing standing between this page and launch.
 - Confidentiality is `limited`: no screenshots, no internal tooling names, no roadmap detail. Dossier §12 asks which ZF visuals can be shown — currently none are referenced.
 - No `links`. Is there a public ZF SCALAR or Velocity page worth linking to?
 
@@ -57,25 +55,24 @@ Rule applied throughout: no placeholder strings, no private metrics, and no inve
 - **No metrics at all**, by design. Users, traffic and revenue are private per the dossier. If you want anything public (e.g. cantons covered, sources monitored, languages), say which.
 - The AI section names ARGUS and Graphiti in the dossier; both are described generically here ("long-running agents", "a memory layer") to avoid exposing internals. Name them publicly?
 - Nothing about ingestion or scraping mechanics is described, per the dossier's instruction.
-- No screenshots. Dossier §12 asks for them; none exist in the repo.
 
 ## content/work/studenti-rs.mdx
 
 - `45k` documents is now `verified` on your confirmation, alongside `250k` registered users. Note the live homepage badges round to **40.000+** and **250.000+**, so a visitor who clicks through sees a smaller document number than the case study claims. Worth reconciling one way or the other.
 - Revenue is stated as private in the body and no figure appears anywhere.
 - The 2008 build date and the 2022 buy-back are treated as verified (both appear on the current site).
-- No screenshots.
+- **`company: "nemestic"` is gone** (2026-09-03, your call): studenti.rs is your product, not the employer's. The Nemestic connection now lives in `detail` and in "Role and scope", which links to the Nemestic band on the homepage timeline, and the band's own summary and `fact` still carry it. Nothing else read `company` for this entry except the case-study and card chips, which now show the role instead.
 
 ## content/work/fontalternatives.mdx
 
-- **Start year `2023` looks wrong.** It is still `approx: true`, and two independent sources say 2026: your own LinkedIn project entry dates FontAlternatives **Jan 2026 – Present**, and Search Console shows the property with no data at all before January 2026. The new chart on the page makes that visible — it starts flat in January 2026. Left untouched because you did not ask for it, but a reader will notice. Confirm 2026-01, or explain what shipped in 2023.
-- Traffic metrics are `verified` and dated: `16.4K` monthly visits (mid-2026) and `28.3K` Google search clicks over the 16-month Search Console window. Both go stale — decide how often you want to refresh them, or drop the monthly-visits figure and keep only the chart.
+- **Start date settled:** `2026-01`, confirmed by you on 2026-09-03, and `approx` is gone. It matches your LinkedIn project entry (Jan 2026 – Present) and the Search Console chart, which starts flat in January 2026. The homepage timeline's independent row now prints 2026 next to the marker.
+- Traffic metrics are `verified` and dated: `16.4K` monthly visits (mid-2026) and `28.3K` Google search clicks over the 16-month Search Console window. Both go stale — decide how often you want to refresh them, or drop the monthly-visits figure and keep only the chart. Note the window now starts before the project does: it is the property's 16 months to August 2026, and the chart shows why the first eight are flat.
 - The dossier mentions an article documenting the content flywheel. **Reference removed** because `/notes` is deferred and there is nowhere to link. Where is it published?
 
 ## content/work/fontswap.mdx
 
 - `309` Chrome Web Store users, read from the live listing on 2026-09-02 and dated in the label so it ages honestly. It is still a live counter; re-read it at launch.
-- Period `2024 – now`, `approx: true` — **no source for the start date at all.** Guessed from its relationship to FontAlternatives, and suspect for the same reason FontAlternatives' 2023 is.
+- Period `2024 – now`, `approx: true` — **no source for the start date at all.** Guessed from its relationship to FontAlternatives, which is now dated January 2026, so a 2024 FontSwap cannot be right either. Give it a real date.
 
 ## content/work/avataurus.mdx
 
@@ -93,7 +90,9 @@ Rule applied throughout: no placeholder strings, no private metrics, and no inve
 
 - Period `2024 – 2025`, `approx: true` — **no source.**
 - Framed as "paused because of time constraints", per the failure-framing rules. The body says TenderLift took the hours; confirm that is the reason you want in public.
-- Links to `boxium.com` — confirm the domain still resolves and shows something reasonable.
+- **Domain settled:** the product is at `boxium.ch` (2026-09-03, your answer); `boxium.com` is parked and belongs to someone else. `url`, `links`, three screenshots and a mark derived from the site's own favicon all ship now.
+- **`status` stays `paused` while boxium.ch is live and selling.** That is your call and it is recorded here, but a reader who clicks through sees a working service with a phone number and a price. Say if "paused" should become something else.
+- The `tech` list says Next.js / TypeScript / Postgres; boxium.ch is served as a static Astro build. If the shipped site is not the product you built, the list needs revisiting.
 
 ## content/work/panciona.mdx
 
@@ -118,7 +117,8 @@ Rule applied throughout: no placeholder strings, no private metrics, and no inve
 ## content/work/nunium.mdx
 
 - Period `2022`, `approx: true` — **no source.** Guessed.
-- **`url` omitted** for the same reason as FlexMatch; the dossier lists `nunium.com`.
+- **`url` deliberately omitted, and it stays that way.** nunium.com still resolves, but you are taking it down, so a live link would rot. The entry links the Wayback capture of 2025-02-21 instead — the only 200-status snapshot of the domain the Archive holds, and it renders with its CSS. If the site goes down before the Archive takes another copy, that snapshot is all that will be left; consider saving a fresh one at <https://web.archive.org/save/https://nunium.com/> before it disappears.
+- `status: "archived"` is confirmed and the three screenshots were taken on 2026-09-03, with each caption saying so.
 - Cofounders described as "two friends in Germany" per the dossier, unnamed.
 
 ## content/work/internxt.mdx
@@ -139,7 +139,8 @@ Rule applied throughout: no placeholder strings, no private metrics, and no inve
 
 ## All work entries
 
-- **Screenshots landed for three entries.** TenderLift, studenti.rs and FontAlternatives each ship three viewport shots (1440×1000, 834×1112, 390×844) with `blurDataURL`s in `public/static/work/`; FontAlternatives also carries a Search Console traffic chart (`search-console-16m.webp`). The shader header still stands in everywhere else. Panciona, FlexMatch and Boxium have no usable Wayback capture to shoot from — they need to be run from the owner's GitHub repos instead. Hi Fam has no URL and no artwork at all, so it cannot get a screenshot by any route. Nunium is live and linked (`nunium.com`) but its `status` is still `archived`; confirm whether that is right before it becomes a screenshot candidate. FontSwap's mark is traced from its 128 px Chrome Web Store icon — see `public/static/logos/work/SOURCES.md` — rather than a real screenshot.
+- **Screenshots landed for five entries.** TenderLift, studenti.rs, FontAlternatives, Boxium and Nunium each ship three viewport shots (1440×1000, 834×1112, 390×844) with `blurDataURL`s in `public/static/work/`; FontAlternatives also carries a Search Console traffic chart (`search-console-16m.webp`). The shader header still stands in everywhere else.
+- **Hi Fam, Panciona and FlexMatch: you are supplying these yourself, from your GitHub repos at <https://github.com/ruzicic>.** None of the three has a live site or a usable Wayback capture to shoot from, so they have to be run locally. Nothing else is blocking those entries; drop the images in `public/static/work/<slug>/` and add the `media` block. FontSwap's mark is traced from its 128 px Chrome Web Store icon — see `public/static/logos/work/SOURCES.md` — rather than a real screenshot.
 - **`evo-touch` is `confidentiality: limited`** even though it is `kind: product`, because it is ZF work. The contract only says companies default to `limited`. Confirm that is right; if EVO Touch is a fully public product, it could be `public` — but the metrics and screenshots would still be ZF's call.
 - **Length interpretation.** The brief specified 250–600 words for "featured and company entries" and 80–150 for "experiments". Non-featured products (FontSwap, Boxium, Panciona, Hi Fam, FlexMatch, Nunium, Internxt, mladenruzicic.com) were not covered by either bracket; I put them all in the short bracket, which keeps the work index scannable. Say if any of them deserve full case studies — Panciona and FlexMatch have the most substance available.
 - **Accents** for entries the brief did not specify: FontSwap `#CFCAC0`, Avataurus `#7B5CD6`, MontePop `#3FB68B`, Boxium `#8A9BA8`, Panciona `#A8574B`, Hi Fam `#D45D79`, FlexMatch `#4B9CD3`, Nunium `#5E8B7E`, Internxt `#4B6FE0`, Trello Boosted Boards `#0079BF`, mladenruzicic.com `#939597`.
@@ -183,5 +184,5 @@ Rule applied throughout: no placeholder strings, no private metrics, and no inve
 
 - **Not owned by this file:** `content/site.ts` and `content/testimonials.ts` belong to the other agent. The contact email, LinkedIn, GitHub, MentorCruise and calendar URLs used in `about.mdx` and `mentoring.ts` should match whatever lands in `SITE.links`.
 - **Spelling** is British-leaning ("summarise", "optimisation", "monetised") except where a proper noun or an existing published string says otherwise. Switch the whole content directory to US spelling if you prefer; it should be consistent either way.
-- **Serbian orthography**: "Ružičić", "Radić", "Pajić", "Skendžić", "Šćekić", "Kozić" all carry diacritics. The font subset must include latin-ext (the plan already specifies this). Three of those spellings are the site's choice rather than the person's own — see `content/people.ts` above.
+- **Serbian orthography**: "Ružičić", "Radić", "Pajić", "Skendžić", "Šćekić", "Kozić" all carry diacritics. The font subset must include latin-ext (the plan already specifies this). Every spelling is confirmed by the owner (2026-09-03), including the three LinkedIn prints stripped.
 - **The word "tokenmaxing" does not appear anywhere** in this content, per the dossier's instruction to keep it to notes and essays.
