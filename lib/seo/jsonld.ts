@@ -57,14 +57,19 @@ import {
 const site = getSite()
 const ORIGIN = site.url
 
+const nodeBase = (path: string) =>
+  path === "/" ? `${ORIGIN}/` : canonical(path)
+
 const ID = {
   person: `${ORIGIN}/#person`,
   website: `${ORIGIN}/#website`,
   headshot: `${ORIGIN}/#headshot`,
   tenderliftOrg: `${ORIGIN}/#org-tenderlift`,
   entity: (slug: string) => `${ORIGIN}/work#${slug}`,
-  page: (path: string) => `${canonical(path)}#webpage`,
-  breadcrumb: (path: string) => `${canonical(path)}#breadcrumb`,
+  // `/` is `<origin>/#webpage`, like `/#person`: `canonical("/")` has no
+  // trailing slash, so it cannot be the base here.
+  page: (path: string) => `${nodeBase(path)}#webpage`,
+  breadcrumb: (path: string) => `${nodeBase(path)}#breadcrumb`,
 } as const
 
 type Node = Record<string, unknown>

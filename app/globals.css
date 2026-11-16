@@ -58,11 +58,14 @@
     255 255 255 / 0.34
   ); /* button edge on night */
 
-  /* Type */
+  /* Type. Right after each web font, its metric fallbacks (the faces below
+     this block): the face for Apple and Windows, then the one for Android. */
   --font-display:
-    var(--font-geist-serif-regular), "Times New Roman", Times, serif;
+    var(--font-geist-serif-regular), "Geist Serif Fallback Times",
+    "Geist Serif Fallback Noto", "Times New Roman", Times, serif;
   --font-sans:
-    var(--font-geist-sans), -apple-system, "Helvetica Neue", Arial, sans-serif;
+    var(--font-geist-sans), "Geist Fallback Arial", "Geist Fallback Roboto",
+    -apple-system, "Helvetica Neue", Arial, sans-serif;
   --font-mono:
     var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -100,6 +103,81 @@
   --duration-base: 200ms; /* fades */
   --duration-moderate: 240ms; /* sheets in, headline swap */
   --duration-slow: 320ms; /* list expand */
+}
+
+/* ---------------------------------------------------------------------------
+   Metric fallbacks for Geist and Geist Serif: what a slow first visit reads
+   until the web font swaps in (`display: swap`), sized so the text wraps as
+   it will in Geist and nothing moves at the swap. Each `size-adjust` is
+   Geist's advance width over the fallback's, measured on the site's own
+   copy; the overrides are Geist's ascent (1005) and descent (295) over that
+   `size-adjust`. How and why: `app/fonts.ts`, "METRIC FALLBACKS".
+
+   `local()` lists the full name, then the PostScript name. A face whose font
+   is not installed is skipped and the next family is tried: Arial is on
+   macOS, iOS and Windows (Helvetica and Liberation Sans share its widths),
+   Roboto and Noto Serif are Android's system faces. No bold cut: 500 and 600
+   draw the regular one at Geist Medium's widths (`font-synthesis: none`).
+   --------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Geist Fallback Arial";
+  src:
+    local("Arial"), local("ArialMT"), local("Helvetica"),
+    local("Liberation Sans"), local("LiberationSans");
+  font-weight: 400;
+  size-adjust: 103.1%;
+  ascent-override: 97.48%;
+  descent-override: 28.61%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Geist Fallback Arial";
+  src:
+    local("Arial"), local("ArialMT"), local("Helvetica"),
+    local("Liberation Sans"), local("LiberationSans");
+  font-weight: 500 600;
+  size-adjust: 104.86%;
+  ascent-override: 95.84%;
+  descent-override: 28.13%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Geist Fallback Roboto";
+  src: local("Roboto"), local("Roboto-Regular"), local("Roboto Regular");
+  font-weight: 400;
+  size-adjust: 103.01%;
+  ascent-override: 97.56%;
+  descent-override: 28.64%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Geist Fallback Roboto";
+  src: local("Roboto"), local("Roboto-Regular"), local("Roboto Regular");
+  font-weight: 500 600;
+  size-adjust: 105.49%;
+  ascent-override: 95.27%;
+  descent-override: 27.96%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Geist Serif Fallback Times";
+  src:
+    local("Times New Roman"), local("TimesNewRomanPSMT"),
+    local("Liberation Serif"), local("LiberationSerif");
+  font-weight: 400;
+  size-adjust: 111.7%;
+  ascent-override: 89.97%;
+  descent-override: 26.41%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Geist Serif Fallback Noto";
+  src: local("Noto Serif"), local("NotoSerif-Regular"), local("NotoSerif");
+  font-weight: 400;
+  size-adjust: 94.5%;
+  ascent-override: 106.35%;
+  descent-override: 31.22%;
+  line-gap-override: 0%;
 }
 
 /* ---------------------------------------------------------------------------

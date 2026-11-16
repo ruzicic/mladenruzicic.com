@@ -29,5 +29,3 @@ font's `ELSH = 0` instance), the only serif shape the site uses. Result:
 
 When the `geist` package is upgraded, re-copy the two sans/mono files and
 re-convert the serif the same way.
-
-Gloock and JetBrains Mono (the v3 pairing) were removed with the v3 cards.

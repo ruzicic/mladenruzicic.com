@@ -31,6 +31,13 @@ import {
   type Testimonial,
   type WorkEntry,
 } from "@/lib/content/schema"
+import {
+  API_CATALOG_URL,
+  MCP_TOOL_NAMES,
+  MCP_URL,
+  SERVER_CARD_URL,
+} from "@/lib/mcp/info"
+import { CONTENT_SIGNAL } from "@/lib/seo/robots"
 import { isTwinRoute, TWIN_ROUTES } from "@/lib/seo/twins"
 import { DIAGRAMS } from "@/content/diagrams"
 
@@ -50,6 +57,20 @@ import { DIAGRAMS } from "@/content/diagrams"
 
 export const MD_CONTENT_TYPE = "text/markdown; charset=utf-8"
 export const TXT_CONTENT_TYPE = "text/plain; charset=utf-8"
+
+/**
+ * The headers every markdown and llms text response carries for agents:
+ * `x-markdown-tokens`, the rough size an agent can budget for (a quarter of
+ * the UTF-8 bytes, rounded up, as Cloudflare's Markdown for Agents counts
+ * it), and `Content-Signal`, the same AI-use preferences as `robots.txt`.
+ */
+export function agentTextHeaders(body: string): Record<string, string> {
+  const bytes = new TextEncoder().encode(body).byteLength
+  return {
+    "x-markdown-tokens": String(Math.ceil(bytes / 4)),
+    "Content-Signal": CONTENT_SIGNAL,
+  }
+}
 
 const site = getSite()
 
@@ -270,13 +291,13 @@ export function builtListMarkdown(level = 3): string {
 /** The ways to reach him, as a list. */
 export function contactMarkdown(): string {
   return lines(
-    `- Book a call: ${site.links.booking}`,
-    `- Email: [${site.links.email}](mailto:${site.links.email})`,
-    `- X: ${site.links.x}`,
-    `- LinkedIn: ${site.links.linkedin}`,
-    `- GitHub: ${site.links.github}`,
-    `- MentorCruise: ${site.links.mentorcruise}`,
-    `- Press kit (bio, headshot, facts): ${canonical("/press")}`
+    `- [Book a call](${site.links.booking})`,
+    `- [Email](mailto:${site.links.email}): ${site.links.email}`,
+    `- [X](${site.links.x})`,
+    `- [LinkedIn](${site.links.linkedin})`,
+    `- [GitHub](${site.links.github})`,
+    `- [MentorCruise](${site.links.mentorcruise})`,
+    `- [Press kit](${canonical("/press")}): bio, headshot, facts`
   )
 }
 
@@ -820,13 +841,20 @@ export function productDescription(p: Product): string | undefined {
   return kept || undefined
 }
 
-function productLine(p: Product) {
+/**
+ * One product as a list item. `story: false` leaves out the link to its case
+ * study, for a list that already has a section of case studies (`/llms.txt`);
+ * where it is kept it is a link, never a bare URL.
+ */
+function productLine(p: Product, { story = true }: { story?: boolean } = {}) {
   const href = p.url ?? (p.story ? canonical(`/work/${p.story}`) : undefined)
   const name = href ? `[${p.name}](${href})` : p.name
   const parts = [
     productDescription(p),
     p.status ? `Status: ${p.status}.` : undefined,
-    p.story ? `Story: ${markdownUrl(`/work/${p.story}`)}` : undefined,
+    story && p.story
+      ? `[Story](${markdownUrl(`/work/${p.story}`)})`
+      : undefined,
   ].filter(Boolean)
   return `- ${name}${parts.length ? `: ${parts.join(" ")}` : ""}`
 }
@@ -868,7 +896,7 @@ export function llmsTxt(): string {
     "",
     "## Products",
     "",
-    live.map(productLine),
+    live.map((p) => productLine(p, { story: false })),
     "",
     "## Case studies",
     "",
@@ -887,7 +915,9 @@ export function llmsTxt(): string {
     "",
     "## Machine access",
     "",
-    `- [MCP server](${site.url}/mcp): read-only Model Context Protocol endpoint (Streamable HTTP, stateless, no auth). Tools: get_profile, list_work, get_work, get_mentoring, get_contact, ask.`,
+    `- [MCP server](${MCP_URL}): read-only Model Context Protocol endpoint (Streamable HTTP, stateless, no auth). Tools: ${MCP_TOOL_NAMES.join(", ")}.`,
+    `- [MCP server card](${SERVER_CARD_URL}): the MCP server's name, version, transport and tools, as JSON.`,
+    `- [API catalog](${API_CATALOG_URL}): the same server listed per RFC 9727 (linkset JSON).`,
     `- [Sitemap](${site.url}/sitemap.xml)`,
     "",
     "## Optional",
@@ -921,14 +951,14 @@ export function llmsFullTxt(): string {
     askMarkdown(3),
     "## Work he has put real time into, with status",
     "",
-    ownProducts().map(productLine),
+    ownProducts().map((p) => productLine(p)),
     "",
     builtListMarkdown(3),
     "## Contact",
     "",
     contactMarkdown(),
     "",
-    `- MCP server (read-only): ${site.url}/mcp`,
+    `- [MCP server](${MCP_URL}): read-only`,
     "",
     "---",
     "",

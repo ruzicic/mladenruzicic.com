@@ -21,7 +21,8 @@ import {
  *   the story under it, never an image. (On the 2026-11-11 build it is the
  *   story's first paragraph, which paints at the same time as the headline
  *   and covers more area at 1440x900.)
- * - Cumulative layout shift stays under 0.05 through load and settling.
+ * - Cumulative layout shift stays under 0.05 through load and settling;
+ *   through the font swap on a throttled phone, see below.
  * - JavaScript on `/`: at most {@link JS_BUDGET_KB} KB over the wire
  *   (compressed), everything requested up to the end of load. Measured
  *   against the production build of 2026-11-11 at 181 KB (twelve files up to
@@ -111,6 +112,117 @@ test.describe("/ budgets", () => {
       "the Ask panel chunk is not loaded up front"
     ).toBe(false)
   })
+})
+
+/**
+ * The font swap on a slow phone (2026-11-16). There the web fonts arrive
+ * after the first paint, so the text is set first in the metric fallbacks
+ * (`app/globals.css`, "Metric fallbacks"; `app/fonts.ts`) and then swapped.
+ * With next/font's own fallbacks an opening paragraph wrapped to one more
+ * line before the swap and lost it after, and everything under it moved
+ * (lab, 412 wide, slow 4G, CPU 4x: `/mentoring` 0.223, `/` 0.103, `/about`
+ * at 1350 wide 0.069). The test above cannot see that: unthrottled, the
+ * fonts are in before the first paint.
+ *
+ * So every `.woff2` is held back {@link FONT_DELAY_MS} ms, which makes the
+ * fallback paint first on any machine (asserted), on top of the lab's
+ * network and CPU throttling (Chromium, through CDP). The assertion is a
+ * CLS ceiling, not line positions: a Linux runner sets the fallback in
+ * Liberation Sans and Liberation Serif (Arial's and Times New Roman's
+ * widths, the same faces). Measured with the measured fallbacks: at most
+ * 0.001 on all four on macOS.
+ *
+ * It runs in the full Chromium build (`channel: "chromium"`, headless),
+ * not in the headless shell the other tests use. On Linux the shell gets
+ * no desktop font settings: every web font and `local()` face is hinted at
+ * a whole-pixel size with whole-pixel advances, while installed fonts named
+ * by family, and every font in full Chromium, are set at their fractional
+ * size with fractional advances, as in the browsers people use. Body copy
+ * set in the Liberation Sans fallback at 20px measured 104.7% of Geist's
+ * width in the shell (20px times 103.1% is drawn at 21px; any `size-adjust`
+ * from 100% to 102% is drawn at 20px, 97.5%), against 100.7% at every size
+ * from 13px to 44px in full Chromium on the same machine. In the shell `/`
+ * and `/mentoring` at 412 wide rewrapped and failed (0.105, 0.226); in full
+ * Chromium all four pass on Linux too. macOS draws the same in both builds.
+ */
+const SWAP_CLS_BUDGET = 0.03
+const FONT_DELAY_MS = 1500
+const SWAP_CASES = [
+  { path: "/", width: 412 },
+  { path: "/mentoring", width: 412 },
+  { path: "/about", width: 412 },
+  { path: "/about", width: 1350 },
+] as const
+
+test.describe("the font swap moves nothing (throttled)", () => {
+  for (const { path, width } of SWAP_CASES) {
+    test(`${path} at ${width} wide: CLS through the swap under ${SWAP_CLS_BUDGET}`, async ({
+      playwright,
+      browserName,
+      baseURL,
+    }) => {
+      test.skip(browserName !== "chromium", "throttling goes through CDP")
+      test.setTimeout(120_000)
+      const phone = width < 1000
+      // Full Chromium, not the headless shell: see above.
+      const browser = await playwright.chromium.launch({ channel: "chromium" })
+      const context = await browser.newContext({
+        baseURL,
+        viewport: { width, height: phone ? 823 : 900 },
+        deviceScaleFactor: phone ? 1.75 : 1,
+        isMobile: phone,
+        hasTouch: phone,
+      })
+      try {
+        const page = await context.newPage()
+        const cdp = await context.newCDPSession(page)
+        await cdp.send("Network.enable")
+        await cdp.send("Network.emulateNetworkConditions", {
+          offline: false,
+          latency: 562.5,
+          downloadThroughput: (1.4744 * 1024 * 1024 * 0.9) / 8,
+          uploadThroughput: (675 * 1024 * 0.9) / 8,
+        })
+        await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 })
+        await page.route(/\.woff2(\?|$)/, async (route) => {
+          await new Promise((r) => setTimeout(r, FONT_DELAY_MS))
+          await route.continue()
+        })
+        await installClsObserver(page)
+        await page.goto(path, { waitUntil: "load", timeout: 90_000 })
+        await page.evaluate(() => document.fonts.ready.then(() => undefined))
+        await page.evaluate(
+          () =>
+            new Promise<void>((r) =>
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => setTimeout(r, 500))
+              )
+            )
+        )
+        const order = await page.evaluate(() => {
+          const fcp = performance.getEntriesByName("first-contentful-paint")[0]
+          const fonts = (
+            performance.getEntriesByType(
+              "resource"
+            ) as PerformanceResourceTiming[]
+          ).filter((r) => /\.woff2(\?|$)/.test(r.name))
+          return {
+            fcp: fcp?.startTime ?? Infinity,
+            firstFont: Math.min(...fonts.map((r) => r.responseEnd)),
+          }
+        })
+        expect(
+          order.fcp,
+          "the fallback paints before any web font arrives"
+        ).toBeLessThan(order.firstFont)
+        const cls = await getCls(page)
+        console.log(`font swap on ${path} at ${width}: CLS ${cls.toFixed(4)}`)
+        expect(cls).toBeLessThan(SWAP_CLS_BUDGET)
+      } finally {
+        await browser.close()
+      }
+    })
+  }
 })
 
 /**

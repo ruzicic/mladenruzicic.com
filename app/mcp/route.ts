@@ -10,6 +10,7 @@ import {
   getStories,
   isStorySlug,
 } from "@/lib/content"
+import { MCP_SERVER_INFO, type McpToolName } from "@/lib/mcp/info"
 import {
   aboutDoc,
   absolute,
@@ -37,6 +38,10 @@ import { match } from "@/app/components/ask/answer"
  * and looked up in content, and `ask`'s question, which only feeds the
  * keyword match in `app/components/ask/answer.ts` (the same one the Ask panel
  * uses) and is never echoed back.
+ *
+ * Every tool is registered under a name from `MCP_TOOL_NAMES`
+ * (`lib/mcp/info.ts`), the list the server card and `/llms.txt` print;
+ * `tests/machine.spec.ts` holds `tools/list` to it.
  *
  * Only POST is exported: Streamable HTTP lets a stateless server answer GET
  * with 405, which Next does for any method a route does not export. That also
@@ -186,7 +191,7 @@ function ask(question: string): string {
 const handler = createMcpHandler(
   (server) => {
     server.registerTool(
-      "get_profile",
+      "get_profile" satisfies McpToolName,
       {
         title: "Profile",
         description: `Who ${site.name} is: short bio, location, languages, the longer story, facts, CV and links.`,
@@ -197,7 +202,7 @@ const handler = createMcpHandler(
     )
 
     server.registerTool(
-      "list_work",
+      "list_work" satisfies McpToolName,
       {
         title: "List work",
         description: `The work ${site.name} has put real time into, every product and job, with status, links and the slugs get_work accepts.`,
@@ -208,7 +213,7 @@ const handler = createMcpHandler(
     )
 
     server.registerTool(
-      "get_work",
+      "get_work" satisfies McpToolName,
       {
         title: "Get work",
         description:
@@ -226,7 +231,7 @@ const handler = createMcpHandler(
     )
 
     server.registerTool(
-      "get_mentoring",
+      "get_mentoring" satisfies McpToolName,
       {
         title: "Mentoring",
         description: `Whether and how ${site.name} mentors: who it fits, how it works, what mentees said.`,
@@ -237,7 +242,7 @@ const handler = createMcpHandler(
     )
 
     server.registerTool(
-      "get_contact",
+      "get_contact" satisfies McpToolName,
       {
         title: "Contact",
         description: `How to reach ${site.name}: email and profiles.`,
@@ -248,7 +253,7 @@ const handler = createMcpHandler(
     )
 
     server.registerTool(
-      "ask",
+      "ask" satisfies McpToolName,
       {
         title: "Ask",
         description: `Ask a question about ${site.name}'s work. Answers come from the site's prepared answers (${getAsk()
@@ -261,7 +266,9 @@ const handler = createMcpHandler(
     )
   },
   {
-    serverInfo: { name: site.domain, version: site.updated },
+    // The same identity the server card (`/.well-known/mcp/server-card.json`)
+    // publishes.
+    serverInfo: MCP_SERVER_INFO,
     instructions: `Read-only facts about ${site.name}, from ${site.url}. Start with get_profile or list_work. Everything here is public; cite ${site.url} as the source.`,
     // Stateless and read-only: no long-lived subscription streams.
     maxSubscriptions: 0,

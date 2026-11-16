@@ -34,6 +34,21 @@ const RETIRED_WORK_PAGES = [
 ]
 
 /**
+ * The routes `proxy.ts` negotiates between HTML and markdown, and the `Vary`
+ * their HTML should carry (see `headers()` below).
+ */
+const TWINNED_VARY =
+  "Accept, rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch"
+const TWINNED_PAGES = [
+  "/",
+  "/work",
+  "/work/:slug",
+  "/mentoring",
+  "/about",
+  "/press",
+]
+
+/**
  * Content-Security-Policy (docs/v4-build/AUDIT.md). Every page is static
  * (Cache Components prerenders them), so a per-request nonce is not an
  * option: Next's inline flight scripts need `'unsafe-inline'` in
@@ -157,6 +172,23 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // The pages with a markdown twin answer HTML or markdown on one URL by
+      // `Accept` (`proxy.ts`), so their HTML must say `Vary: Accept` too.
+      // The proxy sets it, but Next's page handler then REPLACES `Vary` with
+      // its own RSC list (`res.setHeader('Vary', …)` in
+      // `next/dist/build/templates/app-page-runtime.js`), under `next start`
+      // and on Vercel alike (production, 16 Nov 2026). This entry is the
+      // attempt that can work on Vercel, where config headers become routing
+      // rules applied at the edge; under `next start` the handler overwrites
+      // it as well. It repeats Next's list (`getVaryHeader` in
+      // `next/dist/server/route-modules/app-page/module.js`; no interception
+      // routes, so no `Next-Url`) so that a platform which lets it win
+      // still varies on the RSC headers. Check on a preview:
+      // `curl -sI <preview>/about | grep -i vary`.
+      ...TWINNED_PAGES.map((source) => ({
+        source,
+        headers: [{ key: "Vary", value: TWINNED_VARY }],
+      })),
       {
         // `public/static/**` file names carry no content hash, and the
         // placeholder screenshots and marks there will be replaced in place.

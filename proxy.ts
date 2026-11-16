@@ -1,18 +1,27 @@
 import { NextResponse, type NextRequest } from "next/server"
 
 import { STORY_SLUGS } from "@/lib/content/schema"
+import { DISCOVERY_LINKS } from "@/lib/mcp/info"
 import { isTwinRoute, markdownNotFound } from "@/lib/seo/twins"
 import { SITE } from "@/content/site"
 
 /**
- * Content negotiation for agents: when the client prefers `text/markdown` over
- * `text/html`, serve the page's markdown twin from `app/md/[...path]` on the
- * same URL. Every HTML response from a twinned page also carries
+ * Content negotiation for agents: when the client ranks `text/markdown` at
+ * least as high as anything else it accepts (`prefersMarkdown`), serve the
+ * page's markdown twin from `app/md/[...path]` on the same URL. Every HTML
+ * response from a twinned page also carries
  * `Link: <….md>; rel="alternate"; type="text/markdown"`, so an agent can find
- * the twin from the headers alone.
+ * the twin from the headers alone. On `/` the same header also links the API
+ * catalog and the MCP server card (`DISCOVERY_LINKS`). The markdown branch
+ * keeps the twin's own `Link: rel="canonical"` alone.
  *
  * `Vary: Accept` goes on both branches, so a CDN never hands the markdown to a
- * browser or the HTML to an agent.
+ * browser or the HTML to an agent. On the HTML branch Next's page handler
+ * replaces this `Vary` with its own RSC list; `headers()` in
+ * `next.config.ts` has the rest of that story.
+ *
+ * `X-Robots-Tag: noindex` goes on the `.md` and `/md/` URLs only, never on
+ * the negotiated answer at the canonical URL: that URL is the page.
  *
  * Every way into `app/md/[...path]` goes through here (`Accept`, `<path>.md`,
  * `/md/<route>`), and only the routes in `lib/seo/twins.ts` get through. Any
@@ -62,13 +71,15 @@ export function proxy(request: NextRequest) {
   // is stored there today; such a request is a plain 404).
   if (pathname.endsWith(".md")) {
     if (pathname.startsWith("/static/")) return NextResponse.next()
-    return toTwin(request, pathname.slice(1, -".md".length))
+    return noindex(toTwin(request, pathname.slice(1, -".md".length)))
   }
 
   // `/md/<route>` asked for directly.
   if (pathname === "/md" || pathname.startsWith("/md/")) {
     const route = pathname.slice("/md/".length)
-    return isTwinRoute(route) ? NextResponse.next() : markdownNotFound(SITE_URL)
+    return isTwinRoute(route)
+      ? noindex(NextResponse.next())
+      : markdownNotFound(SITE_URL)
   }
 
   if (pathname.startsWith("/work/")) {
@@ -103,12 +114,21 @@ export function proxy(request: NextRequest) {
     pass.headers.set("Vary", "Accept")
     pass.headers.set(
       "Link",
-      `<${mdUrl(pathname)}>; rel="alternate"; type="text/markdown"`
+      [
+        `<${mdUrl(pathname)}>; rel="alternate"; type="text/markdown"`,
+        ...(pathname === "/" ? DISCOVERY_LINKS : []),
+      ].join(", ")
     )
     return pass
   }
 
   return toTwin(request, mdPath(pathname).slice("/md/".length))
+}
+
+/** Marks a markdown response at a `.md` or `/md/` URL as not for the index. */
+function noindex<T extends Response>(response: T): T {
+  response.headers.set("X-Robots-Tag", "noindex")
+  return response
 }
 
 /** Rewrite to the twin at `/md/<route>`, or answer the markdown 404. */
@@ -122,25 +142,29 @@ function toTwin(request: NextRequest, route: string) {
 }
 
 /**
- * True when `text/markdown` outranks `text/html` in the Accept header.
- * Quality values are honoured, so `Accept: text/markdown;q=0.9, text/html`
- * keeps serving HTML: the agent has to actually ask for markdown first.
+ * True when `text/markdown` is listed with a quality at least as high as
+ * every other type in the Accept header (wildcards included), ties going to
+ * markdown. So `text/markdown, text/html` plus the any-type wildcard (what
+ * agents such as Claude Code send) gets markdown, while `text/markdown;q=0.9, text/html` keeps HTML and a
+ * browser's Accept, which never lists `text/markdown`, always gets HTML.
  */
 function prefersMarkdown(accept: string): boolean {
-  let markdown = -1
-  let html = -1
+  let markdown = 0
+  let other = 0
   for (const part of accept.split(",")) {
-    const [type, ...params] = part.trim().split(";")
+    const [rawType, ...params] = part.trim().split(";")
+    const type = rawType.trim().toLowerCase()
+    if (!type) continue
     const q = params
       .map((p) => p.trim())
       .find((p) => p.startsWith("q="))
       ?.slice(2)
     const weight = q === undefined ? 1 : Number(q)
     if (Number.isNaN(weight)) continue
-    if (type.trim() === "text/markdown") markdown = Math.max(markdown, weight)
-    if (type.trim() === "text/html") html = Math.max(html, weight)
+    if (type === "text/markdown") markdown = Math.max(markdown, weight)
+    else other = Math.max(other, weight)
   }
-  return markdown > 0 && markdown > html
+  return markdown > 0 && markdown >= other
 }
 
 export const config = {
