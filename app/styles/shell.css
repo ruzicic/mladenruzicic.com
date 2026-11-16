@@ -1,0 +1,121 @@
+/* ---------------------------------------------------------------------------
+   Shell: the paper sheet over the dark footer.
+   Imported once by `app/layout.tsx`. Owned by the foundation.
+   --------------------------------------------------------------------------- */
+
+/* The frame: night behind, the paper sheet on top with rounded bottom
+   corners, the footer on night below it. */
+[data-page-frame] {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-night);
+  color: var(--color-ink);
+}
+
+[data-page-sheet] {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-paper);
+  border-radius: 0 0 var(--radius-page) var(--radius-page);
+  padding-block: var(--page-pad-top) var(--page-pad-bottom);
+
+  /* The top is the same on every page (owner, 12 Nov: one header, higher
+     up); every page but the landing keeps the boards' shorter foot. */
+  &:not([data-home]) {
+    padding-bottom: 136px;
+
+    @media (max-width: 720px) {
+      padding-bottom: 112px;
+    }
+  }
+}
+
+[data-page-main] {
+  display: flex;
+  flex-direction: column;
+  outline: none;
+}
+
+/* "As the footer comes into view, the main section gets smaller" (owner,
+   11 Nov; "more width reduction", later the same day). The whole sheet
+   recedes: it scales down, content and all, about a point just above its
+   bottom padding, so its sides draw in, its foot lifts off the footer and
+   its corners round further.
+
+   Why scale and not paint over the edges: the earlier inset night shadow
+   (and any clip of the paper alone) covers whatever sits near the sheet's
+   edge, and wide blocks reach the 24px gutter at tablet widths (story
+   figures up to 1108px, the mentoring pile and the about rail below 790px).
+   Scaling the sheet with its content cannot cover or clip anything at any
+   width. `scale` runs on the compositor and is not a layout shift. Every
+   positioned overlay inside the sheet (dialogs, popovers, the press menu) is
+   in the top layer, so the transform's containing block does not move them.
+
+   The narrowing follows the footer's arrival: it starts as the footer's top
+   edge enters the view and is complete when the footer is fully in (the end
+   of the page), whatever the footer's height. Only where scroll-driven
+   animations exist and motion is welcome; otherwise the sheet stays still.
+   Like the strip's focus, it is moved by the reader's own scrolling, so the
+   headline's pause (`data-motion="paused"`) does not apply to it. */
+[data-page-sheet] {
+  /* Per side at the end: about 6vw on desktop (86px at 1440, 4x the old
+     24px), 20px on a 390 phone (the old 12px, plus two thirds). */
+  --sheet-scale: 0.88;
+  --sheet-radius-end: 96px;
+  /* Roughly where the content ends: the last line barely moves. */
+  --sheet-origin-y: calc(100% - 136px);
+
+  @media (min-width: 1600px) {
+    --sheet-scale: 0.9;
+  }
+
+  @media (max-width: 720px) {
+    --sheet-scale: 0.9;
+    --sheet-radius-end: 56px;
+    --sheet-origin-y: calc(100% - 112px);
+  }
+}
+
+@keyframes page-sheet-recede {
+  to {
+    scale: var(--sheet-scale);
+    border-radius: 0 0 var(--sheet-radius-end) var(--sheet-radius-end);
+  }
+}
+
+@supports (animation-timeline: view()) and (animation-range: entry) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-page-sheet] {
+      transform-origin: 50% var(--sheet-origin-y);
+      animation: page-sheet-recede linear both;
+      /* Fallback where `timeline-scope` is missing: the sheet's own exit,
+         over about the height of a footer. */
+      animation-timeline: view();
+      animation-range: exit 0% exit 55%;
+    }
+
+    @supports (timeline-scope: --a) {
+      [data-page-frame] {
+        timeline-scope: --site-foot;
+      }
+
+      [data-site-footer] {
+        view-timeline: --site-foot block;
+      }
+
+      [data-page-sheet] {
+        animation-timeline: --site-foot;
+        animation-range: entry 0% entry 100%;
+      }
+    }
+  }
+}
+
+/* The footer on night. */
+[data-site-footer] {
+  color: var(--color-night-ink);
+}

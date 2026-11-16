@@ -1,0 +1,30 @@
+# What `vercel deploy` must never upload from this folder. The CLI does not
+# read .gitignore: without this file it uploads everything but its own short
+# default list (.git, .next, .vercel, node_modules, .env.local, ...).
+# The site build needs none of the paths below (it reads content/ask/context.md,
+# never workers/; nothing in app/, lib/ or content/ imports tests/, scripts/ or
+# docs/).
+
+# Private dossiers and boards (about 1.5 GB, never public).
+docs/
+
+# The Ask Worker: deployed with wrangler on its own, and holds local secrets
+# (.dev.vars, deploy.local.json, wrangler.deploy.json, .wrangler/).
+workers/
+
+# Agent worktrees and local state.
+.claude/
+.DS_Store
+tsconfig.tsbuildinfo
+
+# Environment files: only the example is safe to ship.
+.env*
+!.env.example
+
+# Tests, their reports and the tools only the Worker uses.
+tests/
+test-results/
+playwright-report/
+blob-report/
+coverage/
+scripts/

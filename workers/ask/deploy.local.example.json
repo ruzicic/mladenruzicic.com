@@ -1,0 +1,4 @@
+{
+  "notesNamespaceId": "replace with the 32-character id that `wrangler kv namespace create` prints",
+  "questionsDatabaseId": "replace with the database_id (a UUID) that `wrangler d1 create` prints"
+}

@@ -1,0 +1,116 @@
+---
+slug: "wolkabout"
+title: "WolkAbout"
+company: "wolkabout"
+# WolkAbout only. The v3 entry also covered Execom (from February 2016),
+# which now has a row of its own on the list.
+period:
+  from: "2017-07"
+  to: "2020-06"
+updated: "2026-11-16"
+role: "Frontend engineer, junior to senior, then team lead"
+accent: "#12A3A8"
+tech:
+  - "Angular"
+  - "TypeScript"
+  - "RxJS"
+  - "NgRx"
+  - "Nx monorepo"
+  - "Micro frontends"
+  - "MQTT over WebSocket"
+  - "Node.js"
+line: "Junior to senior in three years: Angular frontends for an IoT platform moving large volumes of live data."
+detail: "WolkAbout made an IoT platform: backend software that connects devices and keeps their data, and WolkReact, the web and mobile apps on top of it. From 2017 to 2020 I built its modular Angular front end from the ground up, and the REST client and component library around it."
+# No team size: the v3 entry's "5–6 engineers" metric is dropped.
+links:
+  - label: "@wolkabout/wolk-rest on npm"
+    url: "https://www.npmjs.com/package/@wolkabout/wolk-rest"
+  - label: "wolkabout.com (Web Archive)"
+    url: "http://web.archive.org/web/20210616143417/https://wolkabout.com/"
+# The owner, November 2026: screenshots from inside the app were shared
+# often, so showing them is fine. The pictures were made on 2026-11-12 by
+# serving the app's prebuilt bundle against a local mock. That bundle is from
+# April 2021, after he left, so the captions say so. The tenant, buildings,
+# devices, readings and users on screen are invented
+# (docs/v4-build/sources/work/wolkabout/SOURCES.md).
+confidentiality: "public"
+story: true
+# The case-study page (2026-11 layout). The summary and the three paragraphs
+# are the owner's own (14 Nov 2026); there are no public numbers; the links
+# are `links`. Nothing here speaks of the company after he left (owner, 14
+# Nov 2026).
+# Every picture is a wide run of the 2021 build, with
+# invented data, shown whole on the plate until it is shot square.
+panel:
+  summary: "Three years on an IoT platform, from junior developer to team lead."
+  meta:
+    - "2017 to 2020"
+    - "Frontend engineer, junior to senior, then team lead"
+  paragraphs:
+    - "WolkAbout made a platform for connected devices: software that collects what devices send, and the apps people use to watch and control them. I joined in 2017 and left in 2020."
+    - "I built the screens people worked in all day: dashboards of live data, device lists, rules. I started as a junior, became a senior, and led the team in my last months."
+    - "WolkAbout was my first product company, after years of freelancing and outsourcing. I learned a lot about the business itself: customer relationships, competitor research and more. It was a great fit for me, and it ended up shaping every career choice I made after it."
+  links:
+    heading: "Links"
+    items:
+      - title: "@wolkabout/wolk-rest on npm"
+        href: "https://www.npmjs.com/package/@wolkabout/wolk-rest"
+        icon: "/static/work/wolkabout/favicon-npm.png"
+        color: "#CB0000"
+      - title: "wolkabout.com (Web Archive)"
+        href: "http://web.archive.org/web/20210616143417/https://wolkabout.com/"
+        icon: "/static/work/wolkabout/favicon-web-archive.png"
+        color: "#020202"
+  people: ["radovan", "milena", "tamara", "igor"]
+  plate: "#E5F3F2"
+column:
+  - kind: "clip"
+    src: "/static/work/wolkabout/sq-walkthrough.mp4"
+    poster: "/static/work/wolkabout/sq-walkthrough-poster.webp"
+    caption: "The launcher, a dashboard, the devices, one device, the messages and a rule. Run in 2026 from a 2021 build, with invented data."
+    alt: "A walkthrough of WolkReact: the launcher of applications, the Campus Overview dashboard, the device list, one device, the live messages and a rule in the rule editor."
+  - kind: "image"
+    src: "/static/work/wolkabout/sq-dashboard.webp"
+    caption: "A dashboard of typed widgets: gauges, readings, a switch, a setpoint, trend charts and live messages. Run in 2026 from a 2021 build, with invented data."
+    alt: 'The WolkReact dashboard "Campus Overview": a boiler temperature gauge at 57.2 °C, readings for a cold store, server-room power and lab CO2, two switches set to On, a setpoint slider, a "2 warnings" status badge, a list of live messages such as "High Humidity: ON" and "CO2 above 1000 ppm", charts of room temperatures and main panel power over a day, a humidity gauge at 78%, and readings for total energy and water flow, for an invented tenant called Northfield Campus.'
+  - kind: "image"
+    src: "/static/work/wolkabout/sq-device-details.webp"
+    caption: "One device: its status and keys, and its sensors with their last values. Run in 2026 from a 2021 build, with invented data."
+    alt: 'The device page "Boiler Room Sensor" in Device Management: status Connected, its device and gateway keys, last report, protocol and type at the top; below them tabs for Sensors, Actuators, Alarms, Attributes, Configurations and Access, and a table of two sensors, Temperature at 57.2 °C and Pressure at 1,489 mbar.'
+  - kind: "image"
+    src: "/static/work/wolkabout/sq-rule-editor.webp"
+    caption: "A rule in the platform's own rule language: when the lab's CO2 goes over 1000, switch the ventilation on. Run in 2026 from a 2021 build, with invented data."
+    alt: 'The Rule Engine editor for a rule called "Lab ventilation boost": a name, a description, and a dark code editor with seven lines that read, in short, when the CO2 feed of the Air Quality Lab is above 1000, turn its ventilation on and send an info message. Toggles below for rule status and execution logging.'
+  - kind: "image"
+    src: "/static/work/wolkabout/dashboard-2019.webp"
+    caption: "WolkAbout's own product screenshot, 2019: a dashboard from my years there, as the company's website showed it."
+    alt: 'The "WolkAbout IoT Tool" in 2019, on a blue background: a dashboard with a world map of device pins, temperature and accelerometer readings for a demo device called "C Office", a temperature gauge at -1.9 °C, a switch, a slider, and humidity and pressure charts.'
+seo:
+  title: "WolkAbout: a modular front end for an IoT platform"
+  description: "Three years at WolkAbout, junior to senior: a micro-frontend Angular app for an IoT platform, a TypeScript REST client and a component library."
+---
+
+## Summary
+
+WolkAbout made an IoT platform: backend software that connects devices, stores and processes what they send, and WolkReact, the web and mobile apps on top of it for device management, dashboards, rules, messages and reports. Its engineering was in Novi Sad. I came over from Execom in July 2017 and stayed until June 2020, growing from a junior developer into a senior one and, for the last months, a team lead.
+
+## What I was responsible for
+
+Everything frontend, research and development, the marketing website, customer relationships, automations, and the CI/CD and infrastructure tooling.
+
+- I built a modular, micro-frontend Angular application from the ground up, with a focus on performance, scalability and extensibility.
+- I built a set of tools to speed up development on the WolkAbout Platform: a Node.js TypeScript REST client and a UI component library in Angular.
+- I was the solo developer on the company website.
+
+## What the product looked like
+
+WolkReact opens on a launcher. Each tile is a separate application with its own menu: platform management, administration, devices, data, rules, and visualisation and monitoring. Dashboards are grids of typed widgets, each loading its own data. The same table, filters and detail panel run through devices, points, rules and users, so the modules feel like one product although each one ships on its own.
+
+The pictures were recreated in 2026 with invented data: no campus, building, device or person on screen is real. They were made from a build of April 2021, ten months after I left, so they show the product a little further on than I last saw it, on the same architecture. The 2019 screenshot is the company's own, from its website.
+
+## How it was built
+
+- One Nx monorepo for the whole web front end, with every application module and every shared library its own package under `@wolkabout/`, so modules could be composed per installation and teams could ship without blocking each other.
+- Angular and TypeScript, RxJS, NgRx for state, Angular Material, Storybook and Jest.
+- Live data arrived as streams over MQTT on a WebSocket. We treated it as streams, throttled and batched at the edge of the app instead of inside components, so a busy device did not redraw a whole dashboard.
+- Every screen talks to the platform through the same REST client, `@wolkabout/wolk-rest`, which is still on npm.

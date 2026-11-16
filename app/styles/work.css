@@ -1,0 +1,646 @@
+/* ---------------------------------------------------------------------------
+   The list "Everything I've built, and what happened to it" and its cursor
+   preview (`Landing.dc.html` / `Landing-Mobile.dc.html`, `#everything`).
+   Imported by `app/components/work/Ledger.tsx`; used on `/` and `/work`.
+   --------------------------------------------------------------------------- */
+
+.ledger {
+  margin-top: var(--section-gap);
+
+  /* /work: right under the page's title and intro. */
+  &[data-complete] {
+    margin-top: 48px;
+
+    @media (max-width: 720px) {
+      margin-top: 40px;
+    }
+  }
+}
+
+.ledger-title {
+  margin: 0;
+  font-size: var(--text-page);
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.ledger-list {
+  position: relative;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: 720px) {
+    margin-top: 16px;
+  }
+}
+
+/* /work: the page's <h1> and intro name the list, so it starts tighter. */
+.ledger[data-complete] .ledger-list {
+  margin-top: 0;
+}
+
+.ledger-label {
+  margin: 0;
+  padding: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: 400;
+  line-height: calc(16px * var(--type-scale));
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+
+.ledger-group + .ledger-group > .ledger-label {
+  padding-top: 24px;
+  border-top: 1px solid var(--color-rule);
+
+  @media (max-width: 720px) {
+    padding-top: 20px;
+  }
+}
+
+.ledger-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ledger-item {
+  border-top: 1px solid var(--color-rule);
+  scroll-margin-top: 96px;
+}
+
+/* One row, on `/` and `/work` alike (owner, 13 and 14 Nov 2026,
+   `CopyE.dc.html` E2 option c). Two columns: the year label above the tile
+   and name, the description in the wide column, and where the row goes as a
+   label above the description, on the year's line. Not under the
+   description as drawn: the hover preview card sits below and right of the
+   pointer, so on the hovered row it covered anything under the description;
+   the line above stays clear of it. A row with neither a year nor a
+   destination has no label line; one with a destination but no year (ONA)
+   keeps the line for the words, so showing them moves nothing. On desktop
+   neither the name nor the row is a link: the actions are. On phones the
+   row is the link and the actions are hidden (`.ledger-go` below). */
+.ledger-row {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  grid-template-areas:
+    "when to"
+    "name what";
+  column-gap: 16px;
+  row-gap: 0;
+  align-items: start;
+  padding: 12px 0;
+  font-size: var(--fs-16);
+  line-height: calc(23px * var(--type-scale));
+  color: var(--color-ink);
+  transition: opacity var(--duration-instant) ease;
+
+  > .ledger-name {
+    grid-area: name;
+  }
+
+  > .ledger-what {
+    grid-area: what;
+  }
+
+  @media (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "when"
+      "name"
+      "what";
+    column-gap: 12px;
+
+    > .ledger-what {
+      margin-top: 2px;
+    }
+  }
+}
+
+.ledger-name {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.28em;
+  min-width: 0;
+}
+
+/* The tile sits on the first line's cap height, not the baseline. */
+.ledger-tile {
+  margin: 0.21em 0 0;
+  vertical-align: top;
+}
+
+.ledger-what {
+  color: var(--color-muted);
+
+  @media (max-width: 720px) {
+    font-size: var(--fs-15);
+    line-height: 1.45;
+  }
+}
+
+.ledger-when {
+  grid-area: when;
+  margin-bottom: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: calc(16px * var(--type-scale));
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+/* Where the row goes, in words. The line is always laid out, so showing it
+   moves nothing; where the device hovers it is faded out until the row is
+   hovered or holds focus. Faded with opacity, never hidden, so the words
+   stay in the accessibility tree and the row link's name. Both actions in
+   one style (owner, 16 Nov 2026: "use the same (as case study). less
+   variations"): mono capitals in the ink, the domain included. */
+.ledger-to {
+  grid-area: to;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 12px;
+  margin-bottom: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: calc(16px * var(--type-scale));
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+/* The row's only links on desktop (owner, 13 Nov 2026): the case study,
+   then the site, alike. */
+/* The arrow after a row's action, where the unicode arrow and its space
+   were: a little under the old gap, so the row keeps its width. */
+.ledger-dest-ico {
+  margin-left: 0.3em;
+}
+
+.ledger-dest {
+  position: relative;
+  color: var(--color-ink);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: transparent;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover {
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -4px -6px;
+  }
+
+  /* A 44px target on touch screens without moving the text (a tablet; on
+     phones the row is the link). It stays inside its row (the next row
+     paints over anything that crosses into it): on the year's line it
+     reaches into the row's top padding and the description. A pointer that
+     hovers gets only a small margin, so the description is never a hidden
+     link. */
+  @media (hover: none) {
+    &::before {
+      inset: -14px -6px;
+    }
+  }
+}
+
+/* Phones (owner, 16 Nov 2026: "make all row items clickable entirely. hide
+   case study/website links - the whole row is clickable"): the row is one
+   link (`RowLink`, `.ledger-go`) and the two actions are gone; elsewhere
+   the actions stay and the row link is not drawn. */
+.ledger-go {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .ledger-to {
+    display: none;
+  }
+
+  /* Room at the row's end for the arrow. */
+  .ledger-row[data-go] {
+    padding-right: 32px;
+  }
+
+  /* The link lies over the whole row (no z-index of its own, so its press
+     wash, `::before`, goes under the row's words and the link itself over
+     them); its one visible part is the arrow at the row's end, centred on
+     the row. */
+  .ledger-go {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border-radius: var(--radius-control);
+    color: var(--color-ink);
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+
+    &::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      /* Inside the collapsible rows' 6px clip margin. */
+      inset: 0 -6px;
+      border-radius: var(--radius-control);
+      background-color: transparent;
+      transition: background-color var(--duration-fast) ease;
+    }
+
+    &:active::before {
+      background-color: var(--color-wash);
+      transition: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-ink);
+      outline-offset: 0;
+    }
+  }
+}
+
+@media (hover: hover) {
+  .ledger-to {
+    opacity: 0;
+  }
+
+  .ledger-row:is(:hover, :focus-within) > .ledger-to {
+    opacity: 1;
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="paused"]) .ledger-to {
+    transition: opacity var(--duration-fast) linear;
+  }
+}
+
+/* Hover dims the other rows (desktop only); keyboard focus does the same. */
+@media (hover: hover) {
+  .ledger-list:hover .ledger-row {
+    opacity: 0.55;
+  }
+
+  .ledger-list .ledger-row:hover {
+    opacity: 1;
+  }
+}
+
+.ledger-list:not(:hover):has(.ledger-row :focus-visible) .ledger-row {
+  opacity: 0.55;
+}
+
+/* Doubled class: must outrank the dimming rule above (its :has() counts). */
+.ledger-list:not(:hover) .ledger-row.ledger-row:has(:focus-visible) {
+  opacity: 1;
+}
+
+/* `/work#<slug>` (old case-study URLs land here): a quiet wash. */
+.ledger-item:target > .ledger-row::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 -12px;
+  border-radius: var(--radius-control);
+  background: var(--color-wash);
+}
+
+/* Rows past the board's cut open in place (grid rows 0fr to 1fr). Only
+   with scripting: without JavaScript the list is complete. */
+.ledger-more {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--duration-slow) var(--ease-out);
+
+  > .ledger-rows {
+    min-height: 0;
+    overflow: hidden;
+    transition: visibility var(--duration-slow);
+
+    @supports (overflow-clip-margin: 6px) {
+      overflow: clip;
+      overflow-clip-margin: 6px;
+    }
+  }
+}
+
+@media (scripting: enabled) {
+  .ledger:not([data-open]) .ledger-more {
+    grid-template-rows: 0fr;
+
+    > .ledger-rows {
+      visibility: hidden;
+    }
+  }
+}
+
+.ledger-foot {
+  border-top: 1px solid var(--color-rule);
+  padding-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 24px;
+}
+
+.ledger[data-complete] .ledger-foot {
+  padding-top: 12px;
+}
+
+/* "Show all" / "Show fewer" (a Button, compact). */
+.ledger-toggle {
+  @media (scripting: none) {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The preview card. One element for the whole list; `LedgerPreview` sets
+   `translate` (position), `--pv-origin` and the tilt's `rotate`, and toggles
+   `data-shown`, `data-on` (the visible layer) and `data-glide`.
+   --------------------------------------------------------------------------- */
+.ledger-pv {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  width: 300px;
+  height: 200px;
+  pointer-events: none;
+  translate: 0 0;
+  will-change: translate;
+  --pv-origin: 0 0;
+}
+
+/* Not under the phone breakpoint either: a 300px card on a 320px-wide
+   window (a desktop at 400% zoom) pushed the page into sideways scroll. */
+@media (hover: hover) and (pointer: fine) and (min-width: 721px) {
+  .ledger-pv {
+    display: block;
+  }
+}
+
+.ledger-pv-anim {
+  width: 300px;
+  height: 200px;
+  transform-origin: var(--pv-origin);
+  scale: 0.92;
+  opacity: 0;
+  filter: blur(6px);
+  transition:
+    scale 160ms ease-out,
+    opacity 160ms ease-out,
+    filter 160ms ease-out;
+
+  .ledger-pv[data-shown] & {
+    scale: 1;
+    opacity: 1;
+    filter: blur(0);
+    transition:
+      scale 260ms cubic-bezier(0.34, 1.36, 0.64, 1),
+      opacity 180ms ease-out,
+      filter 180ms ease-out;
+  }
+}
+
+.ledger-pv-tilt {
+  position: relative;
+  width: 300px;
+  height: 200px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--color-ink);
+  transform-origin: var(--pv-origin);
+  rotate: -2deg;
+  transition: rotate 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--color-ink) 6%, transparent),
+    0 12px 32px -8px color-mix(in srgb, var(--color-ink) 24%, transparent),
+    0 28px 60px -20px color-mix(in srgb, var(--color-ink) 18%, transparent);
+}
+
+.ledger-pv-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: var(--color-paper);
+  transition: opacity 160ms ease-out;
+
+  &[data-on] {
+    opacity: 1;
+  }
+
+  &[data-tone="letters"] {
+    background: var(--color-card);
+    color: var(--color-paper);
+  }
+}
+
+.ledger-pv-mark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 300px;
+  height: 168px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  /* On a screenshot layer the mark only stands in when data is saved. */
+  [data-tone="image"] > & {
+    display: none;
+  }
+
+  .ledger-pv[data-lite] [data-tone="image"] > & {
+    display: flex;
+  }
+}
+
+.ledger-pv[data-lite] [data-tone="image"] {
+  background: var(--color-card);
+  color: var(--color-paper);
+}
+
+.ledger-pv-svg {
+  width: 84px;
+  height: 84px;
+}
+
+.ledger-pv-letters,
+.ledger-pv-glyph {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-synthesis: none;
+  line-height: 1;
+}
+
+.ledger-pv-letters {
+  font-size: 120px;
+}
+
+.ledger-pv-glyph {
+  font-size: 260px;
+  translate: 0 -70px;
+}
+
+.ledger-pv-frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+
+  .ledger-pv[data-lite] & {
+    display: none;
+  }
+
+  img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: block;
+    width: 300px;
+    max-width: none;
+    translate: 0 0;
+    opacity: 0;
+    transition: opacity 160ms ease-out;
+
+    &[data-loaded] {
+      opacity: 1;
+    }
+  }
+
+  /* The capture covers the still once it is gliding. */
+  [data-pv-capture] {
+    visibility: hidden;
+  }
+
+  [data-glide] & [data-pv-capture] {
+    visibility: visible;
+  }
+}
+
+.ledger-pv-cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  background: color-mix(in srgb, var(--color-ink) 88%, transparent);
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: 32px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  :not([data-tone="image"]) > & {
+    border-top: 1px solid
+      color-mix(in srgb, var(--color-paper) 14%, transparent);
+    line-height: 31px;
+  }
+}
+
+.ledger-pv-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-ink) 72%, transparent);
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  line-height: 18px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 240ms ease-out;
+
+  [data-glide] > & {
+    opacity: 1;
+  }
+}
+
+.ledger-pv-dot {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+
+  [data-glide] & {
+    animation: ledger-pv-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes ledger-pv-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+  50% {
+    opacity: 0.35;
+    scale: 0.7;
+  }
+}
+
+/* Reduced motion: no trailing, no tilt, no glide; the card only fades. */
+@media (prefers-reduced-motion: reduce) {
+  .ledger-pv {
+    transition: none !important;
+  }
+
+  .ledger-pv-tilt {
+    rotate: none !important;
+    transition: none !important;
+  }
+
+  .ledger-pv-anim,
+  .ledger-pv[data-shown] .ledger-pv-anim {
+    scale: 1;
+    filter: none;
+    transition: opacity 150ms linear !important;
+  }
+
+  .ledger-pv-layer {
+    transition: opacity 150ms linear !important;
+  }
+
+  .ledger-pv-tag {
+    display: none !important;
+  }
+}

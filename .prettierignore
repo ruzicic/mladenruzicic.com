@@ -1,5 +1,11 @@
-dist
 node_modules
 .next
+.claude
+dist
 build
-.contentlayer
+docs
+next-env.d.ts
+pnpm-lock.yaml
+workers/*/.wrangler
+workers/*/worker-configuration.d.ts
+content/ask/context.md

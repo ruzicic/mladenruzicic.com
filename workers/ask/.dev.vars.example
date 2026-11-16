@@ -1,0 +1,16 @@
+# Copy to .dev.vars for `pnpm dev` (wrangler dev). Never commit .dev.vars.
+# Everything below is safe to share: these are Cloudflare's published test
+# keys (developers.cloudflare.com/turnstile/troubleshooting/testing/), not
+# real ones, and they only work because ASK_ALLOW_LOCALHOST is true.
+
+ASK_ALLOW_LOCALHOST=true
+# Always passes for the dummy token. 2x0000000000000000000000000000000AA always fails.
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+# 32 or more random characters; empty keeps Ask closed. Generate one with
+#   openssl rand -base64 48
+# and never reuse it for the deployed Worker.
+ASK_SIGNING_KEY=
+# Room for the whole evaluation set in one day.
+ASK_VISITOR_DAILY_CAP=100
+# Days a logged question is kept in the local database; "0" logs nothing.
+ASK_LOG_RETENTION_DAYS=90

@@ -1,0 +1,751 @@
+/* ---------------------------------------------------------------------------
+   `/mentoring`: heading block, the testimonial pile, who it is for, how it
+   works (`Landing-Mentoring.dc.html` at 1440, `Landing-Mentoring-Mobile.dc.html`
+   at 390). Imported by `app/mentoring/page.tsx`. The top block and the compact
+   footer are the shell's (`site.css`).
+   --------------------------------------------------------------------------- */
+
+.ment-col {
+  box-sizing: border-box;
+  width: var(--column-width);
+  margin-left: var(--column-start);
+}
+
+/* ---------------------------------------------------------------------------
+   Heading block
+   --------------------------------------------------------------------------- */
+
+.ment-head {
+  box-sizing: border-box;
+  width: var(--column-width);
+  margin: 64px 0 0 var(--column-start);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  @media (max-width: 720px) {
+    margin-top: 48px;
+    gap: 16px;
+  }
+}
+
+.ment-h1 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: normal;
+  font-synthesis: none;
+  font-variation-settings: "ELSH" 0;
+  font-size: 54px;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  text-wrap: balance;
+
+  @media (max-width: 720px) {
+    margin-bottom: 6px;
+    font-size: 44px;
+    line-height: 1.04;
+  }
+}
+
+.ment-intro {
+  margin: 0;
+  color: var(--color-ink-soft);
+}
+
+/* The public figures under the intro: Geist Serif figure, mono label, no
+   boxes and no rules. One row of three, on a phone too. */
+.ment-nums {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  /* One equal column per figure (`--ment-n`, set from content; at most
+     three), except that a figure never squeezes below its own width ("2
+     years" is the widest). The same row on a phone: three fit at 390. */
+  grid-template-columns: repeat(var(--ment-n, 3), minmax(min-content, 1fr));
+  column-gap: 24px;
+  row-gap: 22px;
+
+  /* Phones: each column as wide as its figure needs, the room left between
+     them, so the middle label keeps its arrow at 360. */
+  @media (max-width: 720px) {
+    grid-template-columns: repeat(var(--ment-n, 3), auto);
+    justify-content: space-between;
+    margin-top: 10px;
+    column-gap: 12px;
+  }
+}
+
+.ment-num {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+
+  /* As wide as its words need (the phone row's auto columns). */
+  @media (max-width: 720px) {
+    min-width: auto;
+  }
+}
+
+.ment-num-v {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: normal;
+  font-synthesis: none;
+  font-variation-settings: "ELSH" 0;
+  font-size: 47px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+  white-space: nowrap;
+
+  /* Three figures in one row down to 360. */
+  @media (max-width: 720px) {
+    font-size: min(35px, 8.4vw);
+  }
+}
+
+.ment-num-l {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: 1.4;
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-muted);
+  text-wrap: balance;
+
+  /* Phones: the labels' tracking a step tighter, so "MENTORCRUISE" and its
+     arrow fit their column at 360. */
+  @media (max-width: 720px) {
+    letter-spacing: 0.04em;
+  }
+
+  /* The last word and the arrow, never apart. */
+  & .ment-num-end {
+    white-space: nowrap;
+
+    & .ico {
+      margin-left: 0.25em;
+    }
+  }
+
+  /* Inline, not the primitive's inline-flex: the arrow follows the last
+     word when the label wraps. */
+  & a {
+    display: inline;
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--color-underline);
+    transition: text-decoration-color var(--duration-fast) ease;
+    border-radius: 2px;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-ink);
+      outline-offset: 3px;
+    }
+  }
+
+  @media (hover: hover) {
+    & a:hover {
+      color: var(--color-ink);
+      text-decoration-color: var(--color-ink);
+    }
+  }
+}
+
+/* Lockups in the proof line: tile, then the underlined name. The underline,
+   the wash and the touch target are the shared branded-link rules (`.blk`,
+   `.blk-w` in `app/styles/brand-link.css`). */
+.ment-lk {
+  /* Over the primitive's inline-flex baseline row (it is an ExternalLink):
+     inline, like the landing's and About's lockups, so the tile sits where
+     theirs does. */
+  display: inline;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Section titles
+   --------------------------------------------------------------------------- */
+
+.ment-h2 {
+  margin: 0;
+  font-size: var(--text-page);
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+/* ---------------------------------------------------------------------------
+   What mentees said: the pile
+   --------------------------------------------------------------------------- */
+
+.ment-said {
+  margin-top: var(--section-gap);
+  display: flex;
+  flex-direction: column;
+}
+
+.ment-said-body {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+/* The pile's frame is wider than the text column: 680px, centred 30px left
+   like the column (`50% - 370px`). On a phone it is the column. */
+.ment-region {
+  /* Board values that have no token: the pile's own ease and timings. */
+  --ment-ease: cubic-bezier(0.65, 0, 0.25, 1);
+  --ment-move: 420ms;
+  --ment-fade: 300ms;
+  --ment-inset: 20px;
+
+  box-sizing: border-box;
+  width: min(680px, calc(100% - 2 * var(--gutter)));
+  margin: 32px 0 0 max(var(--gutter), calc(50% - 370px));
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  @media (max-width: 720px) {
+    --ment-inset: 6px;
+    margin-top: 24px;
+    gap: 16px;
+  }
+}
+
+.ment-pile {
+  position: relative;
+  /* The card's height and the stack's 44px under it. */
+  height: calc(300px * var(--type-scale) + 44px);
+  cursor: grab;
+  /* Vertical swipes scroll the page; horizontal ones move the card. */
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+
+  &[data-held] {
+    cursor: grabbing;
+  }
+
+  /* Text stays selectable until the card is actually being dragged. */
+  &[data-dragging] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  @media (max-width: 720px) {
+    height: calc(344px * var(--type-scale) + 24px + 32px);
+  }
+}
+
+/* A thrown card leaves the pile sideways: clip it at the page's edges, never
+   let it widen the page. */
+.ment-said {
+  overflow-x: clip;
+}
+
+.ment-card {
+  --x: 0px;
+  --y: 0px;
+  --s: 1;
+
+  position: absolute;
+  top: 0;
+  left: var(--ment-inset);
+  z-index: 0;
+  box-sizing: border-box;
+  width: calc(100% - 2 * var(--ment-inset));
+  /* Taller with the type (the boards' 300px times the scale), so the
+     longest quote still fits. */
+  height: calc(300px * var(--type-scale));
+  margin: 0;
+  padding: 36px 40px 30px;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 7%, transparent);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  /* Translate, rotate, scale: the same list the script writes while a card
+     is held or in the air, so every hand-off interpolates term by term. */
+  transform: translate(var(--x), var(--y)) rotate(var(--r, 0deg))
+    scale(var(--s));
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 3%, transparent);
+  transition:
+    transform var(--ment-move) var(--ment-ease),
+    box-shadow var(--ment-move) ease,
+    opacity var(--ment-fade) ease;
+
+  /* The board's four slots: the lifted top card and three behind it, each a
+     little further down and a little smaller. */
+  &[data-pos="0"] {
+    z-index: 10;
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--color-ink) 5%, transparent),
+      0 22px 48px -18px color-mix(in srgb, var(--color-ink) 22%, transparent);
+    /* Arriving on top (or springing back after a short drag): a damped
+       spring with a slight overshoot (zeta 0.62, about 8%). The cubic-bezier
+       line is for engines without linear(). */
+    transition:
+      transform 560ms cubic-bezier(0.34, 1.3, 0.64, 1),
+      box-shadow var(--ment-move) ease,
+      opacity var(--ment-fade) ease;
+    transition:
+      transform 560ms
+        linear(
+          0,
+          0.008 1.3%,
+          0.032 2.5%,
+          0.122 5.3%,
+          0.236 7.8%,
+          0.64 15.8%,
+          0.749 18.3%,
+          0.834 20.5%,
+          0.905 22.8%,
+          0.969 25.3%,
+          1.016 27.8%,
+          1.052 30.5%,
+          1.077 34.3%,
+          1.083 38.5%,
+          1.017 57%,
+          0.999 65.3%,
+          0.993 75.8%,
+          1
+        ),
+      box-shadow var(--ment-move) ease,
+      opacity var(--ment-fade) ease;
+  }
+
+  &[data-pos="1"] {
+    --x: 14px;
+    --y: 10px;
+    --s: 0.985;
+    z-index: 9;
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 4%, transparent);
+  }
+
+  &[data-pos="2"] {
+    --x: -10px;
+    --y: 20px;
+    --s: 0.97;
+    z-index: 8;
+  }
+
+  &[data-pos="3"],
+  &[data-pos="out"] {
+    --x: 8px;
+    --y: 30px;
+    --s: 0.955;
+  }
+
+  &[data-pos="3"] {
+    z-index: 7;
+  }
+
+  &[data-pos="out"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (max-width: 720px) {
+    /* 24px more than the scale: the longest quotes at 360. */
+    height: calc(344px * var(--type-scale) + 24px);
+    padding: 28px 24px 24px;
+
+    &[data-pos="0"] {
+      box-shadow:
+        0 1px 2px color-mix(in srgb, var(--color-ink) 5%, transparent),
+        0 18px 40px -16px color-mix(in srgb, var(--color-ink) 22%, transparent);
+    }
+
+    &[data-pos="1"] {
+      --x: 7px;
+      --y: 8px;
+    }
+
+    &[data-pos="2"] {
+      --x: -5px;
+      --y: 16px;
+    }
+
+    &[data-pos="3"],
+    &[data-pos="out"] {
+      --x: 4px;
+      --y: 24px;
+    }
+  }
+}
+
+/* The timer's move lands without the spring. */
+.ment-pile[data-move="auto"] .ment-card[data-pos="0"] {
+  transition:
+    transform 640ms var(--ment-ease),
+    box-shadow var(--ment-move) ease,
+    opacity var(--ment-fade) ease;
+}
+
+/* Pressed: the top card settles flat and a touch smaller, its shadow drawn
+   in, within 80ms. */
+.ment-card[data-press] {
+  transform: translate(var(--x), var(--y)) rotate(0deg) scale(0.985);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--color-ink) 6%, transparent),
+    0 10px 24px -14px color-mix(in srgb, var(--color-ink) 24%, transparent);
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
+}
+
+/* Held by the pointer: the script writes the transform every frame. */
+.ment-card[data-drag] {
+  transition: box-shadow 80ms ease-out;
+}
+
+/* In the air (Web Animations drive the transform): over the pile until it
+   is clear of it, then under it. Opaque until it lands. */
+.ment-card[data-fly],
+.ment-pile[data-move] .ment-card[data-fly] {
+  opacity: 1;
+  pointer-events: none;
+  transition: none;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--color-ink) 5%, transparent),
+    0 22px 48px -18px color-mix(in srgb, var(--color-ink) 22%, transparent);
+}
+
+.ment-card[data-fly="under"] {
+  z-index: 0;
+}
+
+.ment-quote {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: normal;
+  font-synthesis: none;
+  font-variation-settings: "ELSH" 0;
+  font-size: var(--fs-28);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  color: var(--color-ink);
+
+  & p {
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  [data-len="m"] > & {
+    font-size: var(--fs-25);
+  }
+
+  [data-len="l"] > & {
+    font-size: var(--fs-23);
+  }
+
+  @media (max-width: 720px) {
+    font-size: var(--fs-22);
+
+    [data-len="m"] > & {
+      font-size: var(--fs-20);
+    }
+
+    [data-len="l"] > & {
+      font-size: var(--fs-18);
+    }
+  }
+}
+
+.ment-cap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--fs-16);
+  line-height: 1.3;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.ment-who {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ment-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: 1.3;
+  font-weight: 400;
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.ment-face {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-tile);
+}
+
+.ment-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--color-ink) 6%, transparent);
+  font-size: var(--fs-14);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* The 2px bar filling towards the next card. Its animation is the timer. */
+.ment-bar {
+  box-sizing: border-box;
+  margin-left: var(--ment-inset);
+  width: calc(100% - 2 * var(--ment-inset));
+  height: 2px;
+  background: var(--color-rule);
+  overflow: hidden;
+  opacity: 0;
+
+  &[data-on] {
+    opacity: 1;
+  }
+}
+
+.ment-bar-fill {
+  height: 2px;
+  background: var(--color-ink);
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: ment-fill var(--ment-seconds, 7s) linear forwards;
+}
+
+@keyframes ment-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.ment-ctls {
+  box-sizing: border-box;
+  margin-left: var(--ment-inset);
+  width: calc(100% - 2 * var(--ment-inset));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Pause and the counter (Buttons: icon and compact). The counter keeps one
+   width as its digits change. */
+.ment-count {
+  min-width: 72px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No flight and no drag-follow: the script cross-fades the top card. */
+  .ment-card,
+  .ment-card[data-pos],
+  .ment-pile[data-move] .ment-card[data-pos="0"] {
+    transition: none;
+  }
+
+  .ment-pile {
+    cursor: pointer;
+  }
+
+  /* It never advances on its own, so there is nothing to pause. */
+  .ment-bar,
+  .ment-toggle {
+    display: none;
+  }
+}
+
+/* Without JavaScript: a plain readable stack, no controls. */
+@media (scripting: none) {
+  .ment-pile {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    cursor: auto;
+    touch-action: auto;
+  }
+
+  .ment-card,
+  .ment-card[data-pos] {
+    position: static;
+    width: auto;
+    height: auto;
+    margin-inline: var(--ment-inset);
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .ment-bar,
+  .ment-ctls {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Who it is for, how it works
+   --------------------------------------------------------------------------- */
+
+.ment-fit {
+  margin-top: var(--section-gap);
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+
+  @media (max-width: 720px) {
+    gap: 48px;
+  }
+}
+
+.ment-group,
+.ment-how {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ment-how {
+  margin-top: var(--section-gap);
+}
+
+/* The closing block (owner, 15 Nov 2026): the line, the booking button,
+   and "Or write to me." under it, quiet. */
+.ment-cta {
+  margin-top: var(--section-gap);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.ment-cta__alt {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: calc(20px * var(--type-scale));
+  color: var(--color-muted);
+
+  & a {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--color-underline);
+    border-radius: 2px;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-ink);
+      outline-offset: 3px;
+    }
+  }
+
+  @media (hover: hover) {
+    & a:hover {
+      color: var(--color-ink);
+      text-decoration-color: var(--color-ink);
+    }
+  }
+}
+
+.ment-rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--color-rule);
+  color: var(--color-ink-soft);
+
+  & > li {
+    padding: 14px 0;
+    border-top: 1px solid var(--color-rule);
+    text-wrap: pretty;
+  }
+}
+
+/* Who it is for: no rules, a washed plus or minus before each item. */
+.ment-marks {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--color-ink-soft);
+
+  & > li {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    column-gap: 14px;
+    align-items: start;
+    text-wrap: pretty;
+  }
+
+  &[data-tone="fit"] {
+    --mark-wash: var(--color-fit-wash);
+    --mark-ink: var(--color-fit-ink);
+  }
+
+  &[data-tone="nofit"] {
+    --mark-wash: var(--color-nofit-wash);
+    --mark-ink: var(--color-nofit-ink);
+  }
+}
+
+/* 20px square, the site's 4px corner, centred on the first line of text
+   (line box = 1lh; the square sits in the middle of it). */
+.ment-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: calc((1lh - 20px) / 2);
+  border-radius: var(--radius-control);
+  background: var(--mark-wash);
+  color: var(--mark-ink);
+
+  @media (forced-colors: active) {
+    forced-color-adjust: none;
+    background: Canvas;
+    color: CanvasText;
+    outline: 1px solid CanvasText;
+  }
+}
+
+.ment-steps > li {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: baseline;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+}
+
+.ment-step-n {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}

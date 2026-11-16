@@ -1,0 +1,160 @@
+# E2E harness
+
+Playwright suite for the site. Copy and data
+come from `content/**` (the site's source of truth), so a copy change needs no
+test change. Locators are roles, labels and text, not class names, so the
+suite survives restyling. The few structural hooks are ids and data
+attributes the components own (`#headline`, `#contact`, `[data-strip]`,
+`[data-rail]`, `[data-pv-still]`).
+
+## Layout
+
+| File                      | Covers                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a11y.spec.ts`            | axe (WCAG 2.0/2.1/2.2 A + AA) on every page at 1440x900 and 390x844, plus Ask open, the list expanded and the strip's cards out of focus.                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `about.spec.ts`           | `/about`: the story word for word with the early projects' carousel between the two halves of the second paragraph (slides, counter, arrows, keys, drag, the loop at both ends and its hidden copies, equal heights at four widths, touch swipes at 390), the CV entries with roles in three styles, the mirror, the postscript and its Paranoia run (the page held still while it runs, let go on Escape, a hidden tab or leaving the page).                                                                                                       |
+| `ask.spec.ts`             | Each prepared question gives its answer and source line; a typed question that matches; one that does not gets the fallback and the email link; `data-ask-open` on `<html>`; Ask on other pages; a source link navigates and closes; the page holds still under the panel with no sideways shift; at 390 by touch (Chromium) the sheet comes in from the right, the page holds, the sheet scrolls.                                                                                                                                                  |
+| `budgets.spec.ts`         | Production only. On `/`: the largest contentful paint is text above the fold, CLS under 0.05, JavaScript under 208 KB compressed up to load (181 KB measured on 2026-11-11, plus about 15%). On `/work/studenti-rs`: CLS under 0.05, JavaScript under 226 KB compressed (196.5 KB measured on 2026-11-12).                                                                                                                                                                                                                                          |
+| `content-rules.spec.ts`   | On every page (text, title, description, JSON-LD), every markdown twin, `/llms.txt` and `/llms-full.txt`: no em dash outside testimonials, Lausanne never given as his location, no bracket placeholder.                                                                                                                                                                                                                                                                                                                                            |
+| `dent-gpu.spec.ts`        | The dent drawn on a real GPU (opt-in with `DENT_GPU=1`): a press dents and the dent stays with the page, no text selection, no dent on links, buttons or the strip, reduced motion takes it down.                                                                                                                                                                                                                                                                                                                                                   |
+| `dent.spec.ts`            | The homepage dent's loading rules: nothing of it is requested except on `/`, on a desktop with a mouse wider than 1024px, without reduced motion, after `load` and a first mouse move.                                                                                                                                                                                                                                                                                                                                                              |
+| `diagram.spec.ts`         | The case-study diagrams: under `next dev` every diagram on `/dev/diagrams` at its three sizes (text alternative, inside its square, no brackets, the walk animation, no-JS, axe); against a production build, on the story pages and `/dev/diagrams` a 404.                                                                                                                                                                                                                                                                                         |
+| `footer.spec.ts`          | One footer on every page: the same text and links in the same order; the bottom row is the station clock with "Ticino" and the time there.                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `header.spec.ts`          | One header: the name at the same place and size on every page but the case studies (their bar is `story-cover.spec.ts`), at 1440 and 390; the back arrow hangs in the gutter; at 390 and 360 two rows on five routes (the name centred on the 44px Ask, the line under both).                                                                                                                                                                                                                                                                                                                                  |
+| `home-copy.spec.ts`       | The landing's copy: the intro paragraphs with their product lockups, "How I work", Zarez live, the About CV line.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `icons.spec.ts`           | The site's icon set: no unicode arrows left in text; the icons in the header's back link, the list's actions, outgoing links and the Ask button; `/dev/icons` a 404 in production.                                                                                                                                                                                                                                                                                                                                                                  |
+| `keyboard.spec.ts`        | Skip link; Tab order through the top block; visible focus; Ask from the keyboard (focus trap, Escape, focus return, Enter asks); the press menu (Shift+F10, arrows, Escape); the strip's arrow keys and Home/End, and every card's actions; the list's "Show all" / "Show fewer" and collapsed rows out of the Tab order; the testimonial pile's pause and counter, quotes readable to assistive tech.                                                                                                                                              |
+| `landing-list.spec.ts`    | The landing's list: the year above the name, the description in the wide column, the actions in words shown on hover and focus.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `landing-strip.spec.ts`   | "Recent work" by hand: a click on a card out of focus brings it into focus and does nothing else (not even its Website), the end card the same; a click, tap or Enter on the card in focus follows its first pill (case study, else website), the pills staying its only links; a mouse drag follows 1:1 and settles on a card without a click, selection or native drag; the cursors; the clip follows focus; the vertical wheel scrolls the page; at 390 a touch swipe at any speed moves exactly one card and a vertical swipe scrolls the page. |
+| `machine.spec.ts`         | `/llms.txt`, `/llms-full.txt`, `/sitemap.xml` (exactly the real pages, no redirected slugs), `/robots.txt`, the markdown twin of every page (`Accept: text/markdown`, `Vary: Accept`), every JSON-LD block parses, the `Person` node on `/`, `/mcp` JSON-RPC `initialize`.                                                                                                                                                                                                                                                                          |
+| `mentoring.spec.ts`       | `/mentoring`: the four figures under the intro (value first, the reviews link); the pile (all figures in the DOM, a tap and a throw send the top card to the back, a short drag springs back, rapid taps leave the slots whole; by touch at 390 a drag holds the page still and a quick vertical swipe scrolls it); the fit marks (no rules, headings from content); haptics (one tick per manual move, none on autoplay or a spring-back, a quiet no-op without support).                                                                          |
+| `mobile.spec.ts`          | No horizontal overflow on any page; 44px targets on the main controls; Ask opens as a side sheet from the right, its close on the Ask button, the page held still behind it and scrolling again after; the list loads no preview pictures.                                                                                                                                                                                                                                                                                                          |
+| `motion.spec.ts`          | Motion allowed: the headline changes phrase within its pace; pause stops it and play restarts it; the pile advances on its own and pause stops it; the clock's second hand moves.                                                                                                                                                                                                                                                                                                                                                                   |
+| `newsletter.spec.ts`      | The footer sign-up on `/`: labelled field; an address the browser or the server rejects; with no `CONVERTKIT_API_KEY` the "offline" line, never the thanks; the thanks via a rewritten response; the no-JS post; only `@example.com` addresses. Turnstile, client side: no key, nothing of it; a test key and a stubbed script: loaded on first focus, never with the page, a fresh token per post, a failed check posts without one, a tick shows under the field and holds the send.                                                              |
+| `newsletter-bots.spec.ts` | No browser: the `subscribe` logic in Node, Kit and Siteverify answered by a stub `fetch`. No Turnstile variables, or only one: straight to Kit. A filled honeypot: success-looking, nothing called. Both set: a missing, refused or spent token, Ask's or another site's, or Siteverify down or slow, gets the generic `failed` line and Kit is never called.                                                                                                                                                                                       |
+| `no-js.spec.ts`           | JavaScript off: every block of copy paints, the headline is one full sentence showing its first phrase, the list has all 16 rows, story cards are plain links to `/work/<slug>`, Ask is a link to `#contact`, every testimonial.                                                                                                                                                                                                                                                                                                                    |
+| `no-placeholders.spec.ts` | No bracket placeholder reaches a page, a markdown mirror, `/llms.txt` or `/llms-full.txt`.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `popover.spec.ts`         | The product popovers in the landing's story: the pointer can travel into the panel and use its link.                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `press.spec.ts`           | `/press` against its sources: every fact against `SITE`, the About CV, the products, the mentoring figures and the case studies' roles; the short bio's facts; the markdown twin and the Ask context.                                                                                                                                                                                                                                                                                                                                               |
+| `project-links.spec.ts`   | The two-actions rule: wherever a project appears it has at most "Case study" and "Website"; names, pictures, cards and rows are not links (a strip card in focus forwards a click to its first action).                                                                                                                                                                                                                                                                                                                                             |
+| `reduced-motion.spec.ts`  | `prefers-reduced-motion: reduce`: the headline holds and offers Play; the pile does not advance on its own, and a tap still advances (a cross-fade, no drag-follow); the second hand holds; no time-based animation runs on `/` after load.                                                                                                                                                                                                                                                                                                         |
+| `routes.spec.ts`          | Every page (`/`, `/work`, `/mentoring`, `/about`, `/press`, the nine stories): 200, one `<h1>`, title, meta description, self canonical, header/main/footer, `#contact`, no console errors. Every redirect in `next.config.ts` answers 308 to its destination (`/uses`, `/mentorship`, retired slugs). 404s.                                                                                                                                                                                                                                        |
+| `status.spec.ts`          | Production only: real 404 status codes for unknown pages, slugs and mirrors (no soft 404s).                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `story-copy.spec.ts`      | The owner's answers on the case studies: the dated TenderLift numbers, what may and may not be shown, the figure captions.                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `story-layout.spec.ts`    | All nine case studies: at 1440 under the cover the 400px panel beside the column of 752px squares, at 390 one column (the first square, the panel, then the other squares, the width of the column), every square square and all the same size, the panel pinned under the bar while the column scrolls and never past the next story or the footer, no `[` + capitals anywhere on the page.                                                                                                                                                                                                                       |
+| `story-links.spec.ts`     | Every link in a story's panel carries the linked site's favicon, and it loads.                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `story-roles.spec.ts`     | The role timeline on the ZF story: exclusive `<details>`, keyboard, motion and reduced motion.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `story-video.spec.ts`     | Every story with a clip (from content): muted, inline, `preload="none"`, sized, poster in place; no `<source>` and no request until near the viewport, then WebM first and playing; pauses off screen and under `html[data-motion="paused"]`; a reader's pause sticks; no shift when the clip loads.                                                                                                                                                                                                                                                |
+| `strip-clip.spec.ts`      | The product clip on a "Recent work" card (the first card with `media.clip`): its poster, at the clip's proportions, is in the HTML before any video request; the clip is requested only when its card is on screen and in focus; only the card in focus plays, the headline's pause stops it, and it starts over on coming back into focus; under reduced motion and without JavaScript the poster is all there is; at 390 wide only the narrow take (poster and video) is requested, at 1440 only the wide one.                                    |
+| `strip-film.spec.ts`      | The strip's print and end card: the end card is one link to `/work` named by the plain sentence, its count comes from content, the grain and veil never take a click.                                                                                                                                                                                                                                                                                                                                                                               |
+| `transitions.spec.ts`     | Footer and top-block links navigate in place (no reload), land at the top with the new `<h1>` and title, and leave focus off the old page and out of the footer; a list row to its story and Back; a story's next-story link; the header's name and Ask as shared elements (`site-name`, `site-ask`) going to a story.                                                                                                                                                                                                                              |
+| `helpers.ts`              | The page list, content-derived labels, hydration wait, sitemap and JSON-LD readers, animation helpers, CLS/LCP observers.                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `global-setup.ts`         | Requests every route once before the first test, so a dev server's first-hit compile is not paid inside a test.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+
+## Projects
+
+| Project          | Engine                                  | Specs                                                           |
+| ---------------- | --------------------------------------- | --------------------------------------------------------------- |
+| `Desktop Chrome` | Chromium 1440x900                       | everything except `mobile.spec.ts` and `reduced-motion.spec.ts` |
+| `Mobile Safari`  | WebKit, iPhone 14 390x844, touch        | `mobile.spec.ts`                                                |
+| `Desktop Safari` | WebKit 1440x900                         | `transitions.spec.ts`, `ask.spec.ts`                            |
+| `reduced-motion` | Chromium with `reducedMotion: "reduce"` | `reduced-motion.spec.ts`                                        |
+
+`a11y.spec.ts` covers the phone size inside `Desktop Chrome` (390x844 with
+touch), so axe runs on one engine.
+
+### The WebKit caveat
+
+macOS ships with "Press Tab to highlight each item" off, and Playwright's
+WebKit inherits it: Tab skips links. That is the platform's setting, not the
+site's, so Tab-order tests (`keyboard.spec.ts`) run on Chromium only, and the
+Tab step in `transitions.spec.ts` is skipped on WebKit.
+
+### How "nothing moved" is tested
+
+A test that has to show that something does NOT happen (the paused headline,
+the reduced-motion clock) installs Playwright's fake clock
+(`page.clock.install`) and runs it forward with `page.clock.runFor`, so ten
+seconds of stillness take no real time. The testimonial pile's timer is a CSS
+animation, which the fake clock does not drive: those tests read it through
+`element.getAnimations()` and finish it with `animation.finish()`.
+
+### One axe judgement in code
+
+`color-contrast` stays on everywhere. The Ask button's label is drawn with
+`mix-blend-mode: difference`, which axe cannot evaluate (it reads the label's
+own near-white colour). For nodes whose computed blend mode is `difference`,
+`a11y.spec.ts` recomputes the painted colour from the colours axe reports and
+keeps the violation only if that still fails. See `blendedContrastPasses`.
+
+## Running locally
+
+```sh
+pnpm exec playwright install chromium webkit   # once
+```
+
+**Against a server that is already running** (the shared dev server while
+the site is being built, or your own):
+
+```sh
+PLAYWRIGHT_BASE_URL=http://localhost:3200 pnpm test:e2e
+```
+
+With `PLAYWRIGHT_BASE_URL` set, Playwright starts no server. Outside CI the
+timeouts are generous (60 s per test, 45 s per navigation) because a dev
+server compiles each route on its first hit; `global-setup.ts` warms them all
+first.
+
+**Let Playwright start the dev server:** `pnpm test:e2e` with nothing set runs
+`pnpm dev -p 3104`, or reuses whatever already listens on 3104.
+
+**The production path, exactly what CI runs:**
+
+```sh
+pnpm build
+CI=1 pnpm test:e2e
+```
+
+`CI=1` starts `pnpm start -p 3104`, never reuses a server, retries once and
+adds the GitHub and HTML reporters. It also turns on `budgets.spec.ts`. To run
+the budgets against a production server you started yourself:
+
+```sh
+PLAYWRIGHT_PROD=1 PLAYWRIGHT_BASE_URL=http://localhost:3000 pnpm exec playwright test budgets.spec.ts
+```
+
+Useful variants:
+
+```sh
+pnpm test:e2e:ui                                   # Playwright's UI mode
+pnpm exec playwright test ask.spec.ts              # one file
+pnpm exec playwright test --project="Mobile Safari"
+pnpm exec playwright show-report                   # after a run
+```
+
+Traces, screenshots and videos are kept for failed tests; open a trace with
+`pnpm exec playwright show-trace test-results/<test>/trace.zip`.
+
+## Running in CI
+
+`.github/workflows/e2e.yml` runs on every pull request and on push to `main`:
+it restores `.next/cache`, installs dependencies and the Chromium + WebKit
+browsers, runs `pnpm build` as its own step, then `pnpm test:e2e` with
+`CI=true`, so `webServer` only has to start `pnpm start -p 3104`. The HTML
+report is uploaded when the run fails.
+
+## Reading a red run
+
+On 2026-11-16 against a production build (`PLAYWRIGHT_PROD=1`): **770
+passed, 17 skipped**, none failing. The skips are all by design:
+
+- five `dent-gpu.spec.ts` tests: they need a GPU (`DENT_GPU=1`);
+- nine `diagram.spec.ts` specimen tests: `/dev/diagrams` exists only under
+  `next dev` (the production block runs instead);
+- one `transitions.spec.ts` Tab test on Desktop Safari: WebKit's Tab skips
+  links (see "The WebKit caveat").
+
+There are no `test.fixme`s. Timing-sensitive pointer tests (the strip and
+carousel drags) read speed from the drag itself, so they hold under a full
+parallel run; if one flakes, run it with `--repeat-each` before suspecting
+the code.

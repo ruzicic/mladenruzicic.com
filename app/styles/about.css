@@ -1,0 +1,523 @@
+/* ---------------------------------------------------------------------------
+   /about: portrait and "The longer story." with the early projects'
+   carousel inside it, the CV and the postscript; and the fact list, which
+   only /press shows now (`FactList`). Ported from
+   docs/v4-ideation/board/project/Landing-About.dc.html (1440) and
+   Landing-About-Mobile.dc.html (390). Imported by the components in
+   app/components/about/ (the fact list is shared with /press).
+
+   Unlayered on purpose, like landing.css: these rules override primitive
+   utilities (which live in @layer utilities) where the board differs.
+   --------------------------------------------------------------------------- */
+
+/* The text column, as every section on the board sits in it. */
+.ab-col {
+  box-sizing: border-box;
+  width: var(--column-width);
+  margin-left: var(--column-start);
+}
+
+/* Sections: 96px apart on desktop, 72px on phones (`--section-gap`). */
+.ab-sec {
+  margin-top: var(--section-gap);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ab-h2 {
+  margin: 0;
+  font-size: var(--text-page);
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.ab-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
+}
+
+/* A list under hairlines: a rule above every row, one under the last. */
+.ab-rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--color-rule);
+
+  & > :where(li, div) {
+    border-top: 1px solid var(--color-rule);
+  }
+}
+
+/* ============================== Intro =================================== */
+
+.ab-intro {
+  margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  @media (max-width: 720px) {
+    margin-top: 48px;
+    gap: 16px;
+  }
+}
+
+.ab-portrait {
+  display: block;
+  width: 96px;
+  height: 96px;
+  border-radius: 20px;
+  object-fit: cover;
+  background: var(--color-tile);
+}
+
+.ab-h1 {
+  margin: 10px 0 8px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: normal;
+  font-synthesis: none;
+  font-variation-settings: "ELSH" 0;
+  font-size: 60px;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  text-wrap: balance;
+
+  @media (max-width: 720px) {
+    margin: 8px 0 6px;
+    font-size: 44px;
+    line-height: 1.04;
+  }
+}
+
+.ab-para {
+  margin: 0;
+  color: var(--color-ink-soft);
+}
+
+/* A product named in the story: its tile and an underlined name. */
+/* Lockups in the story: tile + underlined name. The underline, the wash and
+   the touch target are the shared branded-link rules (`.blk`, `.blk-w` in
+   `app/styles/brand-link.css`). */
+.ab-lk {
+  white-space: nowrap;
+}
+
+/* ========================== Early projects ============================== */
+/* The carousel inside the story (owner, 15 Nov 2026: layout B, the board's
+   card 77 variant b). Desktop: one slide in the text column, the 165 by 124
+   picture beside the caption and its line, the counter and arrows at the
+   bottom right of the words. Phone: the slide stacks (a 228 by 171
+   picture, then the words) inside the column, gutter on both sides, one
+   slide in view and nothing of the next (the polish round of 15 Nov 2026:
+   clipped words at the edge read as broken); the counter and the same
+   arrows sit above it, right-aligned. The rail (`app/styles/rail.css`) is as tall as its tallest slide,
+   so every slide has the same height and the page never moves. */
+.ab-car {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.ab-car__rail {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 4px;
+  }
+}
+
+.ab-slide {
+  flex: none;
+  box-sizing: border-box;
+  width: 100%;
+  scroll-snap-align: start;
+}
+
+.ab-slide__fig {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 165px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+}
+
+/* The picture: no padding round it, a hairline edge, small corners. */
+.ab-slide__pic {
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px var(--color-rule);
+
+  @media (max-width: 720px) {
+    width: min(228px, 100%);
+  }
+}
+
+/* The caption, then the line of context. On desktop the words keep clear
+   of the counter and arrows under them (8px, then the 36px buttons). */
+.ab-slide__words {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 44px;
+
+  @media (max-width: 720px) {
+    gap: 8px;
+    padding-bottom: 0;
+  }
+}
+
+.ab-slide__text {
+  font-size: var(--fs-15);
+  line-height: 1.5;
+  color: var(--color-muted);
+  text-wrap: pretty;
+}
+
+.ab-car__ctl {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  @media (max-width: 720px) {
+    position: static;
+    order: -1;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+  }
+}
+
+.ab-car__count {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ab-car__arrows {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ========================= Facts (/press) ============================== */
+
+.ab-fact {
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  gap: 16px;
+  align-items: baseline;
+  padding: 12px 0;
+
+  @media (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  & dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+
+  & dd {
+    margin: 0;
+    color: var(--color-ink-soft);
+    font-variant-numeric: tabular-nums;
+    text-wrap: pretty;
+  }
+}
+
+/* ================================ CV ==================================== */
+/* Two lines per employer (owner, 15 Nov 2026: role names, no third
+   column; the board's card 78, layout 1): the years as the small label
+   above, as in the home and /work list rows (`.ledger-when`), then the tile,
+   the company and the role, then the description at the full column
+   width. */
+.ab-cv {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 0;
+}
+
+.ab-cv__years {
+  margin-bottom: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: calc(16px * var(--type-scale));
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.ab-cv__line {
+  margin: 0;
+  font: inherit;
+  color: var(--color-ink);
+  text-wrap: pretty;
+}
+
+.ab-cv__name {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* The role: the mono label of the years, a step darker (owner, 16 Nov
+   2026: "fontstyle for company name + role can't be the same"). Three
+   levels: the company in the ink at medium weight, the role in mono
+   capitals in the quiet ink, the description in the muted body. */
+.ab-cv__role {
+  margin-left: 0.4em;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-quiet);
+
+  /* Phones (owner, 16 Nov 2026): the role wrapped and read as the
+     description's first line, so it gets a line of its own: the company,
+     then the role, then the description. */
+  @media (max-width: 720px) {
+    display: block;
+    margin: 2px 0 0;
+  }
+}
+
+.ab-cv__text {
+  margin: 0;
+  color: var(--color-muted);
+  text-wrap: pretty;
+}
+
+.ab-cv__foot {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+
+  @media (max-width: 720px) {
+    gap: 12px 16px;
+  }
+}
+
+/* ============================ Postscript ================================ */
+/* The note after the CV (15 Nov 2026), ported from the paper lab's
+   /paranoia: the sentence a little quieter than the paragraphs, the game's
+   tile and the champions' avatar group in the line, then the button and
+   its sign. */
+
+.ab-ps {
+  position: relative;
+  margin-top: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+
+  @media (max-width: 720px) {
+    margin-top: 56px;
+  }
+
+  /* The cursor image, when content has one: over the block, for a fine
+     pointer only. `--ps-cursor` is the image and its hotspot; the keyword
+     after it is the normal cursor if the image cannot be used. The button
+     keeps the gauntlet too (its "pointer" is the gauntlet), as in the lab. */
+  @media (pointer: fine) {
+    &[data-cursor],
+    &[data-cursor] * {
+      cursor: var(--ps-cursor), auto;
+    }
+
+    &[data-cursor] :is(a, button, [role="button"]) {
+      cursor: var(--ps-cursor), pointer;
+    }
+  }
+}
+
+/* ...and across the page while a run lasts. */
+@media (pointer: fine) {
+  html[data-paranoia-run][style*="--ps-cursor"],
+  html[data-paranoia-run][style*="--ps-cursor"] * {
+    cursor: var(--ps-cursor), auto !important;
+  }
+}
+
+.ab-ps__text {
+  margin: 0;
+  font-size: var(--fs-16);
+  line-height: 1.55;
+  color: var(--color-muted);
+  text-wrap: pretty;
+}
+
+.ab-ps__lead {
+  color: var(--color-ink-soft);
+}
+
+/* The game's name with its tile and the avatars never break apart. */
+.ab-ps__game {
+  white-space: nowrap;
+  color: var(--color-ink-soft);
+}
+
+.ab-ps__tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+  vertical-align: -4px;
+  border-radius: 5px;
+  background: var(--color-night);
+
+  & img {
+    display: block;
+  }
+}
+
+/* Two equal circles, the second over the first by a quarter, a paper ring
+   between them and the thin gold ring; sized to the text so the line does
+   not grow. */
+.ab-ps__avatars {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  vertical-align: -4px;
+}
+
+/* One avatar and its tooltip: the tooltip is placed against this box, so
+   it follows the avatar through any transform of the page (the sheet
+   scales down as the footer comes in). */
+.ab-ps__avw {
+  position: relative;
+  display: inline-flex;
+
+  & + & {
+    margin-left: -4.5px;
+  }
+
+  &[data-on] {
+    z-index: 2;
+  }
+}
+
+.ab-ps__av {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  /* The gold of the champions' frames: not a page token, only this ring. */
+  border: 1px solid #c8aa6e;
+  box-shadow: 0 0 0 1.5px var(--color-paper);
+  overflow: hidden;
+  background: var(--color-night);
+  outline: none;
+
+  & img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  &:focus-visible {
+    z-index: 1;
+    box-shadow:
+      0 0 0 1.5px var(--color-paper),
+      0 0 0 3px var(--color-ink);
+  }
+}
+
+/* The tooltip: a small mono label on night, centred above its avatar. */
+.ab-ps__tip {
+  position: absolute;
+  z-index: 5;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  translate: -50% 0;
+  padding: 4px 7px;
+  border-radius: 4px;
+  background: var(--color-night);
+  color: var(--color-night-ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity var(--duration-instant) var(--ease-standard);
+
+  [data-on] > & {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.ab-ps__cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+
+  @media (max-width: 720px) {
+    flex-direction: column;
+    align-items: flex-start;
+
+    /* The long label on one line at 360 (the button never wraps): the
+       design's 14px there, the scaled step from about 420px up. */
+    & .btn {
+      font-size: min(var(--fs-14), 3.85vw);
+    }
+  }
+}
+
+/* "Sound on. Mandatory.": a sign, not a control. */
+.ab-ps__sign {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
+}

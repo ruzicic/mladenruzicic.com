@@ -37,4 +37,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-.contentlayer
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+
+# v3 planning material — intentionally untracked (private metrics, live-site screenshots)
+docs/
+
+# agent worktrees
+.claude/worktrees/
+
+# Cloudflare Worker local state and account-specific config (workers/ask/README.md)
+.wrangler/
+workers/*/.dev.vars
+workers/*/.dev.vars.*
+!workers/*/.dev.vars.example
+workers/*/deploy.local.json
+workers/*/wrangler.deploy.json

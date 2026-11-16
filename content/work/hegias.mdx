@@ -1,0 +1,124 @@
+---
+slug: "hegias"
+title: "HEGIAS"
+company: "hegias"
+period:
+  from: "2020-07"
+  to: "2021-04"
+updated: "2026-11-16"
+role: "Senior Full Stack Developer"
+accent: "#6F246F"
+tech:
+  - "React"
+  - "TypeScript"
+  - "styled-components"
+  - "Ant Design"
+  - "Storybook"
+  - "A-Frame"
+  - "three.js"
+  - "Node.js"
+  - "AWS"
+line: "Moving an AR/VR MVP toward production: 3D pipelines, microservices on AWS, in-app voice."
+detail: "HEGIAS made browser-based VR for architecture and real estate: upload a building model, walk through it in a browser or a headset. From July 2020 to April 2021 I led the full-stack work on the HEGIAS CMS, the web app where all of that happened."
+links:
+  - label: "HEGIAS"
+    url: "https://hegias.com"
+# The owner, November 2026: screenshots from inside the app were shared often
+# and the app no longer exists as it was, so showing it is fine. Every picture
+# below was made on 2026-11-12 by running the CMS, its 3D layer and the
+# component library (as they stood in March 2021) against a local mock API.
+# The organisation, people, projects, scenes, furniture and materials on
+# screen are all invented (docs/v4-build/sources/work/hegias/SOURCES.md).
+# The share-link panel is left out: it shows a local address.
+confidentiality: "public"
+story: true
+# The case-study page (CaseStudy.dc.html, 12 Nov 2026): panel copy, numbers,
+# captions and the order of the squares are the board's, word for word. Left
+# out until the owner gives them (docs/v4-build/PLACEHOLDERS.md): two more
+# numbers and a third paragraph, "what I took from it". The four clips are
+# cut from HEGIAS's own videos (docs/v4-build/dossier/hegias/notes.md); the
+# two stills are wide recreations shown whole on the plate until they are
+# shot square.
+panel:
+  summary: "Virtual reality for architects. I led the team that built the web app."
+  meta:
+    - "2020 to 2021"
+    - "Senior Full Stack Developer"
+  live:
+    label: "hegias.com"
+    href: "https://hegias.com"
+  numbers:
+    - value: "6"
+      lines: ["People on", "the team"]
+  paragraphs:
+    - "HEGIAS is a Zurich company that makes VR for architecture and real estate: upload a building model, then walk through it in a browser or a headset."
+    - "I reported to the CTO and was responsible across the stack: the frontend and CMS, the backend, infrastructure, internal tooling, the component library and integrations. My job was to get the teams aligned and working together, not in silos."
+  people: ["josip"]
+  plate: "#F1EBEF"
+column:
+  - kind: "clip"
+    src: "/static/work/hegias/sq-tutorial-floor.mp4"
+    poster: "/static/work/hegias/sq-tutorial-floor-poster.webp"
+    short: "Tutorial clip"
+    caption: "From HEGIAS’s own tutorial video, 2023"
+    alt: "An oak floor is dragged from the material library into the room and appears at once; the view then turns through the room."
+  - kind: "image"
+    src: "/static/work/hegias/sq-scene-editor.webp"
+    focus: "0% 50%"
+    short: "Scene editor"
+    caption: "The scene editor, with the furniture library beside it · recreated 2026, demo data"
+    alt: "The HEGIAS scene editor: organisation, project and scene switchers, a toolbar, a simple 3D living room with a bookshelf, a sofa, a floor lamp, a plant and a dining table, and the object library on the right, from a lounge chair to a potted plant."
+  - kind: "diagram"
+    id: "hegias/model-to-headset"
+    short: "From model to headset"
+  - kind: "clip"
+    src: "/static/work/hegias/sq-furnish.mp4"
+    poster: "/static/work/hegias/sq-furnish-poster.webp"
+    short: "Furnishing"
+    caption: "Furnishing a scene. From HEGIAS’s own tutorial video, 2023"
+    alt: "A shelf from the object library is dropped into the room, and the view walks up to it."
+  - kind: "image"
+    src: "/static/work/hegias/sq-material-library.webp"
+    focus: "0% 50%"
+    short: "Material library"
+    caption: "The material library: a list, a 3D view, the details · recreated 2026, demo data"
+    alt: "The material library: a list of materials, a large swatch of light terrazzo and its details."
+  - kind: "clip"
+    src: "/static/work/hegias/sq-vr-model.mp4"
+    poster: "/static/work/hegias/sq-vr-model-poster.webp"
+    short: "Inside, in VR"
+    caption: "Inside the model, in VR. From HEGIAS’s own tutorial video, 2023"
+    alt: "Inside the headset: the flat seen as a 1:10 model, then one tap back to full size, standing in the room."
+  - kind: "clip"
+    src: "/static/work/hegias/sq-quest.mp4"
+    poster: "/static/work/hegias/sq-quest-poster.webp"
+    short: "Oculus Quest"
+    caption: "On an Oculus Quest. From HEGIAS’s own product demo video, 2023"
+    alt: "Seen through a Quest headset: a door is measured with the controller, then the floor is changed from the tablet menu."
+seo:
+  title: "HEGIAS: the web app for browser-based VR"
+  description: "Senior Full Stack Developer on the HEGIAS CMS, the web app behind browser-based VR for architects: projects, scenes, a 3D editor, a material library."
+---
+
+## Summary
+
+HEGIAS is a Zurich company that makes browser-based 3D and VR for architecture and real estate. When I was there, from July 2020 to April 2021, it sold one product, HEGIAS VR: upload a building model, then walk through it with others in a browser or a headset. The product existed as an MVP, and my job was to help make it something a paying customer could depend on. It was also the job that brought me to Switzerland.
+
+## What I was responsible for
+
+I reported to the CTO and was responsible across the stack: the frontend and CMS, the backend, infrastructure, internal tooling, the component library and integrations. My job was to get the teams aligned and working together, not in silos.
+
+I started the web app and the component library it is built from, and worked with the 3D developers on the layer that draws the scenes.
+
+## What the product looked like
+
+Work is organised as organisation, then project, then scene, and three switchers in the header let you jump between them from anywhere. A scene opens as a docked workspace: the 3D editor with its toolbar, a library of furniture and materials beside it, and tabs for the details, the uploaded files with their processing status, and share links. Behind that sit the parts a paid product needs: sign-in and registration, members with five roles, organisation settings, subscriptions and payment, all in four languages.
+
+The pictures here were recreated in 2026 with invented data. Every organisation, person, building and piece of furniture on screen is made up.
+
+## How it was built
+
+- Web app: React and TypeScript, Ant Design and styled-components, forms with react-hook-form, translations with i18next in German, English, French and Italian.
+- Component library: our own React components and icon set, documented in Storybook, so every screen of the app is built from the same cards, chips, inputs and buttons.
+- 3D: A-Frame on three.js, with a multiuser layer so people could walk through a scene together.
+- Backend: microservices on AWS, with heavy model processing moved out of the request path into background jobs, in-app voice, and integrations with third-party 3D model libraries.

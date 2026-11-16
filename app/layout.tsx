@@ -1,105 +1,45 @@
-import type { Metadata } from "next"
-import localFont from "next/font/local"
-import FathomAnalytics from "app/components/FathomAnalytics"
-import Footer from "app/components/Footer"
+import { Suspense, type ReactNode } from "react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
-import { structuredData } from "./structured-data"
+import FathomAnalytics from "./components/FathomAnalytics"
+import { SkipLink } from "./components/primitives/SkipLink"
+import { fontVariables } from "./fonts"
 
 import "./globals.css"
+import "./styles/shell.css"
 
-import { Suspense } from "react"
+export {
+  baseMetadata as metadata,
+  baseViewport as viewport,
+} from "@/lib/seo/metadata"
 
-import Header from "./components/Header"
-
-const title = "Mladen Ruzicic"
-const description = "Software developer, mentor, and entrepreneur"
-const imageUrl = "https://mladenruzicic.com/static/images/opengraph-image.png"
-
-export const metadata: Metadata = {
-  metadataBase: new URL("https://mladenruzicic.com/"),
-  title: {
-    default: title,
-    template: `%s | ${title}`,
-  },
-  description,
-  manifest: "/manifest.json",
-  openGraph: {
-    title,
-    description,
-    url: imageUrl,
-    type: "website",
-    locale: "en_US",
-    siteName: title,
-    images: [
-      {
-        alt: `${title} - ${description}`,
-        url: imageUrl,
-        width: 1920,
-        height: 1080,
-      },
-    ],
-  },
-  twitter: {
-    title,
-    card: "summary_large_image",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-}
-
-const ibmPlexSansFont = localFont({
-  src: "./fonts/ibm-plex-sans-var.woff2",
-  display: "swap",
-  preload: true,
-})
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+/**
+ * Root layout: `<html>`, `<body>`, fonts, the skip link and analytics.
+ * Structured data is per page (`app/components/seo/JsonLd.tsx`): each page's
+ * graph carries the Person and WebSite nodes itself.
+ *
+ * The visible chrome (top block, `<main>`, footer) is rendered by each page
+ * through `app/components/site/PageFrame.tsx`, so the three boards' shared
+ * structure lives in one component and the page transition wraps only the
+ * page body.
+ */
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={ibmPlexSansFont.className}>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
-      </head>
-      <body className="p-0 sm:p-4 md:p-8 lg:p-16 xl:p-20">
-        <NoisyGradientBackground />
-        <main className="mx-auto flex w-full max-w-7xl flex-col bg-white">
-          <Header />
+    // `data-scroll-behavior="smooth"` tells the Next router to force
+    // `scroll-behavior: auto` while it resets the scroll position on a route
+    // change, so `html { scroll-behavior: smooth }` never animates a new page
+    // up from the old page's offset. Hash links keep their smooth scroll.
+    <html lang="en" className={fontVariables} data-scroll-behavior="smooth">
+      <body>
+        <SkipLink />
 
-          <div className="mx-4 mt-8 pb-16 sm:mx-8 lg:mx-16 lg:mt-16 xl:mx-20">
-            {children}
-          </div>
-          <Footer />
+        {children}
 
-          <Suspense fallback={null}>
-            <FathomAnalytics />
-          </Suspense>
-        </main>
+        <Suspense fallback={null}>
+          <FathomAnalytics />
+        </Suspense>
+        {process.env.VERCEL ? <SpeedInsights sampleRate={0.3} /> : null}
       </body>
     </html>
   )
 }
-
-const NoisyGradientBackground = () => (
-  <div className="fixed inset-0 -z-10 h-full w-full bg-[#cae9e3]">
-    <div className="blur-3xl">
-      <div className="absolute h-[100rem] w-[50rem] rotate-45 rounded-full bg-[#cae9e3]"></div>
-      <div className="absolute ml-auto h-[60rem] w-[60rem] rounded-full bg-[#b5cde6]"></div>
-    </div>
-    <div className="absolute inset-0 h-full w-full bg-noise bg-auto bg-repeat opacity-30"></div>
-  </div>
-)

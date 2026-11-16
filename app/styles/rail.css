@@ -1,0 +1,50 @@
+/* ---------------------------------------------------------------------------
+   A rail: the native horizontal scroller with snap that `useRail`
+   (`app/components/primitives/use-rail.ts`) drives, "Recent work" on `/`
+   and the early projects on `/about` (owner, 15 Nov 2026: "click on
+   unfocused items scrolls to them; drag to move/swipe on mobile"). Imported
+   by each rail's entry component. Each rail's own stylesheet places and
+   snaps its items; these are the rules every rail shares.
+   --------------------------------------------------------------------------- */
+
+/* A mouse drag moves the rail 1:1 with snap off (`data-free`, kept until it
+   has settled on an item) and takes no text with it (`data-dragging`). */
+[data-rail][data-free] {
+  scroll-snap-type: none;
+}
+
+[data-rail][data-dragging] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* The items say they can be grabbed; the links and buttons in them, an
+   item that is itself a link once it is in focus, and an item in focus
+   whose click follows its primary link (`data-rail-primary`, see
+   `useRail`), say they can be pressed. Only for a fine pointer that hovers,
+   after hydration (`data-ready`): without JavaScript nothing can be
+   dragged. */
+@media (hover: hover) and (pointer: fine) {
+  [data-rail][data-ready] > * {
+    cursor: grab;
+  }
+
+  [data-rail][data-ready] > a[href][data-on],
+  [data-rail][data-ready] > [data-on]:has([data-rail-primary]),
+  [data-rail][data-ready] > * :is(a[href], button) {
+    cursor: pointer;
+  }
+
+  [data-rail][data-ready][data-dragging],
+  [data-rail][data-ready][data-dragging] :is(*, a[href]) {
+    cursor: grabbing;
+  }
+}
+
+/* A swipe moves one item, however fast: without this a quick flick on a
+   phone skipped two to four cards. Touch only; a trackpad keeps its glide. */
+@media (pointer: coarse) {
+  [data-rail] > * {
+    scroll-snap-stop: always;
+  }
+}

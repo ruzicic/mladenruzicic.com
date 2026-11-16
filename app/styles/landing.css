@@ -1,0 +1,1492 @@
+/* ---------------------------------------------------------------------------
+   Landing, top half: the cycling headline, the story with its product
+   lockups and popovers, and the "Recent work" strip.
+   Ported from docs/v4-ideation/board/project/Landing.dc.html (1440) and
+   Landing-Mobile.dc.html (390). Imported by Headline, Story and Strip.
+
+   Unlayered on purpose: these rules override the primitives' Tailwind
+   utilities (which live in @layer utilities) where the board differs.
+   --------------------------------------------------------------------------- */
+
+/* Status dots on the strip pills. Not brand colours from content and not
+   site tokens: the board's own fixed values. No green "live" dot since the
+   LIVE and DAY JOB pills went (owner, 16 Nov 2026). */
+:root {
+  --lc-soon: #fbbf24;
+  --lc-idle: var(--color-night-muted);
+}
+
+/* ============================== Headline ================================ */
+
+.lw {
+  width: var(--column-width);
+  margin: 64px 0 8px var(--column-start);
+  box-sizing: border-box;
+
+  @media (max-width: 720px) {
+    margin-top: 48px;
+    margin-bottom: 6px;
+  }
+}
+
+.lw-zone {
+  display: flex;
+  flex-direction: column;
+}
+
+.lw-h {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: normal;
+  font-synthesis: none;
+  font-variation-settings: "ELSH" 0;
+  font-size: var(--text-headline-size);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  text-wrap: wrap;
+}
+
+.lw-prefix {
+  display: block;
+  white-space: nowrap;
+}
+
+/* The swapping line. All layers and an invisible sizer share one grid cell;
+   the sizer is the longest phrase drawn from `data-sizer` (generated
+   content, so it is not a second copy of the text in the DOM). The cell is
+   therefore always as tall as the longest phrase at this width, one line on
+   a wide screen, two on a phone, and nothing shifts on a swap.
+
+   It may run past the text column to the right, as on the board, but stops
+   a gutter short of the viewport, so a long phrase wraps instead of
+   overflowing on mid-width screens. */
+.lw-slot {
+  display: grid;
+  width: max(
+    100%,
+    calc(100vw - max(var(--gutter), 50vw - var(--w-column) / 2 - 30px) - 40px)
+  );
+  text-wrap: balance;
+
+  &::before {
+    content: attr(data-sizer);
+    grid-area: 1 / 1;
+    visibility: hidden;
+    /* The tile: 0.85em plus its 0.2em gap. */
+    padding-left: 1.05em;
+  }
+}
+
+.lw-layer {
+  grid-area: 1 / 1;
+}
+
+.lw-row {
+  margin-top: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  @media (max-width: 720px) {
+    margin-top: 0;
+    gap: 12px;
+  }
+}
+
+.lw-on {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  height: calc(26px * var(--type-scale));
+  margin: 0;
+  font-size: var(--fs-18);
+  line-height: calc(26px * var(--type-scale));
+  color: var(--color-ink-quiet);
+
+  @media (max-width: 720px) {
+    height: calc(23px * var(--type-scale));
+    font-size: var(--fs-16);
+    line-height: calc(23px * var(--type-scale));
+  }
+}
+
+.lw-m {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+
+.lw-out {
+  opacity: 0;
+}
+
+/* The headline's pause (a Button, icon size). It waits for JavaScript but
+   keeps its box meanwhile, so nothing shifts. */
+.lw-pause:not([data-ready]) {
+  visibility: hidden;
+}
+
+@keyframes lw-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.72);
+    filter: blur(7px);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  68% {
+    transform: scale(0.995);
+  }
+  85% {
+    transform: scale(1.001);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes lw-swin {
+  0% {
+    opacity: 0;
+    transform: translateY(0.15em);
+  }
+  67% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes lw-swout {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(-0.15em);
+  }
+}
+
+@keyframes lw-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lw-fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* The board's swap. The phrase and its tile change in place: the old line
+   blurs out upward, the new one settles from just below while its tile pops.
+   The board's load-time rise of the whole headline is not ported: the first
+   phrase is the page's largest paint and is drawn at once. */
+@media (prefers-reduced-motion: no-preference) {
+  .lw-first [data-tile-face] {
+    animation: lw-pop 440ms ease-out 700ms both;
+  }
+  .lw-layer.lw-in {
+    animation: lw-swin 300ms ease-out both;
+  }
+  .lw-in [data-tile-face] {
+    animation: lw-pop 440ms ease-out both;
+  }
+  .lw-layer.lw-out {
+    animation: lw-swout 240ms ease-out both;
+  }
+  .lw-m.lw-in {
+    animation: lw-fade 200ms ease-out both;
+  }
+  .lw-m.lw-out {
+    animation: lw-fadeout 240ms ease-out both;
+  }
+}
+
+/* =============================== Story ================================== */
+
+.lp-story {
+  width: var(--column-width);
+  margin: 18px 0 0 var(--column-start);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-wrap: pretty;
+
+  @media (max-width: 720px) {
+    margin-top: 16px;
+    gap: 16px;
+  }
+}
+
+.lp-stance {
+  margin: 0;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.lp-paras {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  @media (max-width: 720px) {
+    gap: 16px;
+  }
+}
+
+.lp-para {
+  color: var(--color-ink-soft);
+  text-wrap: pretty;
+}
+
+/* Lockups: tile + underlined name. The underline, the wash and the touch
+   target are the shared branded-link rules (`.blk`, `.blk-w` in
+   `app/styles/brand-link.css`); the lit state is there too. */
+.lk {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.lk-chip {
+  font: inherit;
+  border: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+@keyframes lk-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lk-lit > [data-tile-face] {
+    animation: lk-pop 300ms var(--ease-standard);
+  }
+}
+
+/* The popover panel (the `Popover` primitive, restyled to the board). */
+.lk-pop {
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  margin-left: -12px;
+  padding: 16px 18px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow:
+    0 1px 0 rgb(0 0 0 / 0.04),
+    0 16px 44px rgb(0 0 0 / 0.14);
+  font-size: var(--fs-16);
+  line-height: 1.45;
+  color: var(--color-ink);
+  text-align: left;
+  white-space: normal;
+  opacity: 1;
+  transition:
+    opacity 180ms var(--ease-out),
+    translate 180ms var(--ease-out);
+
+  &:popover-open {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    @starting-style {
+      opacity: 0;
+      translate: 0 -4px;
+    }
+  }
+}
+
+/* Desktop: an invisible bridge over the 8px between the name and the panel,
+   on both edges (the panel flips above the name near the bottom of the
+   view). The pointer on it is on the panel, so crossing the gap, or the
+   line of text under the name, never closes the panel or opens another.
+   The popover's UA `overflow: auto` would clip the bridge; the panel's
+   content never overflows on desktop. */
+@media (min-width: 721px) {
+  .lk-pop {
+    overflow: visible;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 12px;
+    }
+
+    &::before {
+      bottom: 100%;
+    }
+
+    &::after {
+      top: 100%;
+    }
+  }
+}
+
+.lk-pop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lk-pop-eyebrow,
+.lk-pop-meta {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: 1.45;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+
+/* The panel's close button (a Button, icon size), level with the eyebrow. */
+.lk-x {
+  margin: -8px -4px -8px 0;
+}
+
+/* Buttons on the panel's white surface take it as their ground. */
+.lk-pop .btn {
+  --btn-bg: var(--color-surface);
+}
+
+/* Desktop names the panel through aria-label; the phone sheet shows it. */
+.lk-pop-title {
+  display: none;
+}
+
+.lk-pop-body {
+  display: block;
+}
+
+/* A project's two links at the panel's foot: "Case study →", "Website ↗". */
+.lk-pop-acts {
+  align-self: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+}
+
+.lk-pop-link {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-16);
+  color: var(--color-ink);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--color-underline);
+
+  &:hover {
+    text-decoration-color: var(--color-ink);
+  }
+}
+
+/* Phones: the popover becomes the board's bottom sheet. The primitive
+   positions with inline anchor() insets, hence the !important. */
+@media (max-width: 720px) {
+  .lk-pop {
+    position: fixed !important;
+    inset: auto 0 0 0 !important;
+    margin: 0 !important;
+    width: auto;
+    max-width: none !important;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px 24px 32px;
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    box-shadow:
+      0 -1px 0 rgb(0 0 0 / 0.04),
+      0 -18px 56px rgb(0 0 0 / 0.24);
+    font-size: var(--fs-17);
+    line-height: 1.5;
+    position-try-fallbacks: none !important;
+
+    &::before {
+      content: "";
+      align-self: center;
+      width: 40px;
+      height: 5px;
+      border-radius: 3px;
+      background: var(--color-rule-strong);
+    }
+
+    &::backdrop {
+      background: rgb(0 0 0 / 0.4);
+      transition: opacity var(--duration-base) ease;
+    }
+
+    &:popover-open {
+      @starting-style {
+        translate: 0 100%;
+        opacity: 1;
+      }
+      &::backdrop {
+        @starting-style {
+          opacity: 0;
+        }
+      }
+    }
+  }
+
+  .lk-pop-head {
+    margin-top: 10px;
+  }
+
+  .lk-x {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    margin: 0;
+  }
+
+  .lk-pop-title {
+    display: block;
+    font-size: var(--fs-22);
+    line-height: 1.2;
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  .lk-pop-body {
+    color: var(--color-ink-soft);
+  }
+
+  .lk-pop-link {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 720px) and (prefers-reduced-motion: reduce) {
+  .lk-pop:popover-open {
+    @starting-style {
+      translate: none;
+      opacity: 0;
+    }
+  }
+}
+
+/* ============================ Recent work =============================== */
+
+.lp-work {
+  position: relative;
+  margin-top: 120px;
+
+  @media (max-width: 720px) {
+    margin-top: 112px;
+  }
+}
+
+.lp-work-head {
+  width: var(--column-width);
+  margin: 0 0 20px var(--column-start);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 36px;
+
+  @media (max-width: 720px) {
+    margin-bottom: 16px;
+  }
+}
+
+.lp-work-title {
+  margin: 0;
+  font-size: var(--text-page);
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.lp-work-ctl {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.lp-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.lp-arrows {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  @media (max-width: 720px) {
+    display: none;
+  }
+}
+
+.lp-strip {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 60px 0 0;
+  overscroll-behavior-x: contain;
+  padding: 8px max(24px, 50% - 310px) 8px max(24px, 50% - 370px);
+  box-sizing: border-box;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: -2px;
+  }
+
+  @media (max-width: 720px) {
+    gap: 8px;
+    padding: 8px 66px 8px 24px;
+    /* The card's own 300px between the gutters, aligned by its centre (see
+       .lc): the same resting place as aligning its start at 24px. */
+    scroll-padding: 0 66px 0 24px;
+  }
+}
+
+/* By hand (owner, 15 Nov 2026): the drag, the cursors and one card per
+   swipe are the shared rail's rules (`app/styles/rail.css`, `[data-rail]`). */
+
+/* --- The card in focus, and the print -----------------------------------
+   One number per card, --lc-f (1 in focus, 0 sat back), drives how far the
+   card recedes. Where scroll-driven animations exist, a view(inline)
+   timeline animates it as the card crosses the strip: full while the card
+   sits in the focus position, easing down as it leaves. CSS only, works
+   without JavaScript. Elsewhere (and under reduced motion) StripRail flags
+   the snapped card with `data-on`, and the others transition to 0. Hover
+   and keyboard focus lift a card part of the way back (--lc-fx >= 0.6).
+
+   Every card is printed, not pasted (owner, 12 Nov: "a touch of film"):
+   - a static monochrome grain over the media (`.lc-film::before`, one
+     shared 256px tile at 128px, soft-light), half as strong inside the
+     windows on a card (the clip, the phone shot), strongest on the night
+     end card, where soft-light alone barely shows;
+   - a slight print tone on the media in focus: saturation 0.95, contrast
+     0.97 (--lc-tone);
+   - a soft corner falloff to 8% black (`.lc-film`'s own background).
+
+   Out of focus a card washes towards paper like a faded print, instead of
+   darkening into its own colour: the media keeps 0.92 of its opacity, loses
+   colour (the whole card to 0.36 saturation, so a brand plate such as EVO
+   blue recedes too) and contrast (to 0.85), and a paper veil rises over
+   media and plate to 0.38 (`.lc-film::after`). Dark and brand cards go
+   milky, not grey-black. The scale is the board's (0.9, 0.92 on phones).
+
+   The words never wash. The veil sits under the scrim (`.lc-shade`), the
+   pills and the caption, so white text keeps the scrim behind it. On the
+   end card the grain lies under the words and tiles and the veil over all
+   of it; its muted line lifts towards paper as the veil rises. Measured
+   from pixels at zero focus (lightest glyph pixel against the lightest
+   pixel behind it): every work card title 7.4:1 or more, the end card's
+   title and line 4.9:1 at the grain's peaks (tests/a11y.spec.ts). */
+@property --lc-f {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@keyframes lc-focus {
+  0%,
+  30% {
+    --lc-f: 0;
+  }
+  42%,
+  62% {
+    --lc-f: 1;
+  }
+  74%,
+  100% {
+    --lc-f: 0;
+  }
+}
+
+.lc {
+  /* Sat back: media opacity, card saturation, media contrast, veil, scale. */
+  --lc-o: 0.92;
+  --lc-sat: 0.36;
+  --lc-con: 0.85;
+  --lc-veil: 0.38;
+  --lc-s: 0.9;
+  /* In focus: the print tone on the media. */
+  --lc-con-on: 0.97;
+  --lc-sat-on: 0.95;
+  /* The grain (its layer's opacity and how hard the tile is pushed) and
+     the corner falloff. */
+  --lc-grain: 0.5;
+  --lc-grain-k: 1.4;
+  --lc-fall: 0.08;
+  /* --lc-f does not inherit; this copy does, so the media layers can read
+     it. Hover and keyboard focus raise it to at least 0.6. */
+  --lc-fx: var(--lc-f);
+  --lc-media: calc(var(--lc-o) + (1 - var(--lc-o)) * var(--lc-fx));
+  --lc-tone: saturate(var(--lc-sat-on))
+    contrast(
+      calc(var(--lc-con) + (var(--lc-con-on) - var(--lc-con)) * var(--lc-fx))
+    );
+
+  position: relative;
+  flex: none;
+  display: block;
+  width: 680px;
+  height: 453px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  scroll-snap-align: center;
+  text-decoration: none;
+  text-align: left;
+  outline: none;
+  transform-origin: center;
+  /* Colour drains from the whole card as it sits back: a brand colour such
+     as EVO blue recedes too, and white or ink words keep their contrast.
+     Any filter, saturate(1) included, also makes the card the backdrop root
+     and an isolated group, so the caption's backdrop blur
+     (.lc-shade::before) samples only the card and the grain blends only
+     with the card, never with the paper around its rounded corners. */
+  filter: saturate(calc(var(--lc-sat) + (1 - var(--lc-sat)) * var(--lc-fx)));
+  scale: calc(var(--lc-s) + (1 - var(--lc-s)) * var(--lc-f));
+  transition: --lc-f 240ms var(--ease-standard);
+  -webkit-tap-highlight-color: transparent;
+
+  /* A work card's links are its action pills; the rest of the card in
+     focus follows the first (`data-rail-primary`, see Strip.tsx). A pill in
+     keyboard focus lifts the card's print as hover does. */
+  &:has(.lc-act:focus-visible) {
+    --lc-fx: max(0.6, var(--lc-f));
+  }
+
+  @media (max-width: 720px) {
+    --lc-s: 0.92;
+    width: 300px;
+    height: 360px;
+    /* Centre, not start: snapping reads the scaled box, and a card that sits
+       back (0.92) has its start edge 12px further in, so a swipe or a tap
+       came to rest 12px off. The centre does not move with the scale. */
+    scroll-snap-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    --lc-s: 1;
+  }
+}
+
+/* A flat plate shows grain more than a picture does: a poster card gets less. */
+.lc[data-poster] {
+  --lc-grain: 0.32;
+}
+
+[data-strip][data-ready] > .lc:not([data-on]) {
+  --lc-f: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    .lc {
+      transition: none;
+      animation: lc-focus linear both;
+      animation-timeline: view(inline);
+    }
+  }
+}
+
+/* --- Card media ------------------------------------------------------------ */
+@keyframes lp-dr {
+  to {
+    translate: var(--dx, 0px) var(--dy, 0px);
+  }
+}
+
+.lc-shot {
+  position: absolute;
+  top: 0;
+  left: -8%;
+  width: 116%;
+  height: 121%;
+  max-width: none;
+  object-fit: cover;
+  object-position: top center;
+  opacity: var(--lc-media);
+  filter: var(--lc-tone);
+  --dy: -17%;
+
+  &[data-geo="b"] {
+    left: -12%;
+    width: 124%;
+    height: 116%;
+    --dy: -14%;
+  }
+
+  @media (max-width: 720px) {
+    [data-tablet] & {
+      height: 129%;
+      --dy: -22%;
+    }
+  }
+}
+
+/* The phone shot: a window on the card with its own lighter print. */
+.lc-phone {
+  position: absolute;
+  right: 32px;
+  top: 88px;
+  z-index: 1;
+  display: block;
+  width: 150px;
+  height: 252px;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: 22px;
+  border: 1px solid rgb(17 17 17 / 0.72);
+  background: var(--color-surface);
+  opacity: var(--lc-media);
+  filter: var(--lc-tone);
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 0.12),
+    0 14px 34px rgb(0 0 0 / 0.3);
+
+  & img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  @media (max-width: 720px) {
+    right: 14px;
+    top: 104px;
+    width: 96px;
+    height: 160px;
+    border-radius: 16px;
+    box-shadow:
+      0 2px 4px rgb(0 0 0 / 0.12),
+      0 10px 26px rgb(0 0 0 / 0.3);
+  }
+}
+
+/* The slow drift (20s and up, alternate) runs on the card in focus only, and
+   holds while the pointer is over the strip.
+
+   WCAG 2.2.2: it only starts once JavaScript is up (`data-ready`), because
+   the reader's stop control, the headline's pause button, needs it. That
+   button sets `data-motion="paused"` on <html> (`HeadlinePause`), which
+   freezes the drift too (and pauses a card's clip, in CardClip). */
+@media (prefers-reduced-motion: no-preference) {
+  .lc-shot {
+    animation: lp-dr var(--dr-dur, 20s) ease-in-out var(--dr-delay, 0s) infinite
+      alternate;
+    animation-play-state: paused;
+  }
+  [data-strip][data-ready] > .lc[data-on] .lc-shot {
+    animation-play-state: running;
+  }
+  @media (hover: hover) {
+    .lp-strip:hover .lc-shot {
+      animation-play-state: paused;
+    }
+  }
+  [data-motion="paused"] .lc-shot {
+    animation-play-state: paused !important;
+  }
+}
+
+/* No footage yet: a poster. The plate, and the product's own tile drawn
+   large a little above the middle, lifted off the plate by a soft shadow
+   (EVO Touch's tile is the plate's own blue). Static. */
+.lc-poster {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 96px;
+  box-sizing: border-box;
+  font-size: 164px;
+  opacity: var(--lc-media);
+  filter: var(--lc-tone);
+
+  @media (max-width: 720px) {
+    padding-bottom: 76px;
+    font-size: 96px;
+  }
+}
+
+.lc-poster-tile {
+  margin: 0;
+  vertical-align: top;
+  border-radius: 30%;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.16),
+    0 22px 48px -14px rgb(0 0 0 / 0.5);
+}
+
+/* The print (see "The card in focus, and the print" above): falloff,
+   grain, veil. Over the media and the plate, under the scrim and the words
+   (the end card: the print under its words and tiles, the veil over
+   everything but the focus ring). */
+.lc-film {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    farthest-corner at 50% 46%,
+    transparent 52%,
+    rgb(0 0 0 / var(--lc-fall)) 100%
+  );
+
+  /* The grain: static, never animated. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("/static/fx/grain.webp") 0 0 / 128px 128px repeat;
+    mix-blend-mode: soft-light;
+    opacity: var(--lc-grain);
+    filter: contrast(var(--lc-grain-k));
+  }
+
+  /* The veil: paper, rising as the card leaves focus. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--color-paper);
+    opacity: calc(var(--lc-veil) * (1 - var(--lc-fx)));
+  }
+
+  /* Inside a window (the clip, the phone shot): half the grain, so the
+     product's own text stays crisp, and no falloff of its own. */
+  &[data-inset] {
+    background: none;
+
+    &::before {
+      opacity: calc(var(--lc-grain) * 0.5);
+    }
+  }
+
+  &[data-only="print"]::after,
+  &[data-only="veil"]::before {
+    content: none;
+  }
+
+  &[data-only="veil"] {
+    background: none;
+  }
+
+  @media (forced-colors: active) {
+    display: none;
+  }
+}
+
+/* A product clip, in the desktop still's place (CardClip). A still bleeds
+   past the card's edges and crops; a clip must show the whole product, the
+   correction popup at its foot included, so it sits whole on the plate as a
+   window: below the pills, above the title, centred, and as large as that
+   space allows at the clip's own proportions (`--lc-clip-ar`, from content).
+   The window is drawn above the shade, so the scrim darkens the plate around
+   it and never the product; the words stay above both. Its box comes from
+   CSS alone, so nothing shifts when the poster or the clip arrives. */
+.lc-clip {
+  --lc-clip-ar: var(--lc-clip-ar-wide);
+
+  position: absolute;
+  inset: 52px 40px 108px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  container-type: size;
+  pointer-events: none;
+
+  /* Phones: the narrow take, if the card has one (`data-narrow`), in a
+     window as wide as the card allows (272px). */
+  @media (max-width: 720px) {
+    --lc-clip-ar: var(--lc-clip-ar-narrow, var(--lc-clip-ar-wide));
+    inset: 50px 14px 106px;
+  }
+}
+
+/* `fit: "bleed"`: a website, read at a size. The window is as wide as the
+   card less 30px a side (16px on phones), starts under the pills as the
+   whole window does, and runs past the card's bottom edge, so its lower part
+   sits under the caption band (the scrim is lifted above it) and the card
+   clips it, like a still. Only its top corners and hairline show. The media
+   keep their own proportions at the top of the frame; below them the frame
+   is the card's plate, chosen from the page's own background. The poster is
+   framed the same way, so nothing moves when the clip starts. */
+.lc-clip[data-fit="bleed"] {
+  inset: 52px 30px -24px;
+  display: block;
+
+  & .lc-clip-frame {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 12px 12px 0 0;
+    background: var(--lc-plate, var(--color-surface));
+
+    & :is(img, video) {
+      inset: 0 0 auto;
+      height: auto;
+      aspect-ratio: var(--lc-clip-ar);
+    }
+  }
+
+  @media (max-width: 720px) {
+    inset: 50px 14px -24px;
+
+    & .lc-clip-frame {
+      border-radius: 10px 10px 0 0;
+    }
+  }
+}
+
+.lc:has(.lc-clip[data-fit="bleed"]) .lc-shade {
+  z-index: 1;
+}
+
+/* A square phone take needs 272px between the pills and the title, and a
+   360px card leaves about 200. So on phones, once any card in the strip has
+   a narrow take, every card grows by 70px together and the strip stays one
+   height. The stills scale with the card (their boxes are percentages). */
+@media (max-width: 720px) {
+  .lp-strip:has(.lc-clip[data-narrow]) > .lc {
+    height: 430px;
+  }
+}
+
+.lc-clip-frame {
+  position: relative;
+  display: block;
+  width: min(100cqw, 100cqh * var(--lc-clip-ar));
+  aspect-ratio: var(--lc-clip-ar);
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--color-surface);
+  opacity: var(--lc-media);
+  filter: var(--lc-tone);
+  box-shadow:
+    0 0 0 1px rgb(17 17 17 / 0.1),
+    0 2px 4px rgb(0 0 0 / 0.06),
+    0 14px 34px rgb(0 0 0 / 0.18);
+
+  & :is(img, video) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  @media (max-width: 720px) {
+    border-radius: 10px;
+  }
+}
+
+/* The poster shows until the clip has a frame and is playing, and again
+   whenever it pauses (out of focus, off screen, motion paused). */
+.lc-clip-video {
+  opacity: 0;
+  transition: opacity 200ms var(--ease-standard);
+
+  &[data-ready][data-playing] {
+    opacity: 1;
+  }
+}
+
+/* Shade, pills, text.
+
+   The board's shade (0.74 at the foot easing to 0 at 64%) put the title in
+   its thin part, so a white screenshot's own text showed through the caption.
+   The scrim now holds at least 0.6 black through the whole text block
+   (--lc-hold from the foot), which keeps white text above 5.7:1 and the 0.88
+   caption above 4.9:1 even over pure white, then eases out above it. A
+   masked backdrop blur under the same band turns the screenshot's own text
+   into texture, so the caption is the only thing that reads there. Above the
+   band the screenshot stays untouched: no dark slab. */
+.lc-shade {
+  /* Grows with the type (16 Nov 2026), so the band still holds the whole
+     text block. */
+  --lc-hold: calc(120px * var(--type-scale));
+
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 64%;
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 0.74) 0,
+    rgb(0 0 0 / 0.62) var(--lc-hold),
+    rgb(0 0 0 / 0.34) calc(var(--lc-hold) + (100% - var(--lc-hold)) * 0.35),
+    rgb(0 0 0 / 0.1) calc(var(--lc-hold) + (100% - var(--lc-hold)) * 0.72),
+    rgb(0 0 0 / 0) 100%
+  );
+  pointer-events: none;
+
+  /* Runs past the card's clipped edges so the blur has no light fringe. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 -24px -24px;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    mask-image: linear-gradient(
+      to top,
+      #000 0,
+      #000 calc(var(--lc-hold) + 12px),
+      transparent calc(var(--lc-hold) + 72px)
+    );
+  }
+
+  /* Phones: the title, three lines of caption and a credit's two. */
+  @media (max-width: 720px) {
+    --lc-hold: 176px;
+    height: 72%;
+    background: linear-gradient(
+      to top,
+      rgb(0 0 0 / 0.78) 0,
+      rgb(0 0 0 / 0.64) var(--lc-hold),
+      rgb(0 0 0 / 0.34) calc(var(--lc-hold) + (100% - var(--lc-hold)) * 0.35),
+      rgb(0 0 0 / 0.1) calc(var(--lc-hold) + (100% - var(--lc-hold)) * 0.72),
+      rgb(0 0 0 / 0) 100%
+    );
+  }
+}
+
+.lc-top {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  @media (max-width: 720px) {
+    top: 14px;
+    left: 14px;
+    right: 14px;
+  }
+}
+
+.lc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: rgb(17 17 17 / 0.66);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* A project's links (owner, 13 Nov 2026), top right where the single
+   action pill was: "Case study →", then "Website ↗". */
+.lc-acts {
+  display: flex;
+  gap: 8px;
+  /* With a long status word on a phone card ("2021 TO 2023"), the actions take
+     the next line rather than run off the card. */
+  margin-left: auto;
+
+  @media (max-width: 720px) {
+    gap: 6px;
+  }
+}
+
+.lc-act {
+  position: relative;
+  gap: 6px;
+  text-decoration: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+
+  &:hover,
+  &:focus-visible {
+    background-color: #ffffff;
+    color: var(--color-ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
+
+  /* A 44px tall target without moving the pill (26px + 9px each way). */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -9px -3px;
+  }
+
+  @media (max-width: 720px) {
+    gap: 5px;
+    padding: 0 8px;
+  }
+}
+
+/* The card in focus is a shortcut to its first action (owner, 16 Nov
+   2026): hovering the card shows where a click goes by filling that pill,
+   as the end card fills its button. Not while the pointer is on the other
+   pill, which then answers for itself. */
+@media (hover: hover) {
+  [data-strip][data-ready]
+    > .lc[data-on]:hover:not(:has(.lc-act:hover))
+    .lc-act[data-rail-primary] {
+    background-color: #ffffff;
+    color: var(--color-ink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lc-act {
+    transition: none;
+  }
+}
+
+.lc-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lc-idle);
+
+  &[data-tone="soon"] {
+    background: var(--lc-soon);
+  }
+}
+
+.lc-txt {
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  bottom: 40px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  @media (max-width: 720px) {
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+  }
+}
+
+.lc-title {
+  font-size: var(--fs-20);
+  line-height: 1.3;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.lc-cap {
+  font-size: var(--fs-16);
+  line-height: 1.4;
+  color: rgb(255 255 255 / 0.88);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (max-width: 720px) {
+    font-size: var(--fs-15);
+    line-height: 1.35;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    /* Three lines since the type grew (16 Nov 2026): every caption whole
+       at 360. */
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+/* Whose pictures these are, when they are not his (Shop Minis). */
+.lc-credit {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: rgb(255 255 255 / 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* A credit is never cut short: on the narrow card it wraps instead. */
+  @media (max-width: 720px) {
+    font-size: var(--fs-11);
+    letter-spacing: 0;
+    white-space: normal;
+  }
+}
+
+/* The last card: the end title of the reel, "That's all, folks!" with NOT
+   put into it by an editor's caret. The footer's night, paper words, the
+   strip's strongest grain. Nothing moves when it arrives; the button's
+   sweep answers the card's own hover and keyboard focus. */
+.lc-end {
+  /* A lighter veil than the other cards (0.34): the grain under it already
+     lifts the night, and the words have to hold 4.5:1 at the grain's peaks. */
+  --lc-veil: 0.34;
+  --lc-grain: 1;
+  --lc-grain-k: 1.9;
+  --lc-fall: 0.1;
+  --lc-end-size: 56px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 40px 40px 36px;
+  background: var(--color-night);
+  color: var(--color-paper);
+  text-align: center;
+
+  @media (max-width: 720px) {
+    --lc-end-size: 36px;
+    padding: 24px 20px 22px;
+  }
+}
+
+.lc-end-main {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding-top: 12px;
+
+  @media (max-width: 720px) {
+    gap: 12px;
+  }
+}
+
+.lc-end-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: normal;
+  font-synthesis: none;
+  font-size: var(--lc-end-size);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.lc-end-line {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* The insertion: a caret on the baseline in the word space, NOT above it. */
+.lc-end-ins {
+  position: relative;
+  display: inline-block;
+  width: 0.46em;
+  height: 0.2em;
+  vertical-align: baseline;
+}
+
+.lc-end-caret {
+  position: absolute;
+  left: 50%;
+  bottom: -0.02em;
+  width: 0.3em;
+  height: 0.2em;
+  translate: -50% 0;
+  overflow: visible;
+}
+
+.lc-end-not {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--lc-end-size) * 0.6);
+  translate: -50% 0;
+  rotate: -3deg;
+  padding-left: 0.16em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  line-height: 1;
+  letter-spacing: 0.16em;
+  color: var(--color-paper);
+  white-space: nowrap;
+
+  @media (max-width: 720px) {
+    font-size: var(--fs-11);
+  }
+}
+
+/* Muted on night; it lifts towards paper as the veil rises, so it keeps
+   4.5:1 on the washed card too. */
+.lc-end-body {
+  margin: 0;
+  max-width: 400px;
+  font-size: var(--fs-16);
+  line-height: 1.45;
+  text-wrap: balance;
+  color: color-mix(
+    in srgb,
+    var(--color-night-muted),
+    var(--color-paper) calc((1 - var(--lc-fx)) * 100%)
+  );
+
+  @media (max-width: 720px) {
+    font-size: var(--fs-15);
+  }
+}
+
+/* Credits: the tiles of what the strip left out. Two rows at most on
+   desktop, one on phones; past that, "+n" (`CREDITS` in Strip.tsx). */
+.lc-end-credits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: calc(16 * 28px + 15 * 6px);
+  margin-top: 8px;
+  font-size: var(--fs-28);
+
+  @media (max-width: 720px) {
+    margin-top: 4px;
+
+    &[data-cut-phone] > [data-tile]:nth-child(n + 7) {
+      display: none;
+    }
+  }
+
+  @media (min-width: 721px) {
+    &[data-cut-desk] > [data-tile]:nth-child(n + 33) {
+      display: none;
+    }
+  }
+}
+
+.lc-end-tile {
+  margin: 0;
+}
+
+.lc-end-more {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: 0.04em;
+  color: var(--color-night-soft);
+
+  @media (max-width: 720px) {
+    &[data-for="phone"] {
+      display: inline-flex;
+    }
+  }
+
+  @media (min-width: 721px) {
+    &[data-for="desk"] {
+      display: inline-flex;
+    }
+  }
+}
+
+.lc-end-btn {
+  margin-top: 18px;
+
+  @media (max-width: 720px) {
+    margin-top: 14px;
+  }
+}
+
+/* The button is the visual of the card's link: the card's hover and
+   keyboard focus run its sweep (button.css). Hover only once the card is in
+   focus: before that a click only brings it there. */
+@media (hover: hover) {
+  [data-strip]:not([data-ready]) > .lc-end:hover .lc-end-btn,
+  [data-strip][data-ready] > .lc-end[data-on]:hover .lc-end-btn {
+    border-color: var(--btn-line-on);
+
+    &::after {
+      transform: scaleY(1);
+      transition: transform var(--duration-base) var(--ease-out);
+    }
+  }
+}
+
+.lc-end:focus-visible .lc-end-btn {
+  border-color: var(--btn-line-on);
+
+  &::after {
+    transform: scaleY(1);
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lc-end .lc-end-btn::after {
+    transition: none !important;
+  }
+}
