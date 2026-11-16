@@ -1,111 +1,39 @@
 import { Suspense, type ReactNode } from "react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
-import { getCompanies, getHome, getSite } from "@/lib/content"
-import { jsonLdScript, personJsonLd, webSiteJsonLd } from "@/lib/seo/jsonld"
-
 import FathomAnalytics from "./components/FathomAnalytics"
-import { Preloader } from "./components/preloader/Preloader"
 import { SkipLink } from "./components/primitives/SkipLink"
-import { Footer, Header, MobilePill, ScrollHairline } from "./components/site"
-import type { PillCompany } from "./components/site"
-import { nowFraction } from "./components/site/now"
-import { resolveTo } from "./components/timeline/span"
 import { fontVariables } from "./fonts"
 
 import "./globals.css"
 import "./styles/shell.css"
-import "./styles/hero.css"
-import "./styles/pages.css"
 
-export { baseMetadata as metadata } from "@/lib/seo/metadata"
+export {
+  baseMetadata as metadata,
+  baseViewport as viewport,
+} from "@/lib/seo/metadata"
 
 /**
- * Runs before first paint. If this session has already seen the preloader we
- * stamp `data-preloader="off"` on `<html>` and shell.css hides the overlay, so
- * it never flashes on a reload. `suppressHydrationWarning` covers the attribute
- * the script adds. See docs/v3-redesign-plan.md §5.4.
+ * Root layout: `<html>`, `<body>`, fonts, the skip link and analytics.
+ * Structured data is per page (`app/components/seo/JsonLd.tsx`): each page's
+ * graph carries the Person and WebSite nodes itself.
+ *
+ * The visible chrome (top block, `<main>`, footer) is rendered by each page
+ * through `app/components/site/PageFrame.tsx`, so the three boards' shared
+ * structure lives in one component and the page transition wraps only the
+ * page body.
  */
-const PRELOADER_BOOTSTRAP =
-  "try{if(sessionStorage.getItem('mr:preloaded')){document.documentElement.setAttribute('data-preloader','off')}}catch(e){}"
-
-/** Same guard for a visitor with JavaScript disabled: never a black screen. */
-const PRELOADER_NOSCRIPT = '[data-testid="preloader"]{display:none!important}'
-
-export default async function RootLayout({
-  children,
-}: {
-  children: ReactNode
-}) {
-  const site = getSite()
-  const home = getHome()
-  const now = await nowFraction()
-
-  // The mobile sheet's employer colour scrubber: one segment per band, sized in
-  // years. Only these fields cross into the client bundle.
-  const pillCompanies: PillCompany[] = getCompanies().map((company) => ({
-    id: company.id,
-    short: company.short,
-    color: company.color,
-    yearsLabel: company.yearsLabel,
-    years: Number((resolveTo(company.to, now) - company.from).toFixed(2)),
-  }))
-
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    // `data-scroll-behavior="smooth"` is what tells the Next 16 router to
-    // temporarily force `scroll-behavior: auto` while it resets the scroll
-    // position for a new route. Without it the router's scroll-to-top is
-    // animated by `html { scroll-behavior: smooth }` in globals.css, so a fresh
-    // case study visibly slides up from the source page's offset — and any
-    // interruption leaves it parked under the fixed header. In-page `#hash`
-    // links keep their smooth scroll: the router opts out of the override for
-    // hash-only navigations.
-    <html
-      lang="en"
-      className={fontVariables}
-      data-scroll-behavior="smooth"
-      suppressHydrationWarning
-    >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: PRELOADER_BOOTSTRAP }} />
-      </head>
+    // `data-scroll-behavior="smooth"` tells the Next router to force
+    // `scroll-behavior: auto` while it resets the scroll position on a route
+    // change, so `html { scroll-behavior: smooth }` never animates a new page
+    // up from the old page's offset. Hash links keep their smooth scroll.
+    <html lang="en" className={fontVariables} data-scroll-behavior="smooth">
       <body>
         <SkipLink />
 
-        <Preloader
-          verbs={home.preloader.verbs}
-          finalVerb={home.preloader.finalVerb}
-        />
-        <noscript>
-          <style dangerouslySetInnerHTML={{ __html: PRELOADER_NOSCRIPT }} />
-        </noscript>
-
-        <Header siteName={site.name} />
-
-        {/* tabIndex={-1} so the skip link actually moves focus: without it the
-            hash changes, Chromium's sequential-focus starting point puts the
-            next Tab inside, but activeElement stays on <body>, so a screen
-            reader's virtual cursor never moves and the main landmark is never
-            announced. `:focus-visible` scopes the ring, so a programmatic -1
-            focus paints nothing. */}
-        <main id="main" tabIndex={-1}>
-          {children}
-        </main>
-
-        <Footer />
-        <MobilePill companies={pillCompanies} />
-        <ScrollHairline />
-
-        {/* Person + WebSite, emitted once for the whole site: every page-level
-            graph references `#person` and `#website` by `@id`, so both nodes
-            have to exist somewhere in the document. */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={jsonLdScript([
-            personJsonLd(),
-            webSiteJsonLd(),
-          ])}
-        />
+        {children}
 
         <Suspense fallback={null}>
           <FathomAnalytics />

@@ -1,0 +1,30 @@
+/* ---------------------------------------------------------------------------
+   The homepage dent's layer (`app/components/landing/dent/`). Loaded with the
+   effect itself, never with the page. The layer is put on the paper sheet
+   on the first press: the sheet becomes its own stacking context, so the
+   layer at `z-index: -1` sits above the paper and below everything on it,
+   and it is clipped to the sheet (its rounded foot included), so it never
+   changes the page's size.
+   --------------------------------------------------------------------------- */
+
+[data-page-sheet][data-dent] {
+  position: relative;
+  isolation: isolate;
+}
+
+.dent-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: clip;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.dent-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  pointer-events: none;
+}

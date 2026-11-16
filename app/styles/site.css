@@ -1,0 +1,694 @@
+/* ---------------------------------------------------------------------------
+   Site chrome: the top block (name, line, Ask slot), the press menu on the
+   name, the dark footer and its station clock. Ported from the `<header>` and
+   `<footer class="lp-foot">` of docs/v4-ideation/board/project/Landing*.dc.html.
+   Imported by `app/components/site/PageFrame.tsx`.
+   --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   Top block
+   --------------------------------------------------------------------------- */
+
+.site-top {
+  /* The row: the Ask button's height. */
+  --top-row: 48px;
+
+  position: relative;
+  z-index: 34;
+  box-sizing: border-box;
+  width: var(--column-width);
+  margin-left: var(--column-start);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  column-gap: 24px;
+}
+
+.site-top__id {
+  /* As wide as its text, so the page transition moves the block without
+     stretching it. */
+  justify-self: start;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* Top, not centre: the name sits at the same height on every page,
+     whatever the length of the line under it. */
+  justify-content: flex-start;
+  gap: 2px;
+}
+
+/* The two ends travel between the top block and a case study's bar
+   (`StoryBar`) as shared elements of the page transition (`TopBlock`). Only
+   the new snapshot is drawn, at its own size, while the group carries it
+   from the old box to the new one: no crossfade of two copies, no
+   stretching. */
+::view-transition-group(.vt-travel) {
+  animation-duration: var(--duration-slow);
+  animation-timing-function: var(--ease-standard);
+}
+
+::view-transition-old(.vt-travel) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(.vt-travel) {
+  animation: none;
+  height: 100%;
+  object-fit: none;
+  object-position: left top;
+}
+
+/* The name (or a case study's "All work") is centred on the Ask button at
+   every width (owner, 16 Nov 2026: "header position height is not the same
+   across homepage+case study page"), so the left end sits at one height on
+   every page; the line under it follows. */
+.site-top__namewrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: calc((var(--top-row) - 1.3em) / 2);
+  font-size: var(--fs-18);
+  line-height: 1.3;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.site-top__line {
+  margin: 0;
+  font-size: var(--fs-18);
+  line-height: 1.3;
+  font-weight: 400;
+  color: var(--color-muted);
+  text-wrap: balance;
+}
+
+.site-top__name {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  outline: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 4px;
+    border-radius: 3px;
+  }
+}
+
+/* On `/` the name is a button with no pointer action: its cursor says
+   "there is a context menu here". */
+button.site-top__name {
+  cursor: context-menu;
+}
+
+/* A way back: elsewhere the name links home, and a case study's bar
+   (`StoryBar`) leads to /work. The arrow is in the line, its tip on the
+   column's edge, as Ask's edge is on the other side (owner, 16 Nov 2026);
+   the target reaches across the gutter (`--top-reach`), the arrow does
+   not. */
+.site-top__name[data-back] {
+  --top-reach: var(--gutter);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  margin: -10px 0 -10px calc(-1 * var(--top-reach));
+  padding: 10px 0 10px var(--top-reach);
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--color-ink);
+  }
+}
+
+/* The tip is the head's mitred corner: the path's point at 3.75 of 16
+   units, less the mitre's reach past it (half the 1.5px stroke over
+   sin 45°, 1.06px). Pulled left by that much, the tip sits on the link's
+   content edge. */
+.site-top__arrow {
+  margin-left: calc(1.06px - 0.234375em);
+}
+
+.site-top__hint {
+  display: none;
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 3px;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: calc(18px * var(--type-scale));
+  letter-spacing: 0.04em;
+  font-weight: 400;
+  color: var(--color-muted);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .site-top__hint {
+    display: block;
+    animation: site-fade-in var(--duration-base) ease both;
+  }
+}
+
+@keyframes site-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.site-top__ask {
+  align-self: start;
+  width: 96px;
+  height: var(--top-row);
+}
+
+/* Phones (owner, 16 Nov 2026: three rows beside the button "isnt the
+   prettiest header for mobile"): two rows. The name and the compact Ask
+   button share the first, the name centred on the button; the line under
+   the name takes the whole width of the second instead of the room beside
+   the button. */
+@media (max-width: 720px) {
+  .site-top {
+    --top-row: 44px;
+
+    grid-template-rows: auto auto;
+  }
+
+  .site-top__id {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .site-top__ask {
+    grid-column: 2;
+    grid-row: 1;
+    z-index: 1;
+    /* The Ask button's phone box (ask.css). */
+    width: 88px;
+  }
+
+  /* The whole row, so the line under the name starts under the button. */
+  .site-top__namewrap {
+    min-height: var(--top-row);
+    margin-top: 0;
+  }
+
+  /* The line under the name a step smaller than the name, so it stays one
+     line at 360 (owner, 16 Nov 2026: no third row). */
+  .site-top__namewrap {
+    font-size: var(--fs-17);
+  }
+
+  .site-top__line {
+    font-size: var(--fs-15);
+  }
+
+  /* 44px touch target without moving the text; the way back's target
+     also takes the whole gutter. */
+  button.site-top__name {
+    margin: -11px 0;
+    padding: 11px 0;
+  }
+
+  .site-top__name[data-back] {
+    margin-block: -11px;
+    padding-block: 11px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Press menu (right-click / long press on the name)
+   --------------------------------------------------------------------------- */
+
+.press-menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  box-sizing: border-box;
+  width: 240px;
+  padding: 6px;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 2px rgb(17 17 17 / 0.05),
+    0 18px 44px -14px rgb(17 17 17 / 0.22);
+  font-family: var(--font-sans);
+  font-size: var(--fs-15);
+  line-height: 1.3;
+  font-weight: 400;
+  color: var(--color-ink);
+  overflow: visible;
+}
+
+.press-menu:popover-open {
+  display: flex;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .press-menu {
+    opacity: 0;
+    translate: 0 -4px;
+    transition-property: opacity, translate, display, overlay;
+    transition-duration: 120ms;
+    transition-timing-function: var(--ease-out);
+    transition-behavior: allow-discrete;
+  }
+
+  .press-menu:popover-open {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  @starting-style {
+    .press-menu:popover-open {
+      opacity: 0;
+      translate: 0 -4px;
+    }
+  }
+}
+
+.press-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  color: var(--color-ink);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--duration-instant) ease;
+
+  & svg {
+    flex: none;
+    color: var(--color-muted);
+  }
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--color-wash);
+    color: var(--color-ink);
+  }
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--color-ink);
+  }
+}
+
+.press-menu__sep {
+  height: 1px;
+  margin: 4px;
+  border: 0;
+  background: var(--color-rule);
+}
+
+.press-menu__foot {
+  display: block;
+  padding: 4px 10px 6px;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: calc(16px * var(--type-scale));
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+@media (pointer: coarse) {
+  .press-menu {
+    width: 260px;
+    font-size: var(--fs-17);
+  }
+
+  .press-menu__item {
+    min-height: 48px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Footer
+   --------------------------------------------------------------------------- */
+
+.site-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding: 88px 0 64px;
+  color: var(--color-night-ink);
+
+  & p {
+    margin: 0;
+  }
+
+  & a:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 3px;
+  }
+}
+
+.site-foot__col {
+  box-sizing: border-box;
+  width: var(--column-width);
+  margin-left: var(--column-start);
+}
+
+.site-foot__ask {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: var(--fs-18);
+  line-height: 1.45;
+
+  & .site-foot__open {
+    margin-bottom: 6px;
+    text-wrap: pretty;
+  }
+}
+
+.site-foot__link {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+
+  &:hover {
+    color: #ffffff;
+  }
+}
+
+/* --- newsletter (NewsletterForm) -------------------------------------------
+   Board: the `newsletter` block of Landing.dc.html / Landing-Mobile.dc.html.
+   The form is `display: contents`, so the line, the field and the status row
+   sit on one grid: the status row keeps its line in every state, and the
+   thanks takes the form's cell, so nothing below moves. */
+
+.news {
+  /* Field fill and edge on night: not page tokens, only this input uses them. */
+  --news-field-bg: rgb(255 255 255 / 0.06);
+  --news-field-edge: rgb(255 255 255 / 0.28);
+  --news-control-h: 44px;
+  /* The status row, reserved at the line's own height (whole pixels, so
+     a message landing in it moves nothing). */
+  --news-status-h: round(nearest, 20px * var(--type-scale), 1px);
+
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  grid-template-rows: auto minmax(var(--news-status-h), auto);
+  gap: 8px 24px;
+}
+
+.news__form {
+  display: contents;
+}
+
+.news__line {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  font-size: var(--text-ui);
+  line-height: var(--text-ui--line-height);
+  color: var(--color-night-muted);
+  text-wrap: pretty;
+}
+
+.news__field {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.news__row {
+  display: flex;
+  gap: 8px;
+}
+
+.news__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--news-control-h);
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--news-field-edge);
+  /* The corner of the button beside it. */
+  border-radius: var(--radius-control);
+  background: var(--news-field-bg);
+  font: inherit;
+  font-size: var(--text-ui);
+  color: #ffffff;
+
+  &::placeholder {
+    color: var(--color-faint);
+  }
+
+  &:focus {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
+}
+
+/* Subscribe (a Button, dark), as tall as the field. */
+.news__submit {
+  --btn-h: var(--news-control-h);
+}
+
+/* The honeypot: present for bots, never painted or reached. */
+.news__hp {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Where Turnstile renders, only while its check is on (NewsletterForm). It
+   runs unseen for most visitors, so the box is collapsed, its gap in the
+   field's column taken back, and nothing moves; it opens only when
+   Turnstile asks for a tick. Collapsed rather than `display: none`, so the
+   widget's frame still loads and runs. */
+.news__challenge:not([data-on]) {
+  height: 0;
+  margin-top: -6px;
+  overflow: hidden;
+}
+
+.news__status {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: var(--text-small);
+  line-height: var(--news-status-h);
+  color: var(--color-night-ink);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+/* Subscribed: the thanks takes the form's place; the form keeps its box. */
+.news[data-state="ok"] {
+  & .news__line,
+  & .news__field {
+    visibility: hidden;
+  }
+
+  & .news__status {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    align-self: start;
+    margin-top: 0;
+    font-size: var(--text-ui);
+    line-height: var(--text-ui--line-height);
+  }
+}
+
+@media (max-width: 720px) {
+  .news {
+    --news-control-h: 48px;
+
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(var(--news-status-h), auto);
+    gap: 12px 0;
+  }
+
+  .news__line {
+    grid-row: 1;
+    font-size: var(--fs-15);
+  }
+
+  .news__field {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .news__status {
+    grid-column: 1;
+    grid-row: 3;
+    margin-top: -4px;
+  }
+}
+
+.site-foot__base {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.site-foot__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 24px;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.02em;
+}
+
+/* At least 24px wide (WCAG 2.5.8), so a two-letter word ("CV") is still a
+   target; the word sits in the middle of it. */
+.site-foot .site-foot__navlink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 44px;
+  color: var(--color-night-soft);
+  text-decoration: none;
+
+  &:hover {
+    color: #ffffff;
+  }
+}
+
+/* --- phones ---------------------------------------------------------------- */
+
+@media (max-width: 720px) {
+  .site-foot {
+    gap: 40px;
+    padding: 64px 0 56px;
+  }
+
+  .site-foot__ask {
+    gap: 12px;
+    font-size: var(--fs-17);
+
+    & .site-foot__open {
+      margin-bottom: 0;
+    }
+  }
+
+  /* 44px tap height on the inline links, and a little width on each side
+     (the one-letter "X" too), without moving the line. */
+  .site-foot__contact .site-foot__link {
+    display: inline-block;
+    margin: -10px -6px;
+    padding: 10px 6px;
+  }
+
+  .site-foot__nav {
+    gap: 0 20px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Station clock and the timetable row
+   --------------------------------------------------------------------------- */
+
+.clock-row {
+  /* The dial's signal red. Not a page token: it only ever paints this hand. */
+  --clock-red: #eb0000;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  font-size: var(--text-small);
+  line-height: calc(18px * var(--type-scale));
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: rgb(255 255 255 / 0.86);
+}
+
+.clock {
+  flex: none;
+  display: block;
+  width: 24px;
+  height: 24px;
+  overflow: visible;
+}
+
+.clock__face {
+  fill: var(--color-surface);
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+}
+
+.clock__ticks {
+  stroke: var(--color-ink);
+}
+
+.clock__hand {
+  fill: var(--color-ink);
+  transform-box: view-box;
+  transform-origin: 24px 24px;
+}
+
+.clock__sec {
+  fill: var(--clock-red);
+}
+
+.clock-row__cell {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.clock-row__key {
+  color: var(--color-night-muted);
+  font-weight: 400;
+}
+
+.clock-row__now {
+  font-weight: 600;
+}
+
+/* Phones: the same row, the dial a little larger. */
+@media (max-width: 720px) {
+  .clock {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clock__sec {
+    display: none;
+  }
+
+  .clock__hand {
+    transition: none !important;
+  }
+}

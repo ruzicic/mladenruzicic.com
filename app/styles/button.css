@@ -1,0 +1,194 @@
+/* ---------------------------------------------------------------------------
+   Button: one shape for every button on the site (owner, 12 Nov: "The one in
+   the header, 'Ask', has a great shape. Let all of them be like that").
+   Imported by `app/components/primitives/Button.tsx`.
+
+   The shape is the Ask button's: a 1px edge in --color-control-line, the
+   4px --radius-control corner, 48px tall (36px compact, a 36px square for
+   icons; 44px on phones), Geist 15px / 500.
+
+   The effect. Ask keeps its cells (`data-effect="cells"`, ask.css). Every
+   other button gets one quieter move from the same family: a solid fill
+   rises from the bottom edge, as the cells do, and the label inverts under
+   it, as Ask's label does. The fill is a layer above the label with
+   `mix-blend-mode: difference` in --color-wash (on night, --color-surface):
+   over paper it reads as near-black, over the ink label as near-paper. Each
+   pixel is either inverted or not, so the label keeps its contrast at every
+   point of the move, and the label itself stays plain ink, which contrast
+   checkers can read. 200ms in on --ease-out (quick start, soft landing),
+   160ms back on --ease-standard; a press snaps it full in 120ms and drops
+   the button 1px. Reduced motion: the same states, no transition.
+
+   In `@layer components`, so an area's own class (unlayered) can place a
+   button (position, margins, width) without fighting specificity.
+   --------------------------------------------------------------------------- */
+
+@layer components {
+  .btn {
+    --btn-h: var(--control-h);
+    --btn-px: 18px;
+    --btn-bg: var(--color-paper);
+    --btn-fg: var(--color-ink);
+    --btn-line: var(--color-control-line);
+    --btn-line-on: var(--color-ink);
+    --btn-fill: var(--color-wash);
+    --btn-ring: var(--color-ink);
+
+    position: relative;
+    isolation: isolate;
+    box-sizing: border-box;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: var(--btn-h);
+    min-width: var(--btn-h);
+    margin: 0;
+    padding: 0 var(--btn-px);
+    border: 1px solid var(--btn-line);
+    border-radius: var(--radius-control);
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    font-family: var(--font-sans);
+    font-size: var(--fs-15);
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    transition:
+      border-color var(--duration-fast) var(--ease-standard),
+      translate var(--duration-instant) var(--ease-out);
+
+    & > svg {
+      flex: none;
+    }
+
+    /* The fill. Above the label (a positioned layer paints over in-flow
+       content), blended against the button's own background. */
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: calc(var(--radius-control) - 1px);
+      background: var(--btn-fill);
+      mix-blend-mode: difference;
+      pointer-events: none;
+      transform: scaleY(0);
+      transform-origin: 50% 100%;
+      transition: transform var(--duration-fast) var(--ease-standard);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--btn-ring);
+      outline-offset: 3px;
+    }
+
+    &:disabled,
+    &[aria-disabled="true"] {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    /* Pending (Subscribe while it posts): held full, not dimmed. */
+    &[aria-busy="true"] {
+      opacity: 1;
+      cursor: progress;
+    }
+  }
+
+  /* On: real hover (never on touch, so no hover sticks after a tap),
+     keyboard focus, the press, and pending. */
+  @media (hover: hover) {
+    .btn:not(:disabled, [aria-disabled="true"]):hover {
+      border-color: var(--btn-line-on);
+
+      &::after {
+        transform: scaleY(1);
+        transition: transform var(--duration-base) var(--ease-out);
+      }
+    }
+  }
+
+  .btn:not(:disabled, [aria-disabled="true"]):focus-visible,
+  .btn[aria-busy="true"] {
+    border-color: var(--btn-line-on);
+
+    &::after {
+      transform: scaleY(1);
+      transition: transform var(--duration-base) var(--ease-out);
+    }
+  }
+
+  .btn:not(:disabled, [aria-disabled="true"], [data-effect="cells"]):active {
+    border-color: var(--btn-line-on);
+    translate: 0 1px;
+
+    &::after {
+      transform: scaleY(1);
+      transition: transform var(--duration-instant) var(--ease-out);
+    }
+  }
+
+  /* Sizes */
+  .btn[data-size="compact"] {
+    --btn-h: var(--control-h-compact);
+    --btn-px: 14px;
+    gap: 6px;
+    font-size: var(--fs-14);
+  }
+
+  .btn[data-size="icon"] {
+    --btn-h: var(--control-icon);
+    width: var(--btn-h);
+    padding: 0;
+  }
+
+  /* The dark footer: the same shape, the fill in white. */
+  .btn[data-tone="dark"] {
+    --btn-bg: var(--color-night);
+    --btn-fg: var(--color-night-ink);
+    --btn-line: var(--color-night-control-line);
+    --btn-line-on: var(--color-paper);
+    --btn-fill: var(--color-surface);
+    --btn-ring: var(--color-surface);
+  }
+
+  /* Ask: the cells are its effect (app/styles/ask.css), not this fill. */
+  .btn[data-effect="cells"] {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+
+    &::after {
+      content: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn,
+    .btn::after,
+    .btn:is(:hover, :focus-visible, :active)::after {
+      transition: none !important;
+    }
+  }
+
+  /* Forced colours: no blend; the system draws the button. */
+  @media (forced-colors: active) {
+    .btn {
+      border-color: ButtonText;
+
+      &::after {
+        content: none;
+      }
+    }
+  }
+}

@@ -1,161 +1,461 @@
-import type { APIRequestContext, Page } from "@playwright/test"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+import {
+  expect,
+  type APIRequestContext,
+  type Locator,
+  type Page,
+} from "@playwright/test"
+import matter from "gray-matter"
+
+import { ASK } from "@/content/ask"
+import { HOME } from "@/content/pages/home"
+import { PRODUCTS } from "@/content/products"
+import { TESTIMONIALS } from "@/content/testimonials"
 
 /**
- * Shared helpers for the v3 e2e harness. Kept dependency-free (no XML/perf
- * libraries) so the harness only ever needs `@playwright/test` and
- * `@axe-core/playwright` — see the worktree edit allowlist in the task brief.
+ * Shared helpers for the 2027 e2e harness. Copy and data come from
+ * `content/**` (the site's source of truth), so a copy change does not need a
+ * test change. Only `@playwright/test` and `@axe-core/playwright` are used.
  */
+
+/* -------------------------------------------------------------------------- */
+/* The site map                                                               */
+/* -------------------------------------------------------------------------- */
+
+/** The nine case studies with a page of their own (PLAN.md §1, plus Panciona, HEGIAS and WolkAbout). */
+export const STORY_SLUGS = [
+  "tenderlift",
+  "studenti-rs",
+  "fontalternatives",
+  "zarez",
+  "panciona",
+  "zf-scalar",
+  "shopify",
+  "hegias",
+  "wolkabout",
+] as const
+
+/** Every real HTML page, in sitemap order. */
+export const PAGES = [
+  "/",
+  "/work",
+  "/mentoring",
+  "/about",
+  "/press",
+  ...STORY_SLUGS.map((s) => `/work/${s}`),
+] as const
+
+/* -------------------------------------------------------------------------- */
+/* Story columns, from content                                                */
+/* -------------------------------------------------------------------------- */
+
+export interface StoryColumnItem {
+  kind: "image" | "clip" | "diagram"
+  src?: string
+  poster?: string
+}
+
+/**
+ * The squares of a story, read from its front matter
+ * (`content/work/<slug>.mdx`, `column`), so a change of pictures needs no
+ * test change.
+ */
+export function storyColumn(slug: string): StoryColumnItem[] {
+  const raw = readFileSync(
+    join(process.cwd(), "content", "work", `${slug}.mdx`),
+    "utf8"
+  )
+  return (matter(raw).data.column ?? []) as StoryColumnItem[]
+}
+
+export interface StoryLink {
+  title: string
+  href: string
+  icon?: string
+}
+
+/** The links in a story's panel (`panel.links.items`), from its front matter. */
+export function storyLinks(slug: string): StoryLink[] {
+  const raw = readFileSync(
+    join(process.cwd(), "content", "work", `${slug}.mdx`),
+    "utf8"
+  )
+  return (matter(raw).data.panel?.links?.items ?? []) as StoryLink[]
+}
+
+/** A bracketed, upper-case stand-in such as `[YEAR]` or `[SITE NAME]`. */
+export const PLACEHOLDER_RE = /\[[A-Z][A-Z0-9 ·:.,'’/_…-]{2,}\](?!\()/
+
+/** The landing's list ("Stuff I've put real time into"), shared with `/work`. */
+export const LIST = HOME.list
+
+/** Rows in the complete list (17 at the time of writing). */
+export const LIST_ROWS = LIST.groups.reduce((n, g) => n + g.rows.length, 0)
+
+/** Rows the landing shows before "Show all". */
+export const LIST_VISIBLE = LIST.groups.reduce(
+  (n, g) => n + Math.min(g.visible, g.rows.length),
+  0
+)
+
+/**
+ * A project's links on `/` as content defines them (owner, 13 Nov 2026):
+ * "Case study" from the product's `story`, "Website" from its `url`, with
+ * the accessible names from `HOME.actions`. `name` is the name the surface
+ * shows ("ZF" for the EVO Touch card).
+ */
+export function projectLinks(ref: string, name: string) {
+  const product = PRODUCTS.find((p) => p.slug === ref)
+  const a = HOME.actions
+  const fill = (t: string, domain = "") =>
+    t.replaceAll("{name}", name).replaceAll("{domain}", domain)
+  const domain = product?.url
+    ? new URL(product.url).hostname.replace(/^www\./, "")
+    : ""
+  return {
+    caseStudy: product?.story
+      ? {
+          href: `/work/${product.story}`,
+          name: fill(a.caseStudyName),
+          rowName: fill(a.rowCaseStudyName),
+        }
+      : undefined,
+    website: product?.url
+      ? {
+          href: product.url,
+          name: fill(a.websiteName, domain),
+          rowName: fill(a.rowWebsiteName, domain),
+          domain,
+        }
+      : undefined,
+  }
+}
+
+/** Escapes `text` for use inside a RegExp. */
+export function escapeRe(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+/**
+ * The "Recent work" scroller's accessible name: one label for pointer
+ * devices, another on touch screens.
+ */
+export const STRIP_REGION = new RegExp(
+  `^(${escapeRe(HOME.recentWork.regionLabel)}|${escapeRe(
+    HOME.recentWork.regionLabelTouch
+  )})$`
+)
+
+/** "Show all 17" / "Show fewer": the same button, either label. */
+export const LIST_TOGGLE = new RegExp(
+  `^(${escapeRe(LIST.showAllLabel)}|${escapeRe(LIST.showFewerLabel)})$`
+)
+
+/** The headline's pause / play button, either label. */
+export const HEADLINE_TOGGLE = new RegExp(
+  `^(${escapeRe(HOME.headline.pauseLabel)}|${escapeRe(
+    HOME.headline.playLabel
+  )})$`
+)
+
+/** Every testimonial quote, the one place an em dash is allowed. */
+export const TESTIMONIAL_QUOTES = TESTIMONIALS.map((t) => t.quote)
+
+/* -------------------------------------------------------------------------- */
+/* Page-settled waits                                                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The Ask button is the island every page hydrates: it is a link to
+ * `#contact` in the server HTML and becomes a button once React runs. Its
+ * swap is the cheapest reliable "this page is interactive" signal.
+ */
+export async function waitForHydration(page: Page): Promise<void> {
+  await expect(
+    page.getByRole("banner").getByRole("button", { name: ASK.ariaOpen })
+  ).toBeVisible()
+}
+
+/** Navigate and wait until the page is interactive and its fonts are in. */
+export async function gotoReady(page: Page, path: string): Promise<void> {
+  await page.goto(path)
+  await waitForHydration(page)
+  await page
+    .evaluate(() => document.fonts?.ready?.then(() => undefined))
+    .catch(() => {})
+}
+
+/* -------------------------------------------------------------------------- */
+/* Moving parts                                                               */
+/* -------------------------------------------------------------------------- */
+
+/** The last synthetic timestamp sent, so successive drags never go back. */
+let lastDragTs = 0
+
+/**
+ * A mouse drag of `dx` from (`x`, `y`) with fixed timing, for the rails
+ * (`useRail`): `steps` moves `stepMs` apart, then the release `hold` ms
+ * after the last move, sent with explicit timestamps through CDP
+ * (`Input.dispatchMouseEvent`), which Chromium hands to the page as the
+ * events' `timeStamp`. A rail tells a flick from a slow drag by those
+ * timestamps. Playwright's own `mouse.move` steps carry wall-clock time, and
+ * on a busy machine (a full parallel run) a "quick" 300px drag arrived at
+ * 0.2 px/ms or was released 100+ ms after its last move (measured 16 Nov
+ * 2026), which a rail rightly treats as a slow drag. Chromium only.
+ */
+export async function timedDrag(
+  page: Page,
+  x: number,
+  y: number,
+  dx: number,
+  {
+    steps = 12,
+    stepMs = 16,
+    hold = 0,
+  }: { steps?: number; stepMs?: number; hold?: number } = {}
+): Promise<void> {
+  const cdp = await page.context().newCDPSession(page)
+  const t0 = Math.max(Date.now() / 1000, lastDragTs + 0.05)
+  const at = (ms: number) => (lastDragTs = t0 + ms / 1000)
+  const send = (
+    type: "mousePressed" | "mouseMoved" | "mouseReleased",
+    px: number,
+    ms: number
+  ) =>
+    cdp.send("Input.dispatchMouseEvent", {
+      type,
+      x: px,
+      y,
+      button: "left",
+      buttons: type === "mouseReleased" ? 0 : 1,
+      clickCount: type === "mouseMoved" ? 0 : 1,
+      timestamp: at(ms),
+    })
+  await send("mouseMoved", x, 0)
+  await send("mousePressed", x, 0)
+  for (let i = 1; i <= steps; i++)
+    await send("mouseMoved", x + (dx * i) / steps, i * stepMs)
+  await send("mouseReleased", x + dx, steps * stepMs + hold)
+  await cdp.detach()
+}
+
+/**
+ * The headline's swapping line: the `aria-hidden` last child of the `<h1>`
+ * (the `<h1>` itself carries the full sentence for assistive tech). Its text
+ * changes whenever the phrase on show changes.
+ */
+export function headlineSlot(page: Page): Locator {
+  return page.locator("#headline h1 > [aria-hidden='true']").last()
+}
+
+/** The footer station clock's second hand (the clock's last hand group). */
+export function secondHand(page: Page): Locator {
+  return page
+    .getByRole("contentinfo")
+    .getByRole("img", { name: /^Time in / })
+    .locator(":scope > g")
+    .last()
+}
+
+/**
+ * The finite, time-based CSS keyframe animations running inside `root`
+ * (transitions are left out: they are the cards settling, not a timer).
+ */
+export async function runningAnimations(root: Locator): Promise<number> {
+  return root.evaluate(
+    (el) =>
+      el
+        .getAnimations({ subtree: true })
+        .filter(
+          (a) =>
+            a instanceof CSSAnimation &&
+            a.playState === "running" &&
+            a.timeline === document.timeline &&
+            a.effect?.getComputedTiming().iterations !== Infinity
+        ).length
+  )
+}
+
+/** Jumps every finite, time-based keyframe animation in `root` to its end. */
+export async function finishAnimations(root: Locator): Promise<void> {
+  await root.evaluate((el) => {
+    for (const a of el.getAnimations({ subtree: true }))
+      if (
+        a instanceof CSSAnimation &&
+        a.timeline === document.timeline &&
+        a.effect?.getComputedTiming().iterations !== Infinity
+      )
+        a.finish()
+  })
+}
+
+/** A fixed wall-clock time a few seconds into a minute, for fake clocks. */
+export const FIXED_TIME = new Date("2026-11-11T10:00:05+01:00")
 
 /* -------------------------------------------------------------------------- */
 /* Console errors                                                             */
 /* -------------------------------------------------------------------------- */
 
 export interface ConsoleErrorCollector {
-  /** Mutated in place as errors arrive — read `.length` / contents any time. */
+  /** Mutated in place as errors arrive. */
   errors: string[]
 }
 
-/**
- * Attaches `console` (error level only) and `pageerror` listeners to `page`
- * and returns a live-updating collector. Attach before navigating.
- */
+/** Collects `console.error` and uncaught page errors. Attach before `goto`. */
 export function collectConsoleErrors(page: Page): ConsoleErrorCollector {
   const collector: ConsoleErrorCollector = { errors: [] }
-
   page.on("console", (msg) => {
-    if (msg.type() === "error") {
-      collector.errors.push(msg.text())
-    }
+    if (msg.type() === "error") collector.errors.push(msg.text())
   })
-
-  page.on("pageerror", (err) => {
-    collector.errors.push(err.message)
-  })
-
+  page.on("pageerror", (err) => collector.errors.push(err.message))
   return collector
 }
 
 /* -------------------------------------------------------------------------- */
-/* Sitemap                                                                    */
+/* Sitemap and machine outputs                                                */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Fetches `/sitemap.xml` and extracts every `<loc>` entry. Regex-based on
- * purpose: the sitemap is generated by `next-sitemap`'s successor,
- * `app/sitemap.ts`, so it is always well-formed, and pulling in an XML parser
- * just for this would be a dependency the harness doesn't otherwise need.
- */
-export async function readSitemapUrls(
-  request: APIRequestContext,
-  baseURL: string
+/** Every `<loc>` in `/sitemap.xml`, as pathnames. */
+export async function readSitemapPaths(
+  request: APIRequestContext
 ): Promise<string[]> {
-  const res = await request.get(`${baseURL}/sitemap.xml`)
-  if (!res.ok()) {
-    throw new Error(`GET /sitemap.xml returned ${res.status()}`)
-  }
+  const res = await request.get("/sitemap.xml")
+  if (!res.ok()) throw new Error(`GET /sitemap.xml returned ${res.status()}`)
   const body = await res.text()
-  const matches = [...body.matchAll(/<loc>([^<]+)<\/loc>/g)]
-  return matches.map((m) => m[1].trim())
+  return [...body.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+    (m) => new URL(m[1].trim()).pathname
+  )
 }
 
-/** `https://mladenruzicic.com/work/foo` → `/work/foo`, relative to `base`. */
-export function toPathname(url: string, base: string): string {
-  return new URL(url, base).pathname
+/** The text of every `application/ld+json` block on the current page. */
+export async function readJsonLdBlocks(page: Page): Promise<string[]> {
+  return page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((els) => els.map((e) => e.textContent ?? ""))
+}
+
+/** Flattens JSON-LD (arrays, `@graph`) into its nodes. */
+export function jsonLdNodes(value: unknown): Record<string, unknown>[] {
+  if (Array.isArray(value)) return value.flatMap(jsonLdNodes)
+  if (value && typeof value === "object") {
+    const node = value as Record<string, unknown>
+    const graph = node["@graph"]
+    return graph ? [node, ...jsonLdNodes(graph)] : [node]
+  }
+  return []
+}
+
+/** True when a node's `@type` is `type` (or includes it). */
+export function hasType(node: Record<string, unknown>, type: string): boolean {
+  const t = node["@type"]
+  return Array.isArray(t) ? t.includes(type) : t === type
 }
 
 /* -------------------------------------------------------------------------- */
-/* Cumulative Layout Shift                                                    */
+/* Geometry                                                                   */
+/* -------------------------------------------------------------------------- */
+
+/** True when the document scrolls sideways. */
+export async function hasHorizontalOverflow(page: Page): Promise<boolean> {
+  return page.evaluate(
+    () =>
+      document.documentElement.scrollWidth >
+      document.documentElement.clientWidth + 1
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/* Performance observers (budgets.spec.ts)                                    */
 /* -------------------------------------------------------------------------- */
 
 declare global {
   interface Window {
     __e2eCls?: number
-    __e2eLcp?: { startTime: number; size: number } | null
+    __e2eLcp?: {
+      startTime: number
+      size: number
+      url: string
+      tag: string
+      inHeading: boolean
+      inMain: boolean
+      /** Bottom edge of the element, in CSS px from the top of the page. */
+      bottom: number
+      text: string
+    } | null
   }
 }
 
-/**
- * Installs a `layout-shift` PerformanceObserver before any page script runs,
- * accumulating every shift that didn't follow recent user input. Call before
- * `page.goto`.
- */
+/** Accumulates layout shifts not caused by input. Call before `goto`. */
 export async function installClsObserver(page: Page): Promise<void> {
   await page.addInitScript(() => {
     window.__e2eCls = 0
     try {
-      const po = new PerformanceObserver((list) => {
+      new PerformanceObserver((list) => {
         for (const entry of list.getEntries() as unknown as {
           hadRecentInput: boolean
           value: number
         }[]) {
-          if (!entry.hadRecentInput) {
+          if (!entry.hadRecentInput)
             window.__e2eCls = (window.__e2eCls ?? 0) + entry.value
-          }
         }
-      })
-      po.observe({ type: "layout-shift", buffered: true })
+      }).observe({ type: "layout-shift", buffered: true })
     } catch {
-      // layout-shift not supported in this engine; leave __e2eCls at 0.
+      // Not supported in this engine; leave it at 0.
     }
   })
 }
 
-/** Reads the CLS value accumulated by {@link installClsObserver}. */
 export async function getCls(page: Page): Promise<number> {
   return page.evaluate(() => window.__e2eCls ?? 0)
 }
 
-/* -------------------------------------------------------------------------- */
-/* Largest Contentful Paint                                                   */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Installs a `largest-contentful-paint` PerformanceObserver before any page
- * script runs. LCP candidates can still update after this read, but the final
- * entry (once painting settles) is what budgets.spec.ts and motion.spec.ts
- * compare other timings against. Call before `page.goto`.
- */
+/** Records the latest LCP candidate and what element it is. */
 export async function installLcpObserver(page: Page): Promise<void> {
   await page.addInitScript(() => {
     window.__e2eLcp = null
     try {
-      const po = new PerformanceObserver((list) => {
+      new PerformanceObserver((list) => {
         const entries = list.getEntries() as unknown as {
           startTime: number
           size: number
+          url: string
+          element: Element | null
         }[]
         const last = entries[entries.length - 1]
-        if (last) {
-          window.__e2eLcp = { startTime: last.startTime, size: last.size }
+        if (!last) return
+        window.__e2eLcp = {
+          startTime: last.startTime,
+          size: last.size,
+          url: last.url,
+          tag: last.element?.tagName ?? "",
+          inHeading: !!last.element?.closest("h1"),
+          inMain: !!last.element?.closest("main"),
+          bottom: last.element
+            ? last.element.getBoundingClientRect().bottom + window.scrollY
+            : 0,
+          text: (last.element?.textContent ?? "").trim().slice(0, 80),
         }
-      })
-      po.observe({ type: "largest-contentful-paint", buffered: true })
+      }).observe({ type: "largest-contentful-paint", buffered: true })
     } catch {
-      // largest-contentful-paint not supported in this engine.
+      // Not supported in this engine.
     }
   })
 }
 
-/** Reads the last LCP candidate observed by {@link installLcpObserver}. */
-export async function getLcp(
-  page: Page
-): Promise<{ startTime: number; size: number } | null> {
+export async function getLcp(page: Page) {
   return page.evaluate(() => window.__e2eLcp ?? null)
 }
-
-/* -------------------------------------------------------------------------- */
-/* Resource timing                                                            */
-/* -------------------------------------------------------------------------- */
 
 export interface ResourceTiming {
   name: string
   startTime: number
-  /** Compressed, over-the-wire byte count; 0 for cached/opaque responses. */
+  /** Compressed bytes over the wire; 0 for cached or opaque responses. */
   transferSize: number
   initiatorType: string
 }
 
-/** All `PerformanceResourceTiming` entries recorded so far in `page`. */
+/** All resource timing entries recorded so far. */
 export async function getResourceTimings(
   page: Page
 ): Promise<ResourceTiming[]> {
@@ -170,81 +470,4 @@ export async function getResourceTimings(
       }
     })
   )
-}
-
-/* -------------------------------------------------------------------------- */
-/* Live request tracking                                                     */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Attaches a `request` listener that records every request URL containing
- * `substring`. Node-side (as opposed to {@link getResourceTimings}), so it
- * also catches requests the page's own performance timeline might miss (e.g.
- * ones aborted before completion). Attach before navigating.
- */
-export function trackRequestsMatching(page: Page, substring: string): string[] {
-  const urls: string[] = []
-  page.on("request", (req) => {
-    if (req.url().includes(substring)) urls.push(req.url())
-  })
-  return urls
-}
-
-/* -------------------------------------------------------------------------- */
-/* Page-settled waits                                                         */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Resolves once the first-visit preloader is no longer painting.
- *
- * The overlay counts to 100 (600–1000 ms), then cross-fades out over 500 ms
- * before React unmounts it. Mid-fade its `text-muted` status verb sits at a
- * fraction of its opacity over the page behind it, so anything that samples
- * computed colour during that window — axe's `color-contrast` rule above all —
- * sees a transient 1.0–1.6:1 reading that has nothing to do with the page at
- * rest. Auditing after it detaches is the honest measurement, and it is
- * deterministic instead of racing a 500 ms transition.
- *
- * Also returns immediately on a repeat visit in the same session, where the
- * inline `<head>` script stamps `data-preloader="off"` and CSS keeps the
- * server-rendered overlay at `display: none`.
- */
-export async function waitForPreloaderGone(
-  page: Page,
-  timeout = 10_000
-): Promise<void> {
-  await page
-    .waitForFunction(
-      () => {
-        const el = document.querySelector('[data-testid="preloader"]')
-        if (!el) return true
-        return getComputedStyle(el).display === "none"
-      },
-      undefined,
-      { timeout }
-    )
-    .catch(() => {
-      /* Leave the assertion that follows to report the real problem. */
-    })
-}
-
-/**
- * "The route has finished arriving" for pages that never go network-idle.
- *
- * The hero canvas, the shader headers and the scroll hairline all run
- * continuous rAF loops, and the PPR shell streams; `waitForLoadState(
- * "networkidle")` on those routes burns its whole timeout and then gets
- * swallowed by a `.catch()`, which is why a 24-route walk needed a 600 s
- * budget. This waits for the three things that actually change what a test
- * observes — document load, the preloader, webfonts — and nothing else.
- */
-export async function waitForRouteReady(
-  page: Page,
-  timeout = 15_000
-): Promise<void> {
-  await page.waitForLoadState("load", { timeout }).catch(() => {})
-  await waitForPreloaderGone(page, timeout)
-  await page
-    .evaluate(() => document.fonts?.ready?.then(() => undefined))
-    .catch(() => {})
 }

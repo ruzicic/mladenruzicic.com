@@ -1,274 +1,352 @@
 import { expect, test, type Page } from "@playwright/test"
 
+import { ASK } from "@/content/ask"
+import { HOME } from "@/content/pages/home"
+import { MENTORING } from "@/content/pages/mentoring"
+import { PRESS } from "@/content/pages/press"
+import { SITE } from "@/content/site"
+import { TESTIMONIALS } from "@/content/testimonials"
+
+import {
+  gotoReady,
+  LIST,
+  LIST_ROWS,
+  LIST_TOGGLE,
+  LIST_VISIBLE,
+  STRIP_REGION,
+} from "./helpers"
+
 /**
- * Keyboard-only walkthrough — docs/v3-redesign-plan.md §8 ("keyboard-only
- * walkthrough of header/pill/dialog") and §5.6 (native `<dialog>`/Popover
- * primitives, so nothing here is canvas-only).
- *
- * WEBKIT. macOS ships with "Press Tab to highlight each item" off, so Safari —
- * and Playwright's WebKit, which inherits the setting — never puts links in
- * the Tab order at all: pressing Tab on `/` cycles `DIV -> BODY -> DIV`, and
- * `document.activeElement` is `<body>`. That is the platform's choice, not
- * something the site controls, so the two Tab-order tests are Chromium-only
- * and WebKit gets `keyboardControls` below instead: it focuses each of the same
- * controls directly and asserts the same focus ring, which is what a Safari
- * user with full keyboard access enabled would see.
+ * Everything on the site works from the keyboard. Desktop Chrome only: see
+ * "The WebKit caveat" in tests/README.md for why Tab order is not run on
+ * WebKit.
  */
 
-/** Tabs forward up to `maxTabs` times looking for a focused element whose
- * accessible name matches `pattern`. Returns the matching locator, or
- * `undefined` if it was never reached. */
-async function tabUntil(
-  page: Page,
-  pattern: RegExp,
-  maxTabs = 15
-): Promise<ReturnType<Page["locator"]> | undefined> {
-  for (let i = 0; i < maxTabs; i++) {
-    await page.keyboard.press("Tab")
-    const focused = page.locator(":focus")
-    if ((await focused.count()) === 0) continue
-    const name = (
-      (await focused.getAttribute("aria-label")) ??
-      (await focused.textContent()) ??
-      ""
-    ).trim()
-    if (pattern.test(name)) return focused
-  }
-  return undefined
-}
-
-/** The controls the Tab-order tests walk, in Tab order. */
-const HEADER_CONTROLS = [
-  { name: "skip link", selector: 'a[href="#main"]' },
-  { name: "monogram", selector: 'header[data-site-header] a[href="#top"]' },
-  { name: "Work", selector: 'nav[aria-label="Primary"] >> text=Work' },
-  {
-    name: "Mentoring",
-    selector: 'nav[aria-label="Primary"] >> text=Mentoring',
-  },
-  { name: "About", selector: 'nav[aria-label="Primary"] >> text=About' },
-  {
-    name: "sound toggle",
-    selector: 'nav[aria-label="Primary"] button[aria-pressed]',
-  },
-] as const
-
-/** Computed focus indicator of whatever currently has focus. */
-async function focusIndicator(page: Page) {
+/** Describes the focused element: its tag, role and accessible-ish name. */
+async function focused(page: Page) {
   return page.evaluate(() => {
     const el = document.activeElement as HTMLElement | null
-    if (!el || el === document.body) return null
-    const cs = window.getComputedStyle(el)
+    if (!el || el === document.body) return { tag: "BODY", name: "", in: "" }
+    const name = el.getAttribute("aria-label") ?? (el.textContent ?? "").trim()
+    const landmark = el.closest("header, main, footer, dialog")
     return {
       tag: el.tagName,
-      outlineStyle: cs.outlineStyle,
-      outlineWidth: cs.outlineWidth,
-      outlineColor: cs.outlineColor,
-      boxShadow: cs.boxShadow,
+      name,
+      in: landmark ? landmark.tagName.toLowerCase() : "",
     }
   })
 }
 
-function hasVisibleRing(
-  style: Awaited<ReturnType<typeof focusIndicator>>
-): boolean {
-  if (!style) return false
-  const outline =
-    style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0
-  return outline || style.boxShadow !== "none"
-}
+const askButton = (page: Page) =>
+  page.getByRole("banner").getByRole("button", { name: ASK.ariaOpen })
 
-test("Tab reaches the skip link, then header nav links, then the sound toggle", async ({
-  page,
-  browserName,
-}) => {
-  test.skip(
-    browserName === "webkit",
-    "WebKit keeps links out of the Tab order (macOS full keyboard access); see keyboardControls below"
-  )
-  await page.goto("/")
-
-  await page.keyboard.press("Tab")
-  const first = page.locator(":focus")
-  await expect(first, "first Tab stop is the skip link").toHaveAttribute(
-    "href",
-    "#main"
-  )
-
-  for (const label of [/work/i, /mentoring/i, /about/i]) {
-    const link = await tabUntil(page, label)
-    expect(
-      link,
-      `header nav link matching ${label} is Tab-reachable`
-    ).toBeTruthy()
-  }
-
-  const soundToggle = await tabUntil(page, /sound/i)
-  expect(
-    soundToggle,
-    "a sound toggle control is Tab-reachable after the nav links"
-  ).toBeTruthy()
-})
-
-test("focused elements keep a visible focus indicator", async ({
-  page,
-  browserName,
-}) => {
-  test.skip(
-    browserName === "webkit",
-    "WebKit keeps links out of the Tab order (macOS full keyboard access); see keyboardControls below"
-  )
-  await page.goto("/")
-  await page.keyboard.press("Tab") // skip link
-  await page.keyboard.press("Tab") // first real interactive element
-
-  const style = await focusIndicator(page)
-
-  expect(style, "an element is focused").not.toBeNull()
-  expect(
-    hasVisibleRing(style),
-    `focused element needs a visible indicator, got outline-style=${style?.outlineStyle} outline-width=${style?.outlineWidth} box-shadow=${style?.boxShadow}`
-  ).toBe(true)
-})
-
-test("keyboardControls: every header control takes focus and shows the ring", async ({
-  page,
-}) => {
-  await page.goto("/")
-
-  for (const control of HEADER_CONTROLS) {
-    const target = page.locator(control.selector).first()
-    await expect(
-      target,
-      `${control.name} is present in the header`
-    ).toHaveCount(1)
-
-    await target.focus()
-    await expect(target, `${control.name} takes focus`).toBeFocused()
-
-    const style = await focusIndicator(page)
-    expect(
-      hasVisibleRing(style),
-      `${control.name} needs a visible focus indicator, got outline=${style?.outlineStyle} ${style?.outlineWidth} ${style?.outlineColor} box-shadow=${style?.boxShadow}`
-    ).toBe(true)
-  }
-})
-
-test("timeline band: Enter expands, Escape collapses, ArrowRight scrolls the rail", async ({
-  page,
-}) => {
-  await page.goto("/")
-
-  const band = page.locator('[data-testid="timeline-band"]').first()
-  test.skip(
-    (await band.count()) === 0,
-    "no [data-testid=timeline-band] — the timeline regressed out of the DOM; this id ships today"
-  )
-
-  await band.scrollIntoViewIfNeeded()
-  await band.focus()
-  await expect(band).toBeFocused()
-
-  await page.keyboard.press("Enter")
-  await expect(band, "aria-expanded=true after Enter").toHaveAttribute(
-    "aria-expanded",
-    "true"
-  )
-
-  await page.keyboard.press("Escape")
-  await expect(band, "aria-expanded=false after Escape").toHaveAttribute(
-    "aria-expanded",
-    "false"
-  )
-
-  const rail = page.locator("[data-rail-scroller]").first()
-  const scrollBefore = await rail.evaluate((el) => el.scrollLeft)
-  await band.focus()
-  await page.keyboard.press("ArrowRight")
-  const scrollAfter = await rail.evaluate((el) => el.scrollLeft)
-  expect(
-    scrollAfter,
-    "ArrowRight while a band has focus scrolls the timeline rail"
-  ).toBeGreaterThan(scrollBefore)
-})
-
-test('"worked alongside" popover opens with Enter and closes with Escape', async ({
-  page,
-}) => {
-  await page.goto("/")
-
-  /*
-   * The people used to sit in a standalone row under the rail. They now live
-   * inside the band they belong to, so the path is: find a band that has any,
-   * open it from the keyboard, and work the person block inside it. Same
-   * intent as before — keyboard-reachable trigger, operable popover, Escape
-   * closes it.
-   *
-   * `:has()` against the panel works while the panel is still `hidden`: the
-   * markup is server-rendered for every band, expanded or not.
-   */
-  const band = page.locator("[data-rail-band]:has([data-band-people])").first()
-  test.skip(
-    (await band.count()) === 0,
-    "no band renders a people block — content/people.ts ships empty, or no company lists anybody"
-  )
-
-  const bandButton = band.locator('[data-testid="timeline-band"]')
-  await bandButton.scrollIntoViewIfNeeded()
-  await bandButton.focus()
-  await page.keyboard.press("Enter")
-  await expect(bandButton, "the band opens on Enter").toHaveAttribute(
-    "aria-expanded",
-    "true"
-  )
-
-  const people = band.locator("[data-band-people]")
-  await expect(
-    people,
-    "the people block is visible in the open card"
-  ).toBeVisible()
-
-  const trigger = people.locator("button[popovertarget]").first()
-  test.skip(
-    (await trigger.count()) === 0,
-    "no focusable person trigger inside the band's people block"
-  )
-  await trigger.focus()
-  await expect(trigger, "the person trigger takes focus").toBeFocused()
-  await page.keyboard.press("Enter")
-
-  /*
-   * Target the panel this trigger owns, not the first `[popover]` in the
-   * document: every other band renders its own people block, closed, earlier
-   * or later in DOM order.
-   */
-  const panelId = await trigger.getAttribute("popovertarget")
-  expect(panelId, "person trigger names the panel it opens").toBeTruthy()
-  const popover = page.locator(`#${panelId}`)
-  await expect(popover, "popover opens on Enter").toBeVisible({
-    timeout: 2_000,
+test.describe("skip link and top block", () => {
+  test("Tab reaches the skip link first and it moves focus to main", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/")
+    await page.keyboard.press("Tab")
+    const skip = page.getByRole("link", { name: "Skip to content" })
+    await expect(skip).toBeFocused()
+    await expect(skip).toBeInViewport()
+    await page.keyboard.press("Enter")
+    await expect(page.getByRole("main")).toBeFocused()
+    // The next Tab continues inside the page content, not back at the top.
+    await page.keyboard.press("Tab")
+    expect((await focused(page)).in).toBe("main")
   })
 
-  // The LinkedIn link inside the card is reachable and is a real link.
-  const link = popover.locator('a[href*="linkedin.com"]').first()
-  if ((await link.count()) > 0) {
-    await expect(link, "the LinkedIn link is operable").toHaveAttribute(
-      "href",
-      /^https:\/\//
+  test("Tab order through the top block: skip link, name, Ask, then main", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/")
+    await page.keyboard.press("Tab")
+    await expect(
+      page.getByRole("link", { name: "Skip to content" })
+    ).toBeFocused()
+    await page.keyboard.press("Tab")
+    await expect(
+      page.getByRole("banner").getByRole("button", { name: SITE.name })
+    ).toBeFocused()
+    await page.keyboard.press("Tab")
+    await expect(askButton(page)).toBeFocused()
+    await page.keyboard.press("Tab")
+    expect((await focused(page)).in).toBe("main")
+  })
+
+  test("on other pages the name is a link home, before Ask", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/about")
+    await page.keyboard.press("Tab")
+    await page.keyboard.press("Tab")
+    const home = page.getByRole("banner").getByRole("link", { name: SITE.name })
+    await expect(home).toBeFocused()
+    await expect(home).toHaveAttribute("href", "/")
+    await page.keyboard.press("Tab")
+    await expect(askButton(page)).toBeFocused()
+  })
+
+  test("focused controls show a visible focus indicator", async ({ page }) => {
+    await gotoReady(page, "/")
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press("Tab")
+      const ring = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement
+        const s = getComputedStyle(el)
+        const outline =
+          s.outlineStyle !== "none" && parseFloat(s.outlineWidth) > 0
+        const shadow = s.boxShadow !== "none" && s.boxShadow !== ""
+        return { outline, shadow, focusVisible: el.matches(":focus-visible") }
+      })
+      expect(ring.focusVisible, `Tab ${i + 1} is :focus-visible`).toBe(true)
+      expect(
+        ring.outline || ring.shadow,
+        `Tab ${i + 1} draws an outline or ring`
+      ).toBe(true)
+    }
+  })
+})
+
+test.describe("Ask", () => {
+  test("opens from the keyboard, traps focus, Escape closes and returns focus", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/")
+    await askButton(page).focus()
+    await page.keyboard.press("Enter")
+    const dialog = page.getByRole("dialog", { name: ASK.title })
+    await expect(dialog).toBeVisible()
+    await expect
+      .poll(async () => (await focused(page)).in, { message: "focus moved in" })
+      .toBe("dialog")
+
+    // Twenty Tabs and Shift+Tabs never leave the dialog.
+    for (let i = 0; i < 20; i++) {
+      await page.keyboard.press(i % 3 === 2 ? "Shift+Tab" : "Tab")
+      const f = await focused(page)
+      expect(f.in, `Tab ${i + 1} stays in the dialog (on ${f.tag})`).toBe(
+        "dialog"
+      )
+    }
+
+    await page.keyboard.press("Escape")
+    await expect(dialog).toBeHidden()
+    await expect(askButton(page)).toBeFocused()
+    await expect(page.locator("html")).not.toHaveAttribute("data-ask-open")
+  })
+
+  test("Enter in the question box asks the question", async ({ page }) => {
+    await gotoReady(page, "/")
+    await askButton(page).focus()
+    await page.keyboard.press("Enter")
+    const dialog = page.getByRole("dialog", { name: ASK.title })
+    const box = dialog.getByRole("textbox", { name: ASK.inputLabel })
+    await expect(box).toBeVisible()
+    await box.focus()
+    await page.keyboard.type(ASK.questions[2].question)
+    await page.keyboard.press("Enter")
+    await expect(dialog.getByText(ASK.questions[2].answer)).toBeVisible()
+  })
+})
+
+test.describe("press menu on the name", () => {
+  test("Shift+F10 opens it, arrows move, Escape closes and returns focus", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/")
+    const name = page.getByRole("banner").getByRole("button", {
+      name: SITE.name,
+    })
+    await name.focus()
+    await page.keyboard.press("Shift+F10")
+    const menu = page.getByRole("menu", { name: PRESS.menu.ariaLabel })
+    await expect(menu).toBeVisible()
+    await expect(name).toHaveAttribute("aria-expanded", "true")
+    const items = menu.getByRole("menuitem")
+    await expect(items).toHaveCount(3)
+    await expect(items.first()).toBeFocused()
+    await page.keyboard.press("ArrowDown")
+    await expect(items.nth(1)).toBeFocused()
+    await page.keyboard.press("End")
+    await expect(
+      menu.getByRole("menuitem", { name: PRESS.menu.pressKitLabel })
+    ).toBeFocused()
+    await page.keyboard.press("Escape")
+    await expect(menu).toBeHidden()
+    await expect(name).toBeFocused()
+    await expect(name).toHaveAttribute("aria-expanded", "false")
+  })
+
+  test("Shift+F10 on the home link opens it on other pages too", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/mentoring")
+    const name = page.getByRole("banner").getByRole("link", { name: SITE.name })
+    await name.focus()
+    await page.keyboard.press("Shift+F10")
+    const menu = page.getByRole("menu", { name: PRESS.menu.ariaLabel })
+    await expect(menu).toBeVisible()
+    await page.keyboard.press("Escape")
+    await expect(menu).toBeHidden()
+    await expect(name).toBeFocused()
+    await expect(page).toHaveURL(/\/mentoring$/)
+  })
+})
+
+test.describe("Recent work strip", () => {
+  test("arrow keys step through the cards and update the counter", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/")
+    const strip = page.getByRole("region", { name: STRIP_REGION })
+    const section = page.getByRole("region", {
+      name: "Recent work",
+      exact: true,
+    })
+    const counter = section.getByText(/^\d+ \/ \d+$/)
+    const total = (await counter.innerText()).split("/")[1].trim()
+    await expect(counter).toHaveText(`1 / ${total}`)
+
+    await strip.focus()
+    await page.keyboard.press("ArrowRight")
+    await expect(counter).toHaveText(`2 / ${total}`)
+    await page.keyboard.press("ArrowRight")
+    await expect(counter).toHaveText(`3 / ${total}`)
+    await page.keyboard.press("ArrowLeft")
+    await expect(counter).toHaveText(`2 / ${total}`)
+    await page.keyboard.press("End")
+    await expect(counter).toHaveText(`${total} / ${total}`)
+    await expect(section.getByRole("button", { name: /^Next/ })).toBeDisabled()
+    await page.keyboard.press("Home")
+    await expect(counter).toHaveText(`1 / ${total}`)
+    await expect(
+      section.getByRole("button", { name: /^Previous/ })
+    ).toBeDisabled()
+  })
+
+  // Owner, 13 Nov 2026: a card is not a link. Its actions are, and they go
+  // where they say: "Case study" to its page here, "Website" out to its
+  // site in a new tab. Enter on a case study navigates, with no dialog.
+  test("every card's actions go where they say; no card is a link", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/")
+    const strip = page.getByRole("region", { name: STRIP_REGION })
+    const cards = strip.locator(":scope > [data-card]:not(.lc-end)")
+    const count = await cards.count()
+    expect(count).toBeGreaterThan(0)
+    const studies: { name: string; href: string }[] = []
+    for (let i = 0; i < count; i++) {
+      const card = cards.nth(i)
+      const title = (await card.locator(".lc-title").innerText()).trim()
+      expect(await card.evaluate((el) => el.tagName), title).not.toBe("A")
+      for (const link of await card.getByRole("link").all()) {
+        const href = (await link.getAttribute("href"))!
+        const word = (await link.innerText()).trim()
+        if (word === HOME.actions.caseStudy) {
+          expect(href, `${title}: to its case study`).toMatch(
+            /^\/work\/[a-z0-9-]+$/
+          )
+          await expect(link, title).not.toHaveAttribute("target", /.+/)
+          studies.push({ name: title, href })
+        } else {
+          expect(word, title).toBe(HOME.actions.website)
+          expect(href, title).toMatch(/^https:\/\//)
+          await expect(link, title).toHaveAttribute("target", "_blank")
+        }
+        await expect(link, title).not.toHaveAttribute("aria-haspopup")
+      }
+    }
+    expect(studies.length).toBeGreaterThan(0)
+    for (const { name, href } of studies) {
+      const link = strip.locator(`.lc-acts a[href="${href}"]`).first()
+      await link.focus()
+      await page.keyboard.press("Enter")
+      await expect(page, name).toHaveURL(new RegExp(`${href}$`))
+      await expect(page.getByRole("dialog")).toHaveCount(0)
+      await gotoReady(page, "/")
+    }
+  })
+})
+
+test.describe("the list", () => {
+  test(`"${LIST.showAllLabel}" expands the list and collapses it again`, async ({
+    page,
+  }) => {
+    await gotoReady(page, "/")
+    const list = page.getByRole("region", { name: LIST.title })
+    const rows = list.getByRole("listitem")
+    await expect(rows).toHaveCount(LIST_VISIBLE)
+
+    const toggle = list.getByRole("button", { name: LIST_TOGGLE })
+    await expect(toggle).toHaveText(LIST.showAllLabel)
+    await expect(toggle).toHaveAttribute("aria-expanded", "false")
+    await toggle.focus()
+    await page.keyboard.press("Enter")
+    await expect(toggle).toHaveAttribute("aria-expanded", "true")
+    await expect(toggle).toHaveText(LIST.showFewerLabel)
+    await expect(rows).toHaveCount(LIST_ROWS)
+    await expect(toggle).toBeFocused()
+
+    await page.keyboard.press("Space")
+    await expect(toggle).toHaveAttribute("aria-expanded", "false")
+    await expect(rows).toHaveCount(LIST_VISIBLE)
+  })
+
+  test("collapsed rows are not in the Tab order", async ({ page }) => {
+    await gotoReady(page, "/")
+    const list = page.getByRole("region", { name: LIST.title })
+    const links = await list.getByRole("link").count()
+    await list.getByRole("link").first().focus()
+    // Tab through the visible links: the next stop after them is the toggle.
+    for (let i = 1; i < links; i++) await page.keyboard.press("Tab")
+    await page.keyboard.press("Tab")
+    await expect(list.getByRole("button", { name: LIST_TOGGLE })).toBeFocused()
+  })
+})
+
+test.describe("testimonial pile", () => {
+  const said = MENTORING.said
+  const byId = new Map(TESTIMONIALS.map((t) => [t.id, t]))
+  const order = said.pile.map((p) => byId.get(p.testimonial)!)
+  const total = order.length
+
+  test("pause and the counter work from the keyboard", async ({ page }) => {
+    await gotoReady(page, "/mentoring")
+    const pile = page.getByRole("region", { name: said.title })
+
+    const pause = pile.getByRole("button", { name: said.pauseLabel })
+    await pause.focus()
+    await page.keyboard.press("Enter")
+    await expect(
+      pile.getByRole("button", { name: said.playLabel })
+    ).toBeFocused()
+
+    const counter = pile.getByRole("button", {
+      name: /^\d+ \/ \d+, testimonial/,
+    })
+    await expect(counter).toHaveText(`1 / ${total}`)
+    await counter.focus()
+    await page.keyboard.press("Enter")
+    await expect(counter).toHaveText(`2 / ${total}`)
+    await expect(counter).toHaveAccessibleName(
+      said.nextLabelFormat
+        .replaceAll("{n}", "2")
+        .replaceAll("{next}", "3")
+        .replaceAll("{total}", String(total))
     )
-  }
+    // The new top card is announced.
+    await expect(pile.getByRole("status")).toContainText(order[1].author)
 
-  await page.keyboard.press("Escape")
-  await expect(popover, "popover closes on Escape").toBeHidden()
-  // Escape dismissed the card, not the band underneath it.
-  await expect(
-    bandButton,
-    "the band stays open when Escape closes a person card"
-  ).toHaveAttribute("aria-expanded", "true")
+    await page.keyboard.press("Space")
+    await expect(counter).toHaveText(`3 / ${total}`)
+    await expect(pile.getByRole("status")).toContainText(order[2].author)
+  })
 
-  await page.keyboard.press("Escape")
-  await expect(
-    bandButton,
-    "a second Escape collapses the band"
-  ).toHaveAttribute("aria-expanded", "false")
+  test("every quote stays readable to assistive tech", async ({ page }) => {
+    await gotoReady(page, "/mentoring")
+    const pile = page.getByRole("region", { name: said.title })
+    await expect(pile.getByRole("figure")).toHaveCount(total)
+  })
 })

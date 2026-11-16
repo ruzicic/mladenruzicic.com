@@ -1,3 +1,7 @@
 allowBuilds:
+  # vgpu (the homepage dent) pulls Node-side packages whose install scripts
+  # fetch native WebGPU (Dawn) binaries. The browser bundle needs none of it.
+  '@vgpu/adapter-node': false
+  webgpu: false
   sharp: true
   unrs-resolver: false

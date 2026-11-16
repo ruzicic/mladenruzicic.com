@@ -1,14 +1,13 @@
-import type { Company, CompanyId, HeroLogoId } from "@/lib/content/schema"
+import type { Company } from "@/lib/content/schema"
 
 /**
- * Timeline bands, newest first.
- *
- * Every range is verified against the owner's LinkedIn profile (captured
- * 2026-09-02), so `approx` is `false` throughout and no band shows the
- * "dates approximate" badge. `from` and `to` are decimal years: a start is the
- * first day of its month, `year + (month - 1) / 12`, and an end is the last,
- * `year + month / 12`. Keep both to two decimals — the rail only needs pixel
- * accuracy, and exact thirds read as noise in a diff.
+ * The employers, newest first: the v3 site's record of them. Only `id`,
+ * `name` and `people` are read today, by a story's `company` and the
+ * case-study mirrors ("Company", "Worked alongside"); the pages read
+ * employers from `content/products.ts` and the CV from
+ * `content/pages/about.ts`. The other fields (dates, roles, summaries) are
+ * kept as the owner's verified record (ranges checked against his LinkedIn
+ * profile on 2026-09-02; `from` and `to` are decimal years).
  */
 export const COMPANIES = [
   {
@@ -20,10 +19,10 @@ export const COMPANIES = [
     to: "now",
     approx: false,
     yearsLabel: "Oct 2023 – now",
-    role: "Global Product Owner, EVO Touch",
-    prev: "Senior Software Engineer → UI Platform Engineer → Engineering Manager, UI Platform",
+    role: "Global Product Owner, Driver Experience team",
+    prev: "Senior Software Engineer → UI Platform Engineer → Engineering Manager, UI Platform → Global Product Owner, EVO Touch",
     summary:
-      "Joined as a senior engineer on a platform migration, then built the proof of concept for Velocity, the SCALAR design system and React component library. Led the UI Platform team that took it from prototype to the standard for new development. Now own vision, roadmap and delivery for EVO Touch, ZF's multi-platform app for commercial vehicle drivers.",
+      "Joined as a senior engineer on a platform migration, then built the proof of concept for Velocity, the SCALAR design system and React component library. Led the UI Platform team that took it from prototype to the standard for new development. Then owned vision, roadmap and delivery for EVO Touch, ZF's multi-platform app for commercial vehicle drivers, until September 2026. Now product owner on the Driver Experience team.",
     fact: "Platform work is what opened the product-ownership role: Velocity became the default UI answer inside SCALAR, and the product seat followed.",
     people: [],
     logo: "/static/logos/mono/zf-scalar.svg",
@@ -37,8 +36,7 @@ export const COMPANIES = [
     // Shopify green, read straight out of the official Shopping Bag asset
     // (shopify_glyph.svg, `.st0`, in shopify-shopping-bag.zip from
     // shopify.com/brand-assets, retrieved 2026-09-02). The darker side face of
-    // the bag is #5E8E3E. The timeline band and hero shard tint use this
-    // instead of the older #5A31F4 (decision 8).
+    // the bag is #5E8E3E.
     color: "#95BF47",
     from: 2021.25,
     to: 2023.5,
@@ -62,10 +60,10 @@ export const COMPANIES = [
     to: 2021.33,
     approx: false,
     yearsLabel: "Jul 2020 – Apr 2021",
-    role: "Full-stack team lead",
+    role: "Senior Full Stack Developer",
     prev: "Reported to the CTO",
     summary:
-      "Joined to move an AR/VR MVP toward a production-ready product. Microservices on AWS, heavy 3D-model processing through Blender pipelines, in-app voice communication, and integrations with third-party 3D model libraries. Frontend, backend and architecture in the same week.",
+      "Joined to move an AR/VR MVP toward a production-ready product. Microservices on AWS, heavy 3D-model processing in background jobs, in-app voice communication, and integrations with third-party 3D model libraries. Frontend, backend and architecture in the same week.",
     fact: "Technically the densest domain I have worked in: browser-delivered 3D has no forgiving path between a 200 MB asset and a usable scene.",
     people: ["josip"],
     logo: "/static/logos/mono/hegias.svg",
@@ -127,62 +125,3 @@ export const COMPANIES = [
     mark: "N",
   },
 ] satisfies Company[]
-
-/**
- * The six employer marks etched into the hero shards. Execom gets its own shard
- * but points at the WolkAbout band, because that is the one timeline row it
- * belongs to. Every `logo` is a real monochrome mark under
- * `public/static/logos/mono/` — see the sourcing notes in
- * `public/static/logos/mono/SOURCES.md`. `mark` stays as the text fallback the
- * rasteriser paints when an SVG is missing or fails to decode.
- */
-export const HERO_LOGOS = [
-  {
-    id: "zf-scalar",
-    label: "ZF SCALAR",
-    bandId: "zf-scalar",
-    logo: "/static/logos/mono/zf-scalar.svg",
-    mark: "ZF",
-  },
-  {
-    id: "shopify",
-    label: "Shopify",
-    bandId: "shopify",
-    logo: "/static/logos/mono/shopify.svg",
-    mark: "S",
-  },
-  {
-    id: "hegias",
-    label: "HEGIAS",
-    bandId: "hegias",
-    logo: "/static/logos/mono/hegias.svg",
-    mark: "H",
-  },
-  {
-    id: "wolkabout",
-    label: "WolkAbout",
-    bandId: "wolkabout",
-    logo: "/static/logos/mono/wolkabout.svg",
-    mark: "W",
-  },
-  {
-    id: "execom",
-    label: "Execom",
-    bandId: "wolkabout",
-    logo: "/static/logos/mono/execom.svg",
-    mark: "E",
-  },
-  {
-    id: "nemestic",
-    label: "Nemestic",
-    bandId: "nemestic",
-    logo: "/static/logos/mono/nemestic.svg",
-    mark: "N",
-  },
-] satisfies {
-  id: HeroLogoId
-  label: string
-  bandId: CompanyId
-  logo?: string
-  mark: string
-}[]

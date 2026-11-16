@@ -1,0 +1,1105 @@
+/* ---------------------------------------------------------------------------
+   Ask: the button in the top block and its panel / bottom sheet.
+   Ported from the `.ask-*` rules in docs/v4-ideation/board/project/Landing.dc.html
+   and Landing-Mobile.dc.html. Imported by `app/components/ask/AskButton.tsx`.
+   The board's `.ask-tone` palette maps onto the site tokens here.
+   --------------------------------------------------------------------------- */
+
+.ask-btn,
+.ask-dialog {
+  --ask-muted: var(--color-muted);
+  --ask-line: var(--color-rule);
+  --ask-line2: var(--color-underline);
+  --ask-soft: var(--color-wash);
+  --ask-panel: var(--color-surface);
+  --ask-fill: var(--color-night);
+  --ask-pcell: var(--color-wash-strong);
+  --ask-cell: var(--color-ink);
+  --ask-shadow:
+    0 1px 2px rgb(17 17 17 / 0.05), 0 18px 44px -14px rgb(17 17 17 / 0.18);
+  /* The button's box (the top block's slot in site.css matches it). */
+  --ask-btn-w: 96px;
+  --ask-btn-h: 48px;
+
+  /* Phones: compact, still a 44px target. */
+  @media (max-width: 720px) {
+    --ask-btn-w: 88px;
+    --ask-btn-h: 44px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The Ask button: the Button primitive (`app/styles/button.css`) with
+   `effect="cells"`. Its shape (edge, corner, height, type) comes from there;
+   what is Ask's own is its width and the cell fill.
+   --------------------------------------------------------------------------- */
+
+.ask-btn {
+  --btn-h: var(--ask-btn-h);
+  width: var(--ask-btn-w);
+  transition: border-color 60ms linear;
+}
+
+/* 16 x 8 cells of 6px on the button's border box (the layer sits under the
+   1px border). */
+.ask-btn__cells {
+  position: absolute;
+  inset: -1px;
+  display: grid;
+  grid-template-columns: repeat(16, 6px);
+  grid-auto-rows: 6px;
+  pointer-events: none;
+
+  /* Phones: the 88 x 44 button shows the middle of the 96 x 48 grid, so the
+     dither stays one cell in from the right border. */
+  @media (max-width: 720px) {
+    inset: -3px auto auto -9px;
+  }
+}
+
+.ask-bc {
+  opacity: var(--o, 0);
+  transition-property: opacity;
+  transition-timing-function: steps(4, end);
+  transition-delay: var(--d, 0ms);
+  transition-duration: var(--t, 150ms);
+  background: var(--ask-fill);
+}
+
+/* Filled: on hover (real hover only), keyboard focus, and while open. */
+.ask-btn[data-on],
+.ask-btn:focus-visible {
+  border-color: var(--ask-fill);
+
+  & .ask-bc {
+    opacity: 1;
+  }
+}
+
+@media (hover: hover) {
+  .ask-btn:hover {
+    border-color: var(--ask-fill);
+
+    & .ask-bc {
+      opacity: 1;
+    }
+  }
+}
+
+/* The send button beside the field: the shared fill (no cells: only Ask
+   has them), sized to the 44px field. */
+.ask-send {
+  --btn-h: 44px;
+}
+
+/* The label inverts over the fill. */
+.ask-lbl {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #ebebe9; /* difference against paper reads as ink, against the fill as paper */
+  mix-blend-mode: difference;
+  pointer-events: none;
+  font-size: var(--fs-15);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition: opacity 150ms ease;
+
+  /* AskFace.tsx: the label's words, as generated content. */
+  &[data-text]::before {
+    content: attr(data-text);
+  }
+}
+
+.ask-lbl--close {
+  opacity: 0;
+}
+
+/* Forced colours drop the cell fill, and `difference` against the system
+   backplate turned the label into a black slab with an invisible arrow. */
+@media (forced-colors: active) {
+  .ask-lbl {
+    mix-blend-mode: normal;
+    color: ButtonText;
+  }
+}
+
+.ask-btn[data-on] {
+  & .ask-lbl--ask {
+    opacity: 0;
+  }
+
+  & .ask-lbl--close {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion: a plain fill, all at once. */
+@media (prefers-reduced-motion: reduce) {
+  .ask-bc {
+    transition: opacity 150ms linear 0ms;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The dialog: `panel` (desktop) and `sheet` (phones)
+   --------------------------------------------------------------------------- */
+
+.ask-dialog {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  overflow: visible;
+  max-width: none;
+  max-height: none;
+  font-family: var(--font-sans);
+  font-size: var(--fs-16);
+  line-height: normal;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  transition-property: display, overlay;
+  transition-duration: 200ms;
+  transition-behavior: allow-discrete;
+
+  & a {
+    color: var(--color-ink);
+  }
+
+  & button,
+  & input {
+    font-family: inherit;
+  }
+
+  & :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  &:modal {
+    overscroll-behavior: contain;
+  }
+}
+
+/* The frosted glass over the page (board: `rgba(252,252,250,.55)`,
+   `blur(14px) saturate(1.1)`). */
+.ask-dialog::backdrop {
+  background: color-mix(in srgb, var(--color-paper) 55%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  backdrop-filter: blur(14px) saturate(1.1);
+  overflow: hidden;
+  overscroll-behavior: contain;
+  opacity: 0;
+  transition-property: opacity, display, overlay;
+  transition-duration: 160ms;
+  transition-timing-function: ease;
+  transition-behavior: allow-discrete;
+}
+
+.ask-dialog[open]:is([data-phase="in"], [data-phase="open"])::backdrop {
+  opacity: 1;
+  transition-duration: 200ms;
+}
+
+@starting-style {
+  .ask-dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .ask-dialog::backdrop {
+    background: color-mix(in srgb, var(--color-paper) 88%, transparent);
+  }
+}
+
+/* Desktop: laid over the top block (top, left and width are set from its
+   box when the dialog opens), so it scrolls with the page. */
+.ask-dialog[data-variant="panel"] {
+  position: absolute;
+  inset: auto;
+}
+
+.ask-echo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  column-gap: 24px;
+
+  & > .ask-btn {
+    align-self: start; /* as in the top block (site.css) */
+    z-index: 2;
+  }
+}
+
+.ask-echo__id {
+  display: flex;
+  min-width: 0;
+  pointer-events: none;
+
+  & > * {
+    flex: 1;
+  }
+}
+
+.ask-dialog[data-variant="panel"] .ask-panel {
+  position: relative;
+  margin-top: 12px;
+  /* The text column's width on every page, right-aligned under the
+     button. */
+  width: min(var(--w-column), 100%);
+  margin-left: auto;
+}
+
+/* The page is held while the panel is open (`lockScroll`): a panel taller
+   than the room under it scrolls inside instead (`--ask-room`, AskDialog). */
+.ask-dialog[data-variant="panel"] .ask-scroll {
+  max-height: var(--ask-room, none);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ---------------------------------------------------------------------------
+   Phones: the side sheet (owner, 16 Nov 2026). The full height of what is
+   visible of the screen (`--ask-vvh`/`--ask-vvt` follow the visual viewport,
+   so the on-screen keyboard never covers the field), the full width, in
+   from the right edge, the side the button is on. Its head row is the top
+   block's: the title where the name is, the twin of the Ask button where
+   the button is (`--ask-top`, `--ask-left`, measured on open). Transform
+   only; the content rides on the sheet. The field sits at the sheet's foot,
+   under the thumb.
+   --------------------------------------------------------------------------- */
+
+.ask-dialog[data-variant="sheet"] {
+  position: fixed;
+  inset: var(--ask-vvt, 0px) 0 auto 0;
+  width: 100%;
+  height: var(--ask-vvh, 100dvh);
+  overflow: hidden;
+}
+
+/* A dim veil, not the frosted glass: the sheet covers the page, and a blur
+   of the whole screen under a moving sheet costs phones frames. */
+.ask-dialog[data-variant="sheet"]::backdrop {
+  background: rgb(17 17 17 / 0.32);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.ask-dialog[data-variant="sheet"] .ask-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-paper);
+  box-shadow:
+    -1px 0 0 rgb(0 0 0 / 0.04),
+    -18px 0 56px rgb(0 0 0 / 0.22);
+  translate: 100% 0;
+  will-change: translate;
+}
+
+.ask-dialog[data-variant="sheet"]:is([data-phase="in"], [data-phase="open"])
+  .ask-panel {
+  translate: 0 0;
+  transition: translate var(--duration-moderate) var(--ease-out);
+}
+
+.ask-dialog[data-variant="sheet"][data-phase="out"] .ask-panel {
+  translate: 100% 0;
+  transition: translate 200ms var(--ease-in);
+}
+
+.ask-dialog[data-variant="sheet"] .ask-pcontent {
+  flex: 1;
+  min-height: 0;
+  opacity: 1;
+  filter: none;
+  transition: none;
+  padding-top: var(--ask-top, var(--page-pad-top));
+}
+
+/* The head row: as tall as the button, the title where the name is, room on
+   the right for the twin. */
+.ask-dialog[data-variant="sheet"] .ask-head {
+  min-height: var(--ask-btn-h);
+  padding: 0 calc(var(--gutter) + var(--ask-btn-w) + 16px) 0 var(--gutter);
+  font-size: var(--fs-17);
+}
+
+.ask-dialog[data-variant="sheet"] .ask-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--gutter) max(16px, env(safe-area-inset-bottom));
+}
+
+/* The field and the foot go to the bottom of the sheet while the exchange
+   is short, and follow it once it is long. */
+.ask-dialog[data-variant="sheet"] .ask-form {
+  margin-top: auto;
+}
+
+/* The twin of the Ask button: fixed in the dialog, over the button, above
+   the sheet. Its fill runs at twice the button's pace, about as long as the
+   sheet's slide. */
+.ask-twin {
+  position: absolute;
+  top: var(--ask-top, var(--page-pad-top));
+  left: var(--ask-left, auto);
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ask-twin .ask-bc {
+    transition-delay: calc(var(--d, 0ms) * 0.5);
+  }
+
+  /* Out: emptied before the sheet is gone, so the button it leaves behind
+     is the same picture. */
+  [data-phase="out"] > .ask-twin .ask-bc {
+    transition-delay: calc(var(--d, 0ms) * 0.25);
+    transition-duration: 90ms;
+  }
+}
+
+/* The veil follows the sheet in and out; under reduced motion the sheet
+   fades instead of sliding. */
+@media (prefers-reduced-motion: reduce) {
+  .ask-dialog[data-variant="sheet"] .ask-panel {
+    translate: none;
+    opacity: 0;
+    will-change: auto;
+  }
+
+  .ask-dialog[data-variant="sheet"]:is([data-phase="in"], [data-phase="open"])
+    .ask-panel {
+    translate: none;
+    opacity: 1;
+    transition: opacity var(--duration-fast) ease;
+  }
+
+  .ask-dialog[data-variant="sheet"][data-phase="out"] .ask-panel {
+    translate: none;
+    opacity: 0;
+    transition: opacity var(--duration-fast) ease;
+  }
+}
+
+/* --- the wipe cells, the surface, the content ----------------------------- */
+
+.ask-pcells {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: grid;
+  grid-auto-rows: 20px;
+  border-radius: var(--radius-panel);
+  pointer-events: none;
+}
+
+.ask-dialog[data-variant="panel"] .ask-pcells {
+  grid-template-columns: repeat(27, 20px);
+  align-content: start;
+}
+
+.ask-pc {
+  background: var(--ask-pcell);
+  opacity: 0;
+}
+
+[data-phase="in"] .ask-pc {
+  opacity: 1;
+  transition: opacity 90ms steps(3, end) var(--do);
+}
+
+[data-phase="outa"] .ask-pc {
+  opacity: 1;
+  transition: none;
+}
+
+[data-phase="out"] .ask-pc {
+  opacity: 0;
+  transition: opacity 90ms steps(3, end) var(--dc);
+}
+
+.ask-psurf {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ask-dialog[data-variant="panel"] .ask-psurf {
+  border: 1px solid var(--ask-line);
+  border-radius: var(--radius-panel);
+  background: var(--ask-panel);
+  box-shadow: var(--ask-shadow);
+}
+
+[data-phase="in"] .ask-psurf {
+  opacity: 1;
+  transition: opacity 110ms ease-out 170ms;
+}
+
+:is([data-phase="open"], [data-phase="outa"]) .ask-psurf {
+  opacity: 1;
+}
+
+[data-phase="out"] .ask-psurf {
+  opacity: 0;
+  transition: opacity 120ms ease-in;
+}
+
+.ask-pcontent {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  filter: blur(4px);
+}
+
+[data-phase="in"] .ask-pcontent {
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    opacity 220ms var(--ease-standard) 180ms,
+    filter 220ms var(--ease-standard) 180ms;
+}
+
+[data-phase="open"] .ask-pcontent {
+  opacity: 1;
+  filter: none;
+}
+
+:is([data-phase="outa"], [data-phase="out"]) .ask-pcontent {
+  opacity: 0;
+  filter: blur(4px);
+  transition:
+    opacity 120ms ease-in,
+    filter 120ms ease-in;
+}
+
+.ask-scroll {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 20px 14px;
+}
+
+/* Buttons on the panel's white surface take it as their ground, so the
+   fill's blend reads the same as on paper. */
+.ask-dialog[data-variant="panel"] .ask-pcontent .btn {
+  --btn-bg: var(--ask-panel);
+}
+
+/* --- the copy -------------------------------------------------------------- */
+
+.ask-head {
+  flex: none;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.ask-title {
+  margin: 0;
+  font-size: var(--fs-16);
+  line-height: normal;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  text-wrap: initial;
+}
+
+.ask-note {
+  flex: none;
+  margin: 2px 0 0;
+  font-size: var(--fs-13);
+  line-height: 1.45;
+  color: var(--ask-muted);
+}
+
+/* Height 0 to auto. */
+.ask-xp {
+  flex: none;
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows 300ms var(--ease-standard),
+    opacity 180ms ease,
+    visibility 0s linear 300ms;
+
+  &[data-open] {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      grid-template-rows 300ms var(--ease-standard),
+      opacity 220ms ease 60ms,
+      visibility 0s;
+  }
+}
+
+.ask-xpi {
+  min-height: 0;
+  overflow: clip;
+  overflow-clip-margin: 6px;
+}
+
+.ask-rise {
+  padding-top: 8px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 220ms var(--ease-standard),
+    transform 220ms var(--ease-standard);
+}
+
+.ask-xp[data-open] > .ask-xpi > .ask-rise {
+  opacity: 1;
+  transform: none;
+}
+
+.ask-exchange {
+  padding-top: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes ask-qin {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ask-q {
+  margin: 0;
+  align-self: flex-end;
+  max-width: min(380px, 100%);
+  padding: 8px 12px;
+  background: var(--ask-soft);
+  border-radius: var(--radius-control);
+  font-size: var(--fs-14);
+  line-height: 1.45;
+  text-align: right;
+  overflow-wrap: anywhere;
+  animation: ask-qin 240ms var(--ease-standard) both;
+}
+
+.ask-dialog[data-variant="sheet"] .ask-q {
+  max-width: min(300px, 100%);
+}
+
+.ask-reply {
+  padding-top: 14px;
+  display: grid;
+
+  & > * {
+    grid-area: 1 / 1;
+  }
+}
+
+/* "Thinking": the dithering cells and the three verbs. */
+.ask-trow {
+  height: 23px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+
+  &[data-on] {
+    opacity: 1;
+  }
+
+  &:not([data-on]) .ask-tc {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes ask-dith {
+  0% {
+    opacity: 0.08;
+  }
+  20% {
+    opacity: 1;
+  }
+  52% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 0.08;
+  }
+  100% {
+    opacity: 0.08;
+  }
+}
+
+.ask-tcells {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(5, 5px);
+  grid-auto-rows: 5px;
+  width: 25px;
+  height: 15px;
+}
+
+.ask-tc {
+  background: var(--ask-cell);
+  opacity: 0.08;
+  animation: ask-dith 1.2s steps(3, end) infinite both;
+}
+
+.ask-verbs {
+  display: grid;
+  font-size: var(--fs-14);
+  line-height: calc(23px * var(--type-scale));
+  color: var(--ask-muted);
+}
+
+.ask-vb {
+  grid-area: 1 / 1;
+  display: block;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  filter: blur(3px);
+  transition:
+    opacity 200ms var(--ease-standard),
+    transform 200ms var(--ease-standard),
+    filter 200ms var(--ease-standard);
+
+  &[data-state="on"] {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+
+  &[data-state="gone"] {
+    opacity: 0;
+    transform: translateY(-4px);
+    filter: blur(3px);
+  }
+}
+
+.ask-words {
+  margin: 0;
+  font-size: var(--fs-15);
+  line-height: calc(23px * var(--type-scale));
+}
+
+.ask-w {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(3px);
+  transition:
+    opacity 120ms ease-out,
+    filter 120ms ease-out;
+
+  &[data-on] {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+/* The Turnstile check's status line, while it runs (answer.ts). */
+.ask-check {
+  margin: 6px 0 0;
+  font-size: var(--fs-13);
+  line-height: calc(19px * var(--type-scale));
+  color: var(--ask-muted);
+}
+
+/* "The answer was cut short": after the words, before the source line. */
+.ask-notice {
+  margin: 0 0 6px;
+  font-size: var(--fs-13);
+  line-height: calc(19px * var(--type-scale));
+  color: var(--ask-muted);
+}
+
+/*
+ * Where the Turnstile widget renders. In interaction-only mode it stays
+ * empty for most visitors; it takes room only when it asks for a tick.
+ */
+.ask-challenge:empty {
+  display: none;
+}
+.ask-challenge[data-on] {
+  padding-top: 12px;
+}
+
+.ask-src {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: calc(16px * var(--type-scale));
+  letter-spacing: 0.06em;
+  color: var(--ask-muted);
+}
+
+.ask-dialog .ask-src__link {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--ask-line2);
+
+  &:hover {
+    color: var(--color-ink);
+    text-decoration-color: currentColor;
+  }
+}
+
+.ask-cardwrap {
+  padding-top: 12px;
+}
+
+/* --- the answer cards ------------------------------------------------------ */
+
+.ask-dialog .ask-acard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--ask-line);
+  border-radius: var(--radius-control);
+  background: var(--ask-soft);
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: border-color 60ms linear;
+
+  &:hover {
+    border-color: var(--color-ink);
+  }
+}
+
+.ask-dialog .ask-acard--product {
+  align-items: stretch;
+  padding: 10px;
+}
+
+.ask-acard__shot {
+  flex: none;
+  width: 104px;
+  height: 72px;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 2px;
+}
+
+.ask-acard__photo {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.ask-acard__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.ask-acard__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ask-acard__tile {
+  display: inline-flex;
+  font-size: var(--fs-14);
+  line-height: 1;
+
+  & > [data-tile] {
+    margin-right: 0;
+    vertical-align: 0;
+  }
+}
+
+.ask-acard__bigtile {
+  flex: none;
+  display: inline-flex;
+  font-size: 48px;
+  line-height: 1;
+
+  & > [data-tile] {
+    margin-right: 0;
+    vertical-align: 0;
+  }
+}
+
+.ask-acard__stack {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ask-acard__title {
+  font-size: var(--fs-14);
+  font-weight: 500;
+}
+
+.ask-acard__text {
+  font-size: var(--fs-13);
+  line-height: 1.4;
+  color: var(--ask-muted);
+}
+
+.ask-acard__status {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: 0.08em;
+  color: var(--ask-muted);
+}
+
+.ask-acard__dot {
+  width: 5px;
+  height: 5px;
+  background: var(--color-ink);
+}
+
+.ask-acard__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-13);
+  font-weight: 500;
+}
+
+.ask-acard__icon {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 30%;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.1);
+
+  &[data-icon="list"] {
+    background: var(--ask-line);
+    color: var(--color-ink);
+  }
+}
+
+.ask-card__go {
+  flex: none;
+}
+
+.ask-bio {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--ask-line);
+  border-radius: var(--radius-control);
+  background: var(--ask-soft);
+}
+
+.ask-bio__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: 0.08em;
+  color: var(--ask-muted);
+}
+
+.ask-bio__text {
+  margin: 0;
+  font-size: var(--fs-14);
+  line-height: 1.55;
+}
+
+/* "Copy" under the bio (a Button, compact). */
+.ask-ghost {
+  align-self: flex-start;
+}
+
+.ask-bio__after {
+  padding-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 12px;
+}
+
+.ask-dialog .ask-bio__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  font-size: var(--fs-13);
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* --- the chips, the field, the foot ---------------------------------------- */
+
+.ask-chips {
+  padding-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* The question chips (Buttons, compact), left-aligned, one line each. */
+.ask-chip {
+  min-width: 0;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.ask-chip__t {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ask-form {
+  flex: none;
+  margin: 0;
+  padding-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ask-label {
+  font-size: var(--fs-12);
+  color: var(--ask-muted);
+}
+
+.ask-inputrow {
+  display: flex;
+  gap: 8px;
+}
+
+.ask-qin {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--ask-line2);
+  border-radius: var(--radius-control);
+  background: var(--ask-panel);
+  color: var(--color-ink);
+  font-size: var(--fs-14);
+  transition: border-color 60ms linear;
+
+  &::placeholder {
+    color: var(--ask-muted);
+  }
+
+  &:focus {
+    border-color: var(--color-ink);
+  }
+}
+
+.ask-foot {
+  flex: none;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ask-line);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: 0.06em;
+  color: var(--ask-muted);
+}
+
+.ask-ft {
+  opacity: 0;
+  transition: opacity 200ms ease;
+
+  &[data-on] {
+    opacity: 1;
+  }
+}
+
+/* Phones: one chip per row, 44px targets, 16px input (no zoom on iOS). */
+.ask-dialog[data-variant="sheet"] {
+  & .ask-chips {
+    display: flex;
+    flex-direction: column;
+  }
+
+  & .ask-chip {
+    height: auto;
+    min-height: var(--btn-h);
+    padding-block: 8px;
+    line-height: 1.3;
+    white-space: normal;
+  }
+
+  /* The placeholder whole at 360; never under 16px (no zoom on focus). */
+  & .ask-qin {
+    font-size: max(16px, min(var(--fs-16), 4.8vw));
+  }
+
+  & .ask-bio__link {
+    min-height: 44px;
+  }
+}
+
+/* --- reduced motion -------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-pc {
+    display: none;
+  }
+
+  .ask-pcontent {
+    filter: none !important;
+  }
+
+  .ask-tc {
+    animation: none;
+    opacity: 0.4;
+  }
+
+  .ask-vb,
+  .ask-w,
+  .ask-rise {
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .ask-q {
+    animation: none;
+  }
+}

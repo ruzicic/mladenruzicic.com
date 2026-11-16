@@ -1,0 +1,196 @@
+/* ---------------------------------------------------------------------------
+   Icon: the site's own set (`app/components/primitives/Icon.tsx`).
+   Imported by the primitive, like button.css by Button.
+
+   Drawing: a 16-unit grid, one stroke (`--ico-stroke`, 1.5px at any size,
+   `non-scaling-stroke`), butt caps, mitred joins, nothing filled.
+
+   Motion, one rule ("the head leads"): driven by the control that holds the
+   icon, on real hover and on keyboard focus; 160ms on the standard easing;
+   no bounce, no delay, nothing on page load, nothing under reduced motion
+   (state changes still switch, at once).
+   --------------------------------------------------------------------------- */
+
+@layer components {
+  .ico {
+    --ico-stroke: 1.5px;
+    --ico-t: var(--duration-fast) var(--ease-standard);
+
+    display: inline-block;
+    flex: none;
+    width: 1em;
+    height: 1em;
+    /* The cap centre of the text beside it. */
+    vertical-align: -0.15em;
+    overflow: visible;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--ico-stroke);
+    stroke-linecap: butt;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 4;
+
+    & * {
+      vector-effect: non-scaling-stroke;
+    }
+  }
+
+  /* Moving parts turn and slide in their own frame. */
+  .ico :is(.ico-dir, .ico-x, .ico-v, .ico-play, .ico-pause, .ico-drop) {
+    transform-box: view-box;
+    transform-origin: 8px 8px;
+    transition:
+      translate var(--ico-t),
+      rotate var(--ico-t),
+      scale var(--ico-t),
+      opacity var(--ico-t);
+  }
+
+  /* Arrows: the head moves two units forward, the shaft lengthens to
+     follow from its tail. */
+  .ico-head {
+    transition: translate var(--ico-t);
+  }
+
+  .ico-shaft {
+    transform-box: fill-box;
+    transform-origin: 0% 50%;
+    transition: scale var(--ico-t);
+  }
+
+  /* --- static turns ------------------------------------------------------- */
+
+  .ico[data-icon="close"] .ico-x {
+    rotate: 45deg;
+  }
+
+  .ico[data-icon="minus"] .ico-v {
+    rotate: 90deg;
+  }
+
+  /* --- toggles: the second state ----------------------------------------- */
+
+  .ico[data-icon="plus-close"]:is([data-on], [data-on] *) .ico-x {
+    rotate: 45deg;
+  }
+
+  .ico[data-icon="plus-minus"]:is(
+      [data-on],
+      [aria-expanded="true"] *,
+      details[open] > summary *
+    )
+    .ico-v {
+    rotate: 90deg;
+  }
+
+  .ico[data-icon="arrow-down-up"]:is([data-on], [aria-expanded="true"] *)
+    .ico-dir {
+    rotate: 180deg;
+  }
+
+  .ico[data-icon="play-pause"] {
+    & .ico-pause {
+      opacity: 0;
+      scale: 0.8;
+    }
+
+    &[data-on] .ico-play {
+      opacity: 0;
+      scale: 0.8;
+    }
+
+    &[data-on] .ico-pause {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  .ico[data-icon="copy-check"] {
+    & .ico-copy {
+      transition: opacity var(--ico-t);
+    }
+
+    /* The check is wiped in from its first stroke to its last, the way it
+       is drawn (a dash would not survive the non-scaling stroke). */
+    & .ico-check {
+      clip-path: inset(-2px 100% -2px -2px);
+    }
+
+    &[data-on] .ico-copy {
+      opacity: 0;
+    }
+
+    /* The check draws itself once; it vanishes at once on reset. */
+    &[data-on] .ico-check {
+      clip-path: inset(-2px -2px -2px -2px);
+      transition: clip-path var(--ico-t);
+    }
+  }
+
+  /* --- hover and keyboard focus on the control around the icon ------------ */
+
+  @media (hover: hover) {
+    :is(a, button, summary, [data-ico-host]):hover {
+      & .ico :is(.ico-head) {
+        translate: 2px 0;
+      }
+
+      & .ico .ico-shaft {
+        scale: 1.2162 1;
+      }
+
+      &
+        .ico:is(
+          [data-icon="close"],
+          [data-icon="plus-close"][data-on],
+          [data-on] .ico[data-icon="plus-close"]
+        )
+        .ico-x {
+        rotate: 135deg;
+      }
+
+      & .ico[data-icon="download"] .ico-drop {
+        translate: 0 1.5px;
+      }
+    }
+  }
+
+  /* Keyboard focus, and `data-ico-hold` (the /dev/icons specimen's frozen
+     hover). */
+  :is(a, button, summary, [data-ico-host]):focus-visible,
+  [data-ico-hold] {
+    & .ico .ico-head {
+      translate: 2px 0;
+    }
+
+    & .ico .ico-shaft {
+      scale: 1.2162 1;
+    }
+
+    & .ico[data-icon="close"] .ico-x {
+      rotate: 135deg;
+    }
+
+    & .ico[data-icon="download"] .ico-drop {
+      translate: 0 1.5px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ico,
+    .ico * {
+      transition: none !important;
+    }
+  }
+
+  /* Forced colours: the system's text colour. */
+  @media (forced-colors: active) {
+    .ico {
+      stroke: CanvasText;
+    }
+
+    :is(a, button) .ico {
+      stroke: currentColor;
+    }
+  }
+}

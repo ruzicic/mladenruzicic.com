@@ -1,0 +1,1163 @@
+/* ---------------------------------------------------------------------------
+   `/work/<slug>`: the case study. Imported by
+   `app/components/story/StoryPage.tsx` and `StoryBar.tsx`.
+
+   First the cover (owner, 16 Nov 2026, the board's "A · Plate"): the first
+   screen in the story's plate, the tile, the name, the summary, the meta
+   line, and the numbers at its foot above a thin rule. The bar lies over its
+   top ("N4": "← All work" and Ask), and stays at the top on the paper once
+   the name has gone under it. The first square comes up over the cover's
+   foot, so the screen reads as a beginning.
+
+   Then the two columns (CaseStudy.dc.html and CaseStudy-Mobile.dc.html, 12
+   Nov 2026). On the wide page (min(1316px, 100% - 48px), centred): a 468px
+   panel pinned under the bar, 96px of air, a column of identical squares up
+   to 752px wide, 40px apart; then the next story across both. Below 1100px
+   one column: the first square, the panel's content, then the other
+   squares. Geist Serif appears only in the name, the numbers and the next
+   story.
+
+   Unlayered on purpose, like the other area files: these rules override the
+   primitives' Tailwind utilities (in @layer utilities) where they differ.
+   --------------------------------------------------------------------------- */
+
+/* The sheet starts at the very top: the cover is the page's first screen,
+   the bar lies over it. The bar's measures, shared with the cover and the
+   pinned panel: the room above its row on the cover (the site header's,
+   `--page-pad-top`, so the row sits where the top block does on every other
+   page), the row (the Ask button's height), the room under it; once it
+   sticks, `--cs-bar-tuck` of the room above slides out of the window, so
+   12px of it stays (6px on a phone). `--cs-peek` is how much of the first
+   square shows at the cover's foot. */
+[data-page-sheet][data-cover] {
+  /* The panel widens with the type (the boards' 400px times the scale), so
+     its lines keep their length; the squares stay 752px, the frame takes
+     the difference. */
+  --cs-panel-w: calc(400px * var(--type-scale));
+  --cs-w: calc(var(--cs-panel-w) + 96px + 752px);
+  --cs-bar-above: var(--page-pad-top);
+  --cs-bar-row: 48px;
+  --cs-bar-below: 12px;
+  --cs-bar-tuck: calc(var(--cs-bar-above) - 12px);
+  --cs-bar-h: calc(
+    var(--cs-bar-above) + var(--cs-bar-row) + var(--cs-bar-below) +
+      env(safe-area-inset-top, 0px)
+  );
+  --cs-bar-stuck: calc(var(--cs-bar-h) - var(--cs-bar-tuck));
+  --cs-peek: 132px;
+
+  padding-top: 0;
+
+  @media (max-width: 1100px) {
+    --cs-peek: 96px;
+  }
+
+  @media (max-width: 720px) {
+    --cs-bar-row: 44px;
+    --cs-bar-below: 6px;
+    --cs-bar-tuck: calc(var(--cs-bar-above) - 6px);
+    --cs-peek: 54px;
+  }
+}
+
+/* The paper's grain on the plate: the site's one grain tile (the strip's
+   print, `landing.css`), soft-light, static. Text sits above it. */
+.cs-cover::before,
+.cs-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("/static/fx/grain.webp") 0 0 / 128px 128px repeat;
+  mix-blend-mode: soft-light;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------------------------
+   The bar (`StoryBar`)
+   ------------------------------------------------------------------------- */
+
+.cs-bar {
+  position: sticky;
+  top: calc(-1 * var(--cs-bar-tuck));
+  z-index: 34;
+  box-sizing: border-box;
+  height: var(--cs-bar-h);
+  /* Over the cover, not above it. */
+  margin-bottom: calc(-1 * var(--cs-bar-h));
+  padding-top: calc(var(--cs-bar-above) + env(safe-area-inset-top, 0px));
+  /* The plate on the cover, so the cover's words pass under it unseen. */
+  background-color: var(--cs-plate);
+  box-shadow: 0 1px 0 transparent;
+
+  &::before {
+    transition: opacity var(--duration-fast) var(--ease-standard);
+  }
+
+  /* Past the name: the paper ground and a hairline under it. */
+  &[data-scrolled] {
+    background-color: var(--color-paper);
+    box-shadow: 0 1px 0 var(--color-rule);
+
+    &::before {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      box-shadow var(--duration-fast) var(--ease-standard);
+  }
+}
+
+/* The row is the site header's (`.site-top`, site.css): the Ask slot, the
+   name's type, its height and its top, centred on Ask, so the bar sits
+   where the header does on every other page. Up to 1100px it takes the
+   header's column too. Wider, where the story has its wide frame, its ends
+   go to the frame's edges (the cover's words and the squares): the arrow's
+   tip on the cover's left edge, Ask's edge on its right (16 Nov 2026), on
+   the cover and once stuck. Coming from another page the two ends then
+   travel sideways to there (`vt-travel`). */
+@media (min-width: 1101px) {
+  .cs-bar .cs-bar-row {
+    width: min(var(--cs-w), calc(100% - 2 * var(--gutter)));
+    margin-left: max(var(--gutter), calc((100% - var(--cs-w)) / 2));
+  }
+}
+/* Phones: the site header's name spans the row with Ask laid over its end
+   (site.css), for the line under it. The bar has no line: its left end
+   keeps to its own column, so a long name ends before Ask. */
+@media (max-width: 720px) {
+  .cs-bar .cs-bar-id {
+    grid-column: 1;
+  }
+}
+
+.cs-back {
+  min-width: 0;
+  border-radius: var(--radius-control);
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: -2px;
+  }
+}
+
+/* Past the cover the arrow turns up: the link now leads to the top. */
+.cs-back-arrow {
+  @media (prefers-reduced-motion: no-preference) {
+    transition: rotate var(--duration-fast) var(--ease-standard);
+  }
+
+  [data-up] > & {
+    rotate: 90deg;
+  }
+}
+
+/* "All work" and the project's tile and name in one place: the label never
+   changes size, only which of the two shows. The name gives way first, to
+   an ellipsis, where the row is narrow. */
+.cs-back-label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  white-space: nowrap;
+
+  & > span {
+    grid-area: 1 / 1;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: opacity var(--duration-fast) var(--ease-standard);
+    }
+  }
+}
+
+/* The tile at 20px (`ProductTile` is 1em of its font size), 8px before the
+   name, on the name's centre. */
+.cs-back-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  opacity: 0;
+}
+
+.cs-back-mark {
+  display: inline-flex;
+  flex: none;
+  font-size: 20px;
+  line-height: 0;
+}
+
+.cs-back-tile {
+  margin-right: 0;
+  vertical-align: top;
+}
+
+.cs-back-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-scrolled] .cs-back-all {
+  opacity: 0;
+}
+
+[data-scrolled] .cs-back-name {
+  opacity: 1;
+}
+
+/* The morph (owner, 16 Nov 2026: "on scroll, instead of just name, morph
+   logo + name in that header"), in step with the scroll, not on a clock:
+   over the last 56px of the cover name's way under the bar, "All work"
+   fades and rises 10px, the tile and the name rise 12px into its place
+   (the tile from 0.8 of its size) and the arrow turns from left to up; it
+   all goes back down as the name comes back out. The name's view timeline
+   (`--cs-name`) is seen by the bar through the sheet (`timeline-scope`),
+   its window inset by the stuck bar, so the morph ends exactly where
+   `StoryBack`'s threshold sets `data-scrolled`, the link's target and its
+   name: when the name's foot reaches the bar's (exit 100%). Linear,
+   because the scroll is the clock. Only with JavaScript (`data-morph`,
+   set by `StoryBack`), so a page without it keeps "All work"; elsewhere,
+   and with motion reduced, the stepped swap above. A transition would
+   outrank the animation as `data-scrolled` flips, so there is none. */
+@keyframes cs-back-out {
+  from {
+    opacity: 1;
+    translate: 0 0;
+  }
+  to {
+    opacity: 0;
+    translate: 0 -10px;
+  }
+}
+
+@keyframes cs-back-in {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes cs-back-grow {
+  from {
+    scale: 0.8;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes cs-back-turn {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 90deg;
+  }
+}
+
+@supports (animation-timeline: view()) and (animation-range: 0% 100%) and
+  (timeline-scope: --a) {
+  [data-page-sheet][data-cover] {
+    timeline-scope: --cs-name;
+  }
+
+  .cs-name {
+    view-timeline: --cs-name block;
+    view-timeline-inset: var(--cs-bar-stuck) 0px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cs-bar[data-morph] {
+      & .cs-back-all,
+      & .cs-back-name,
+      & .cs-back-mark,
+      & .cs-back-arrow {
+        transition: none;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --cs-name;
+        animation-range: exit calc(100% - 56px) exit 100%;
+      }
+
+      & .cs-back-all {
+        animation-name: cs-back-out;
+      }
+
+      & .cs-back-name {
+        animation-name: cs-back-in;
+      }
+
+      & .cs-back-mark {
+        animation-name: cs-back-grow;
+      }
+
+      & .cs-back-arrow {
+        animation-name: cs-back-turn;
+      }
+    }
+  }
+}
+
+/* -------------------------------------------------------------------------
+   The cover (`StoryCover`)
+   ------------------------------------------------------------------------- */
+
+.cs-cover {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  /* The first screen; on a very tall window no more than 1200px, and never
+     cut short: a cover whose words need more grows instead. */
+  min-height: min(100svh, 1200px);
+  /* Under the bar, less the extra room the bar took above its row when it
+     moved to the site header's height (16 Nov 2026), so the words keep
+     their place on the first screen. */
+  padding: calc(var(--cs-bar-h) + clamp(0px, 5svh - 24px, 32px)) 0 56px;
+  background-color: var(--cs-plate);
+  color: var(--color-ink);
+}
+
+.cs-cover-in {
+  container-type: inline-size;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(var(--cs-w), calc(100% - 2 * var(--gutter)));
+  margin-left: max(var(--gutter), calc((100% - var(--cs-w)) / 2));
+}
+
+.cs-cover-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* The product tile at 72px (`ProductTile` is 1em of its font size). */
+.cs-cover-tile {
+  display: inline-flex;
+  flex: none;
+  font-size: 72px;
+  line-height: 0;
+}
+
+.cs-tile {
+  margin-right: 0;
+  vertical-align: top;
+}
+
+/* The name on one line, as large as its room allows: the cover's width over
+   the name's width in em (`--cs-name-em`, from `fit.ts`), and no more than
+   about a quarter of the window's height, so the numbers stay on the first
+   screen. */
+.cs-name {
+  margin: 20px 0 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: min(240px, calc(100cqi / var(--cs-name-em)), 26svh);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  color: var(--color-ink);
+}
+
+.cs-summary {
+  max-width: calc(700px * var(--type-scale));
+  /* 8px tighter than the board's 36px, and the foot's 16px, so the grown
+     words leave the numbers on a 900px-tall first screen. */
+  margin: 28px 0 0;
+  font-size: var(--fs-26);
+  line-height: 1.35;
+  text-wrap: pretty;
+  color: var(--color-ink);
+}
+
+/* Mono lines on the plate are the quieter ink, not the muted grey: they
+   keep 4.5:1 on every plate (tests/a11y.spec.ts). */
+.cs-meta {
+  margin: 18px 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-quiet);
+}
+
+.cs-live-line {
+  margin: 14px 0 0;
+  font-size: var(--fs-16);
+  line-height: calc(24px * var(--type-scale));
+}
+
+.cs-live {
+  display: inline-flex;
+  min-height: 24px;
+  color: var(--color-ink);
+  text-decoration-line: underline;
+  text-decoration-color: var(--color-underline);
+  text-underline-offset: 4px;
+
+  &:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* The numbers, at the foot: the panel's width, above a thin rule. */
+.cs-cover-foot {
+  box-sizing: border-box;
+  width: var(--cs-panel-w);
+  max-width: 100%;
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.cs-numbers {
+  display: grid;
+  grid-template-columns: repeat(var(--cs-n), minmax(0, 1fr));
+  column-gap: 32px;
+  margin: 0;
+}
+
+/* Value over label on screen; label first for a screen reader (dt, dd). */
+.cs-number {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Every figure in a row at one size: the usual one, or smaller when the
+   widest figure (`--cs-num-em`) would not fit its column. */
+.cs-number-value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: min(64px, calc(100cqi / var(--cs-num-em)));
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: var(--color-ink);
+}
+
+.cs-number-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: 1.35;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-quiet);
+
+  & span {
+    display: block;
+  }
+}
+
+.cs-cover-rule {
+  height: 1px;
+  margin-top: 24px;
+  background: color-mix(in srgb, var(--color-ink) 16%, transparent);
+}
+
+.cs-asof {
+  margin-top: 14px;
+}
+
+/* -------------------------------------------------------------------------
+   The columns, on the paper
+   ------------------------------------------------------------------------- */
+
+/* Pulled up over the cover's foot by `--cs-peek`, so the first square
+   starts on the plate. */
+.cs-body {
+  position: relative;
+  box-sizing: border-box;
+  width: min(var(--cs-w), calc(100% - 2 * var(--gutter)));
+  margin-top: calc(-1 * var(--cs-peek));
+  margin-left: max(var(--gutter), calc((100% - var(--cs-w)) / 2));
+}
+
+/* The first square and the others are one column beside the panel. */
+.cs-cols {
+  display: grid;
+  grid-template-columns: var(--cs-panel-w) minmax(0, 752px);
+  grid-template-areas:
+    "panel lead"
+    "panel column";
+  column-gap: 96px;
+  row-gap: 40px;
+  align-items: start;
+}
+
+.cs-lead {
+  grid-area: lead;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+
+/* -------------------------------------------------------------------------
+   The panel
+   ------------------------------------------------------------------------- */
+
+.cs-panel {
+  grid-area: panel;
+  /* It starts under the cover, clear of the numbers beside the first
+     square. Pinned 24px under the bar. A panel taller than the window would
+     keep its foot out of sight until the end of the page, so
+     `StoryProgress` writes its height into --cs-panel-h and `top` goes
+     lower by the difference: the panel then scrolls with the page until its
+     foot is 24px above the bottom of the window, and holds there. It is a
+     grid item of `.cs-cols`, so it never leaves the columns: a short column
+     cannot leave it floating over the next story or the footer. */
+  margin-top: calc(var(--cs-peek) + 64px);
+  position: sticky;
+  top: min(
+    calc(var(--cs-bar-stuck) + 24px),
+    calc(100svh - var(--cs-panel-h, 0px) - 24px)
+  );
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.cs-paras {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  & p {
+    margin: 0;
+    font-size: var(--fs-15);
+    line-height: calc(24px * var(--type-scale));
+    color: var(--color-ink-soft);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   The roles (`StoryRoles`), in place of the paragraphs: a list of native
+   <details> on a 1.5px hairline, an open circle per past role and a small
+   ink square for the current one. The marker sits on the dates line; the
+   hairline runs from each marker to the next.
+   ------------------------------------------------------------------------- */
+
+.cs-roles {
+  --cs-role-x: 5px; /* the hairline's centre */
+  --cs-role-y: 18px; /* the marker's centre: the dates line, 10px + 8px */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cs-role {
+  position: relative;
+
+  /* From this marker to the next one (the next item starts at our foot, so
+     its marker is --cs-role-y below it). */
+  &:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--cs-role-x) - 0.75px);
+    top: var(--cs-role-y);
+    bottom: calc(-1 * var(--cs-role-y));
+    width: 1.5px;
+    background: var(--color-rule-strong);
+    pointer-events: none;
+  }
+}
+
+.cs-role-sum {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 0 10px 24px;
+  list-style: none;
+  cursor: pointer;
+  border-radius: 4px;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  /* The marker: an open circle, over the hairline. */
+  &::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--cs-role-x) - 4.5px);
+    top: calc(var(--cs-role-y) - 4.5px);
+    box-sizing: border-box;
+    width: 9px;
+    height: 9px;
+    border: 1.5px solid var(--color-muted);
+    border-radius: 50%;
+    background: var(--color-paper);
+  }
+
+  [data-current] > details > &::before {
+    left: calc(var(--cs-role-x) - 4px);
+    top: calc(var(--cs-role-y) - 4px);
+    width: 8px;
+    height: 8px;
+    border: 0;
+    border-radius: 0;
+    background: var(--color-ink);
+  }
+
+  &:hover .cs-role-chev {
+    color: var(--color-ink);
+  }
+}
+
+.cs-role-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cs-role-dates {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: calc(16px * var(--type-scale));
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.cs-role-title {
+  font-size: var(--fs-15);
+  font-weight: 500;
+  line-height: calc(20px * var(--type-scale));
+  color: var(--color-ink);
+}
+
+.cs-role-chev {
+  margin-left: auto;
+  color: var(--color-muted);
+}
+
+.cs-role-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 2px 0 14px 24px;
+}
+
+.cs-role-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cs-role-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: calc(14px * var(--type-scale));
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* The panel's paragraph style (`.cs-paras p`). */
+.cs-role-text {
+  margin: 0;
+  font-size: var(--fs-15);
+  line-height: calc(24px * var(--type-scale));
+  color: var(--color-ink-soft);
+}
+
+/* Opening eases the height and the fade, about 150ms, where the browser can
+   size ::details-content to `auto`; elsewhere it simply opens. Closed, the
+   content is `content-visibility: hidden` (the browser's own), so it stays
+   findable; `allow-discrete` keeps it drawn until the close has finished. */
+@supports (interpolate-size: allow-keywords) and selector(::details-content) {
+  @media (prefers-reduced-motion: no-preference) {
+    .cs-roles details {
+      interpolate-size: allow-keywords;
+
+      &::details-content {
+        overflow: clip;
+        contain: layout;
+        block-size: auto;
+        opacity: 1;
+        transition:
+          block-size 150ms var(--ease-standard),
+          opacity 150ms var(--ease-standard),
+          content-visibility 150ms allow-discrete;
+      }
+
+      &:not([open])::details-content {
+        block-size: 0;
+        opacity: 0;
+      }
+    }
+  }
+}
+
+.cs-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: -8px;
+}
+
+/* The links come after the paragraphs or the roles: 24px above them, the
+   step the numbers keep (owner, 13 Nov 2026: "more top spacing"), not the
+   8px of a block that follows a block. */
+.cs-block[data-block="links"] {
+  margin-top: 8px;
+}
+
+.cs-block-h {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: calc(14px * var(--type-scale));
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.cs-links,
+.cs-people {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A link: the favicon and the title inside one inline link, so the branded
+   wash (`.blk`, `app/styles/brand-link.css`) covers both and, on a wrapped
+   title, each line hugs its words. A hanging indent keeps the favicon in a
+   column of its own (16px + 8px): wrapped lines start under the first
+   line's text. The mono place line sits under the title, outside the link. */
+.cs-link {
+  padding-left: 24px;
+  text-indent: -24px;
+  font-size: var(--fs-14);
+  line-height: calc(20px * var(--type-scale));
+}
+
+.cs-link-a {
+  /* Over the primitive's inline-flex row: plain inline text. */
+  display: inline;
+  color: var(--color-ink);
+}
+
+.cs-link-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: -3px;
+  border-radius: 3px;
+}
+
+/* The last word and the arrow, never apart. */
+.cs-link-end {
+  white-space: nowrap;
+}
+
+.cs-link-arrow {
+  margin-left: 0.25em;
+}
+
+.cs-link-place {
+  display: block;
+  margin-top: 2px;
+  text-indent: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: calc(14px * var(--type-scale));
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
+}
+
+.cs-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-14);
+  line-height: calc(20px * var(--type-scale));
+}
+
+.cs-person-img {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-tile);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: calc(14px * var(--type-scale));
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+}
+
+.cs-progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  line-height: calc(16px * var(--type-scale));
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+}
+
+/* -------------------------------------------------------------------------
+   The column of squares
+   ------------------------------------------------------------------------- */
+
+.cs-column {
+  grid-area: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 40px;
+  min-width: 0;
+}
+
+.cs-sq {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+}
+
+.cs-sq-frame {
+  position: relative;
+  /* The radii and widths below are fractions of the square (cqi), so a
+     phone screen keeps its proportions at 752px and at 342px. */
+  container-type: inline-size;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: clip;
+  background: var(--color-tile);
+
+  /* The hairline frame, over the media, under the clip's control. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    pointer-events: none;
+  }
+
+  /* A picture that is not square sits whole on the story's plate. */
+  &:is([data-shape="wide"], [data-shape="phone"]) {
+    background: var(--cs-plate, var(--color-tile));
+  }
+
+  /* A diagram draws its own ground and frame. */
+  &[data-shape="diagram"] {
+    place-items: stretch;
+    background: none;
+    overflow: visible;
+
+    &::after {
+      content: none;
+    }
+
+    & > * {
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+    }
+  }
+}
+
+/* The media box: the whole square, or the picture's own box on the plate.
+   The still and the clip are stacked in one grid cell. */
+.cs-sq-media {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+
+  & > img,
+  & > video {
+    grid-area: 1 / 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  [data-shape="wide"] > &,
+  [data-shape="phone"] > & {
+    height: auto;
+    overflow: clip;
+    box-shadow: 0 0 0 1px rgb(17 17 17 / 0.1);
+  }
+
+  /* 6px at 752 */
+  [data-shape="wide"] > & {
+    border-radius: 0.8cqi;
+  }
+
+  /* A phone: 40% of the square, at most 300px; its corners 28px at 752. */
+  [data-shape="phone"] > & {
+    max-width: 300px;
+    border-radius: 3.72cqi;
+  }
+}
+
+/* A clip sits over its poster still and stays transparent until it has a
+   frame of its own, so the still is what shows first (StoryVideo). */
+.story-video:not([data-ready]) {
+  opacity: 0;
+}
+
+/* The clip's pause / play control: a Button (icon size) in the square's
+   corner, whatever the size of the picture on the plate. */
+.story-video-toggle {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+}
+
+.cs-cap {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  line-height: calc(16px * var(--type-scale));
+  color: var(--color-muted);
+}
+
+/* Whose picture it is, under the caption, a step quieter. */
+.cs-credit {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--text-label);
+  line-height: calc(14px * var(--type-scale));
+  letter-spacing: 0.02em;
+}
+
+/* -------------------------------------------------------------------------
+   The next story
+   ------------------------------------------------------------------------- */
+
+.cs-next {
+  margin-top: 96px;
+  padding-top: 28px;
+  border-top: 1px solid var(--color-rule);
+}
+
+.cs-next-link {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.cs-next-cue {
+  flex: none;
+  width: 72px;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  line-height: calc(16px * var(--type-scale));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.cs-next-tile {
+  display: inline-flex;
+  flex: none;
+  font-size: var(--fs-32);
+  line-height: 0;
+}
+
+.cs-next-name {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-32);
+  line-height: calc(36px * var(--type-scale));
+}
+
+.cs-next-arrow {
+  margin-left: auto;
+}
+
+/* -------------------------------------------------------------------------
+   One column (tablets and phones): the first square, the panel's content,
+   then the other squares
+   ------------------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .cs-cover {
+    padding-bottom: calc(var(--cs-peek) + 32px);
+  }
+
+  .cs-name {
+    font-size: min(200px, calc(100cqi / var(--cs-name-em)), 24svh);
+  }
+
+  .cs-summary {
+    font-size: var(--fs-22);
+  }
+
+  .cs-cover-foot {
+    width: calc(520px * var(--type-scale));
+  }
+
+  .cs-cols {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "lead"
+      "panel"
+      "column";
+    row-gap: 56px;
+  }
+
+  .cs-panel {
+    position: static;
+    max-width: calc(600px * var(--type-scale));
+    margin-top: 0;
+  }
+
+  /* The reading-progress line belongs to the pinned panel. */
+  .cs-progress {
+    display: none;
+  }
+
+  .cs-lead,
+  .cs-column {
+    max-width: 752px;
+  }
+}
+
+@media (max-width: 720px) {
+  .cs-cover {
+    /* The whole first screen of a phone, the browser's bars shown. */
+    min-height: 100svh;
+    padding: calc(var(--cs-bar-h) + clamp(4px, 9svh - 20px, 56px)) 0
+      calc(var(--cs-peek) + 26px);
+  }
+
+  .cs-cover-tile {
+    font-size: 56px;
+  }
+
+  .cs-name {
+    margin-top: 22px;
+    font-size: min(96px, calc(100cqi / var(--cs-name-em)), 12svh);
+  }
+
+  .cs-summary {
+    margin-top: 26px;
+    font-size: var(--fs-19);
+    line-height: 1.4;
+  }
+
+  .cs-meta {
+    margin-top: 14px;
+    font-size: var(--text-label);
+  }
+
+  .cs-live-line {
+    margin-top: 10px;
+  }
+
+  /* A 44px target, the line's place unchanged. */
+  .cs-live {
+    align-items: center;
+    min-height: 44px;
+    margin-block: -10px;
+  }
+
+  .cs-cover-foot {
+    width: 100%;
+    padding-top: 32px;
+  }
+
+  .cs-numbers {
+    column-gap: 24px;
+  }
+
+  .cs-number {
+    gap: 8px;
+  }
+
+  .cs-number-value {
+    font-size: min(50px, calc(100cqi / var(--cs-num-em)));
+  }
+
+  .cs-number-label {
+    line-height: 1.3;
+  }
+
+  .cs-cover-rule {
+    margin-top: 22px;
+  }
+
+  .cs-cols {
+    row-gap: 40px;
+  }
+
+  .cs-column {
+    row-gap: 16px;
+  }
+
+  .cs-paras p,
+  .cs-role-text {
+    font-size: var(--fs-16);
+    line-height: calc(26px * var(--type-scale));
+  }
+
+  .cs-next {
+    margin-top: 72px;
+    padding-top: 24px;
+  }
+
+  .cs-next-link {
+    gap: 12px;
+  }
+
+  .cs-next-cue {
+    width: auto;
+  }
+
+  .cs-next-tile {
+    margin-left: 4px;
+    font-size: min(var(--fs-28), 7.5vw);
+  }
+
+  .cs-next-name {
+    /* The longest name ("FontAlternatives") on one line at 360. */
+    font-size: min(var(--fs-28), 7.5vw);
+    line-height: calc(32px * var(--type-scale));
+  }
+}

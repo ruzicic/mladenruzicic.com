@@ -1,101 +1,68 @@
-import type {
-  AnchorHTMLAttributes,
-  ButtonHTMLAttributes,
-  ReactNode,
-} from "react"
-import Link from "next/link"
-import { cva, type VariantProps } from "class-variance-authority"
+import type { ComponentPropsWithRef, ElementType, ReactNode } from "react"
+// clsx, not `cn`: this renders inside client islands, and `cn` pulls
+// tailwind-merge (about 8 KB gzipped) into their chunks.
+import { clsx } from "clsx"
 
-import { cn } from "@/lib/utils"
+import "../../styles/button.css"
 
-const buttonVariants = cva(
-  [
-    "inline-flex items-center justify-center gap-2 whitespace-nowrap",
-    "font-mono uppercase tracking-[0.08em]",
-    "rounded-pill border border-transparent",
-    "transition-colors duration-fast ease-pill",
-    "disabled:pointer-events-none disabled:opacity-50",
-  ].join(" "),
-  {
-    variants: {
-      variant: {
-        primary: "bg-accent text-bg hover:bg-fg hover:text-bg",
-        outline: "border-line text-fg hover:border-accent hover:text-accent",
-        ghost: "text-muted hover:text-accent",
-      },
-      size: {
-        sm: "h-8 px-3 text-[11px]",
-        md: "h-10 px-5 text-[12px]",
-        lg: "h-12 px-7 text-[13px]",
-        icon: "h-10 w-10 p-0",
-      },
-    },
-    defaultVariants: { variant: "primary", size: "md" },
-  }
-)
+export type ButtonSize = "regular" | "compact" | "icon"
+export type ButtonTone = "light" | "dark"
+export type ButtonEffect = "sweep" | "cells"
 
-export type ButtonVariants = VariantProps<typeof buttonVariants>
-
-type CommonProps = ButtonVariants & {
-  children?: ReactNode
+interface ButtonOwnProps<C extends ElementType> {
+  /**
+   * The element: `button` (default, `type="button"` unless given), `"a"`, or
+   * a link component (`TransitionLink`). A control that navigates stays a
+   * link.
+   */
+  as?: C
+  /** `regular`: the Ask size (48px). `compact`: 36px. `icon`: a 36px square. Phones: 44px. */
+  size?: ButtonSize
+  /** `dark` on the night footer. Same shape. */
+  tone?: ButtonTone
+  /**
+   * `sweep` (default): the fill rising from the bottom edge with the label
+   * inverting. `cells`: the Ask button's own fill, drawn by its children
+   * (`AskFace`, `app/styles/ask.css`); nothing else uses it.
+   */
+  effect?: ButtonEffect
   className?: string
+  children?: ReactNode
 }
 
-export type ButtonProps = CommonProps &
-  (
-    | ({ href: string } & Omit<
-        AnchorHTMLAttributes<HTMLAnchorElement>,
-        "href" | "className" | "children"
-      >)
-    | ({ href?: undefined } & Omit<
-        ButtonHTMLAttributes<HTMLButtonElement>,
-        "className" | "children"
-      >)
-  )
+export type ButtonProps<C extends ElementType = "button"> = ButtonOwnProps<C> &
+  Omit<ComponentPropsWithRef<C>, keyof ButtonOwnProps<C>>
 
 /**
- * Renders `next/link` when `href` is present, otherwise a real `<button>`.
- * External `href`s (anything not starting with `/` or `#`) get
- * `target="_blank" rel="noreferrer noopener"` unless overridden.
+ * Every button on the site, in the Ask button's shape (`app/styles/button.css`
+ * has the shape, the effect and the reasoning). No client code: it renders in
+ * Server and Client Components alike.
  *
- * Never throws — a `<button>` with no accessible name is a lint/axe problem,
- * not a runtime crash.
+ * ```tsx
+ * <Button onClick={copy}>Copy</Button>
+ * <Button size="icon" aria-label="Pause"><PauseIcon /></Button>
+ * <Button as="a" href="/cv.pdf" download="">Download CV</Button>
+ * <Button tone="dark" type="submit" disabled={pending} aria-busy={pending}>Subscribe</Button>
+ * ```
  */
-export function Button({
-  children,
-  variant,
-  size,
+export function Button<C extends ElementType = "button">({
+  as,
+  size = "regular",
+  tone = "light",
+  effect = "sweep",
   className,
-  ...props
-}: ButtonProps) {
-  const classes = cn(buttonVariants({ variant, size }), className)
-
-  if (typeof props.href === "string") {
-    const { href, ...rest } = props as {
-      href: string
-    } & AnchorHTMLAttributes<HTMLAnchorElement>
-    const external = /^https?:\/\//.test(href)
-    return (
-      <Link
-        href={href}
-        className={classes}
-        {...(external
-          ? { target: "_blank", rel: "noreferrer noopener" }
-          : null)}
-        {...rest}
-      >
-        {children}
-      </Link>
-    )
-  }
-
-  const { type = "button", ...rest } =
-    props as ButtonHTMLAttributes<HTMLButtonElement>
+  ...rest
+}: ButtonProps<C>) {
+  const Tag: ElementType = as ?? "button"
+  const props = rest as Record<string, unknown>
   return (
-    <button type={type} className={classes} {...rest}>
-      {children}
-    </button>
+    <Tag
+      type={Tag === "button" && props.type === undefined ? "button" : undefined}
+      {...props}
+      className={clsx("btn", className)}
+      data-size={size === "regular" ? undefined : size}
+      data-tone={tone === "light" ? undefined : tone}
+      data-effect={effect === "sweep" ? undefined : effect}
+    />
   )
 }
-
-export { buttonVariants }

@@ -1,8 +1,8 @@
-import { llmsTxt, TXT_CONTENT_TYPE } from "@/lib/content/markdown"
+import { llmsTxt, TXT_CONTENT_TYPE } from "@/lib/seo/markdown"
 
 /**
- * `/llms.txt` — the index, generated from `content/` (llmstxt.org).
- * Served as `text/plain` so it opens in a browser tab, per the convention.
+ * `/llms.txt`: the index (llmstxt.org), generated from `content/`. Served as
+ * `text/plain` so it opens in a browser tab, per the convention.
  */
 export function GET() {
   return new Response(llmsTxt(), {

@@ -1,16 +1,21 @@
 import { z } from "zod"
 
+import { hex } from "./schema-base"
+
 /**
- * Content schemas — the exact shape agreed in docs/v3-content-contract.md.
- * Everything under `content/` validates against these; a failure throws with
- * the offending file path so the build fails on bad content.
+ * Content schemas. Everything under `content/` validates against these; a
+ * failure throws with the offending file path so the build fails on bad
+ * content. The v4 product registry and page schemas live in
+ * `./schema-products` and `./schema-pages` and are re-exported from here, so
+ * `@/lib/content/schema` stays the one import path (and stays filesystem-free,
+ * safe for client components).
  */
 
 /* -------------------------------------------------------------------------- */
 /* Companies                                                                  */
 /* -------------------------------------------------------------------------- */
 
-export const COMPANY_IDS = [
+const COMPANY_IDS = [
   "zf-scalar",
   "shopify",
   "hegias",
@@ -20,62 +25,33 @@ export const COMPANY_IDS = [
 ] as const
 export type CompanyId = (typeof COMPANY_IDS)[number]
 
-export const HERO_LOGO_IDS = [
-  "zf-scalar",
-  "shopify",
-  "hegias",
-  "wolkabout",
-  "execom",
-  "nemestic",
-] as const
-export type HeroLogoId = (typeof HERO_LOGO_IDS)[number]
-
 export type PersonId = string
 
 /**
- * Every `content/work/*.mdx` slug, hand-maintained because `proxy.ts` is the
- * one consumer that cannot read the filesystem — it runs in the proxy, and the
- * loaders in `lib/content/index.ts` are server-only.
- *
- * KEEP IN SYNC, and mind that the two directions fail differently. ADDING an
- * `.mdx` without adding it here fails loudly: the zod `slug` enum rejects the
- * file and `next build` stops with the path. REMOVING an `.mdx` and leaving
- * the entry here fails silently — the proxy waves the slug through, the case
- * study route serves its prerendered fallback shell, and the visitor gets a
- * 200 for a page that no longer exists. Delete the entry in the same commit as
- * the file.
+ * Every `content/work/*.mdx` slug: the `slug` enum of the front matter, so a
+ * new `.mdx` fails the build until it is added here. Only the nine
+ * `STORY_SLUGS` have pages; `proxy.ts` answers every other `/work/<slug>`
+ * with a 404 (the old ones redirect, `next.config.ts`).
  */
-export const WORK_SLUGS = [
+const WORK_SLUGS = [
   "zf-scalar",
   "shopify",
   "hegias",
   "wolkabout",
   "tenderlift",
-  "evo-touch",
   "studenti-rs",
   "fontalternatives",
-  "amada",
-  "fontswap",
-  "avataurus",
-  "montepop",
-  "boxium",
   "panciona",
   "hi-fam",
   "flexmatch",
   "nunium",
-  "internxt",
-  "trello-boosted-boards",
-  "mladenruzicic-com",
+  "zarez",
 ] as const
 export type WorkSlug = (typeof WORK_SLUGS)[number]
 
-const hex = z
-  .string()
-  .regex(/^#[0-9a-fA-F]{6}$/, "expected a 6-digit hex colour")
-
-export const companyIdSchema = z.enum(COMPANY_IDS)
-export const workSlugSchema = z.enum(WORK_SLUGS)
-export const personIdSchema = z
+const companyIdSchema = z.enum(COMPANY_IDS)
+const workSlugSchema = z.enum(WORK_SLUGS)
+const personIdSchema = z
   .string()
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "expected a kebab-case id")
 
@@ -100,15 +76,6 @@ export const companySchema = z.object({
 })
 export type Company = z.infer<typeof companySchema>
 
-export const heroLogoSchema = z.object({
-  id: z.enum(HERO_LOGO_IDS),
-  label: z.string().min(1),
-  bandId: companyIdSchema,
-  logo: z.string().startsWith("/static/logos/").optional(),
-  mark: z.string().min(1).max(2),
-})
-export type HeroLogo = z.infer<typeof heroLogoSchema>
-
 /* -------------------------------------------------------------------------- */
 /* People                                                                     */
 /* -------------------------------------------------------------------------- */
@@ -118,9 +85,8 @@ export const personSchema = z.object({
   name: z.string().min(1),
   where: z.string().min(1),
   /**
-   * 320x320 WebP under `public/static/people/`. Optional: `PersonPopover`
-   * falls back to the initials disc, which is what every entry rendered
-   * before photos existed.
+   * 320x320 WebP under `public/static/people/`. Optional: "Worked alongside"
+   * in a story's panel (`StoryPanel`) falls back to an initials disc.
    */
   avatar: z.string().startsWith("/static/people/").optional(),
   /** Full URL or omitted. Never a placeholder. */
@@ -143,6 +109,10 @@ export const testimonialSchema = z.object({
   sourceUrl: z.url().optional(),
   permission: z.literal("public"),
   featured: z.boolean().optional(),
+  /** How long the mentorship ran, as the source shows it ("2 years"). */
+  duration: z.string().min(1).optional(),
+  /** The year of the review. */
+  year: z.number().int().min(2000).max(2100).optional(),
 })
 export type Testimonial = z.infer<typeof testimonialSchema>
 
@@ -150,37 +120,206 @@ export type Testimonial = z.infer<typeof testimonialSchema>
 /* Work                                                                       */
 /* -------------------------------------------------------------------------- */
 
-export const WORK_KINDS = ["company", "product", "experiment"] as const
-export type WorkKind = (typeof WORK_KINDS)[number]
-
-export const WORK_STATUSES = [
-  "current",
-  "active",
-  "maintained",
-  "paused",
-  "completed",
-  "archived",
-] as const
-export type WorkStatus = (typeof WORK_STATUSES)[number]
-
-export const CONFIDENCES = [
-  "verified",
-  "needs-verification",
-  "private",
-] as const
+const CONFIDENCES = ["verified", "needs-verification", "private"] as const
 export type Confidence = (typeof CONFIDENCES)[number]
 
-export const CONFIDENTIALITIES = ["public", "limited", "high"] as const
+const CONFIDENTIALITIES = ["public", "limited", "high"] as const
 export type Confidentiality = (typeof CONFIDENTIALITIES)[number]
+
+/* -------------------------------------------------------------------------- */
+/* Case-study page: the panel and the column of squares                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A bracketed, upper-case stand-in such as `[NUMBER]` or `[HIS WORDS]`. Never
+ * on a story page: the owner's open questions live in
+ * docs/v4-build/PLACEHOLDERS.md, not in `panel` or `column`.
+ */
+const BRACKET = /\[[A-Z]/
+const plain = z
+  .string()
+  .min(1)
+  .refine((s) => !BRACKET.test(s), {
+    message: "no bracket placeholders on a story page",
+  })
+
+/** A clip file: an `.mp4`, with a `.webm` of the same name offered first. */
+const CLIP_PATH = /^\/[^/].*\.mp4$/
+/** A still: WebP, PNG or JPEG under `public/`, registered in `content/media.ts`. */
+const STILL_PATH = /^\/[^/].*\.(webp|png|jpe?g)$/
+
+const storyMediaFields = {
+  /** The one caption line under the square. */
+  caption: plain,
+  /**
+   * Whose picture it is, when it is not his ("Source: zf-scalar.com, ©
+   * ZF Friedrichshafen AG"): a muted mono line under the caption.
+   */
+  credit: plain.optional(),
+  alt: plain,
+  /** The reading-progress label in the panel ("Search and open"). Optional. */
+  short: plain.optional(),
+  /**
+   * Where a wide picture would be cut once it is reshot square ("0% 50%").
+   * The fallback shows a non-square file whole on the story's plate, so the
+   * page does not use it yet.
+   */
+  focus: z
+    .string()
+    .regex(/^\d{1,3}% \d{1,3}%$/, 'expected "x% y%"')
+    .optional(),
+}
+
+const storyImageSchema = z.object({
+  kind: z.literal("image"),
+  src: z.string().regex(STILL_PATH, "expected a .webp, .png or .jpg path"),
+  ...storyMediaFields,
+})
+
+const storyClipSchema = z.object({
+  kind: z.literal("clip"),
+  /** The `.mp4`; the `.webm` beside it must exist too. */
+  src: z.string().regex(CLIP_PATH, "expected an .mp4 path"),
+  /** The still shown first, and instead of the clip under reduced motion. */
+  poster: z.string().regex(STILL_PATH, "expected a .webp, .png or .jpg path"),
+  ...storyMediaFields,
+})
+
+const storyDiagramSchema = z.object({
+  kind: z.literal("diagram"),
+  /**
+   * `<story>/<name>`, one of `DIAGRAM_IDS` in `app/components/diagram` (the
+   * page checks it). Caption and text alternative come from `diagramText`.
+   */
+  id: z.string().regex(/^[a-z0-9-]+\/[a-z0-9-]+$/, "expected <story>/<name>"),
+  short: plain.optional(),
+})
+
+export const storyItemSchema = z.discriminatedUnion("kind", [
+  storyImageSchema,
+  storyClipSchema,
+  storyDiagramSchema,
+])
+export type StoryItem = z.infer<typeof storyItemSchema>
+
+/**
+ * One role in a story's timeline (`panel.timeline`): its dates, its title and
+ * one or two short blocks ("What happened", "How I moved on"). The page shows
+ * each as a `<details>` in the panel; the mirrors print them all.
+ */
+export const storyRoleSchema = z.object({
+  /** "Oct 2023 to Jan 2024", as he writes it. */
+  dates: plain,
+  title: plain,
+  /** The role he holds now: open on load, drawn with a filled marker. */
+  current: z.literal(true).optional(),
+  blocks: z
+    .array(z.object({ label: plain, text: plain }))
+    .min(1)
+    .max(2),
+})
+export type StoryRole = z.infer<typeof storyRoleSchema>
+
+export const storyPanelSchema = z
+  .object({
+    /** The line under the name. */
+    summary: plain,
+    /** The compact mono line: status, years, role, stage, in that order. */
+    meta: z.array(plain).min(1).max(5),
+    /** The live product, beside the name. */
+    live: z.object({ label: plain, href: z.url() }).optional(),
+    /** Up to three highlight numbers; public figures only. */
+    numbers: z
+      .array(
+        z.object({
+          value: plain,
+          /** The label, one entry per line as the board breaks it. */
+          lines: z.array(plain).min(1).max(3),
+        })
+      )
+      .max(3)
+      .optional(),
+    /**
+     * When the numbers were read, as the visitor sees it ("As of 14
+     * November 2026"): one quiet line under the row. Only with `numbers`.
+     */
+    numbersAsOf: plain.optional(),
+    /** Three to four paragraphs at most (the owner's words). */
+    paragraphs: z.array(plain).min(1).max(4).optional(),
+    /**
+     * The roles, oldest first, in place of the paragraphs: a story has one or
+     * the other (`StoryRoles`).
+     */
+    timeline: z.array(storyRoleSchema).min(2).max(8).optional(),
+    links: z
+      .object({
+        heading: plain,
+        items: z
+          .array(
+            z.object({
+              title: plain,
+              href: z.url(),
+              /** Where it was published ("Medium"). */
+              place: plain.optional(),
+              /**
+               * The linked site's own favicon, a 32px PNG under `public/`
+               * (`public/static/work/<slug>/favicon-<name>.png`, listed in
+               * `content/media.ts`), shown at 16. Required: every link
+               * carries one (owner, 14 Nov 2026).
+               */
+              icon: z
+                .string()
+                .regex(/^\/static\/work\/[a-z0-9-]+\/favicon-[a-z0-9-]+\.png$/),
+              /**
+               * The favicon's dominant colour: the link's underline and
+               * hover wash (owner, 15 Nov 2026, "fully branded links").
+               * Required, and it must show on the paper (the loader checks
+               * a contrast of at least 1.6:1).
+               */
+              color: hex,
+              /** Its language when it is not English (`sr`). */
+              lang: z
+                .string()
+                .regex(/^[a-z]{2}$/)
+                .optional(),
+            })
+          )
+          .min(1)
+          .max(3),
+      })
+      .optional(),
+    /** "Worked alongside": ids in `content/people.ts`. */
+    people: z.array(personIdSchema).min(1).max(6).optional(),
+    /**
+     * The story's plate: the ground a non-square picture sits on, whole, inside
+     * its square.
+     */
+    plate: hex,
+  })
+  .superRefine((panel, ctx) => {
+    if (!panel.paragraphs === !panel.timeline)
+      ctx.addIssue({
+        code: "custom",
+        message: "a story panel has either `paragraphs` or `timeline`",
+      })
+    if (panel.numbersAsOf && !panel.numbers?.length)
+      ctx.addIssue({
+        code: "custom",
+        path: ["numbersAsOf"],
+        message: "`numbersAsOf` dates the numbers: set `numbers` too",
+      })
+    if ((panel.timeline ?? []).filter((r) => r.current).length > 1)
+      ctx.addIssue({
+        code: "custom",
+        path: ["timeline"],
+        message: "at most one role is `current`",
+      })
+  })
+export type StoryPanel = z.infer<typeof storyPanelSchema>
 
 export const workFrontmatterSchema = z.object({
   slug: workSlugSchema,
   title: z.string().min(1),
-  shortTitle: z.string().min(1).optional(),
-  kind: z.enum(WORK_KINDS),
-  status: z.enum(WORK_STATUSES),
-  featured: z.boolean(),
-  highlightRank: z.number().int().min(1).max(5).optional(),
   company: companyIdSchema.optional(),
   period: z.object({
     from: z.string().regex(/^\d{4}(-\d{2})?$/, "expected YYYY or YYYY-MM"),
@@ -195,48 +334,20 @@ export const workFrontmatterSchema = z.object({
    * Optional: entries without one fall back to `LAST_UPDATED`, which is what
    * every entry used before this field existed. It is the sitemap's per-entry
    * `<lastmod>`, so setting it here is the only way to stop an edit to
-   * `content/pages/uses.mdx` claiming all twenty case studies changed.
+   * a page edit claiming all twenty case studies changed.
    */
   updated: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "expected YYYY-MM-DD")
     .optional(),
   role: z.string().min(1),
-  location: z.string().min(1).optional(),
   accent: hex,
-  /**
-   * The entry's own monochrome mark, under `public/static/logos/work/`. Every
-   * file there is white-filled geometry in a square viewBox, so consumers paint
-   * it with `mask-image` and pick the ink themselves — see the sourcing notes
-   * in `public/static/logos/work/SOURCES.md`.
-   */
-  logo: z.string().startsWith("/static/logos/").optional(),
-  /** 1–2 character fallback for an entry with no mark, or a mark that 404s. */
-  mark: z.string().min(1).max(2).optional(),
   tech: z.array(z.string().min(1)),
   line: z.string().min(1).max(120),
   detail: z.string().min(1),
   url: z.url().optional(),
   links: z
     .array(z.object({ label: z.string().min(1), url: z.url() }))
-    .optional(),
-  media: z
-    .array(
-      z.object({
-        src: z.string().min(1),
-        alt: z.string().min(1),
-        caption: z.string().min(1).optional(),
-        width: z.number().int().positive(),
-        height: z.number().int().positive(),
-        kind: z.enum(["image", "video"]),
-        /**
-         * 16px-wide base64 data URI used as `next/image`'s `placeholder="blur"`.
-         * Optional: `WorkArt` and `MediaGallery` already read it defensively and
-         * fall back to `placeholder="empty"` when it is absent.
-         */
-        blurDataURL: z.string().startsWith("data:image/").optional(),
-      })
-    )
     .optional(),
   metrics: z
     .array(
@@ -248,6 +359,18 @@ export const workFrontmatterSchema = z.object({
     )
     .optional(),
   confidentiality: z.enum(CONFIDENTIALITIES),
+  /**
+   * v4: one of the nine `/work/<slug>` stories (`getStories()`). Every other
+   * entry 308-redirects to `/work#<slug>`.
+   */
+  story: z.boolean().optional(),
+  /**
+   * The case-study page (`/work/<slug>`, 2026-11 layout): the pinned panel on
+   * the left. Required on the nine stories (`lib/content/index.ts`).
+   */
+  panel: storyPanelSchema.optional(),
+  /** The stack of identical squares on the right, in page order. */
+  column: z.array(storyItemSchema).min(1).max(16).optional(),
   seo: z.object({
     title: z.string().min(1).optional(),
     description: z.string().min(1).max(160),
@@ -260,200 +383,32 @@ export interface WorkEntry extends WorkFrontmatter {
   body: string
 }
 
-/* -------------------------------------------------------------------------- */
-/* Site                                                                       */
-/* -------------------------------------------------------------------------- */
-
-export const siteSchema = z.object({
-  name: z.literal("Mladen Ružičić"),
-  domain: z.literal("mladenruzicic.com"),
-  url: z.literal("https://mladenruzicic.com"),
-  tagline: z.string().min(1),
-  description: z.string().min(1).max(160),
-  location: z.object({
-    city: z.literal("Lausanne"),
-    country: z.literal("CH"),
-  }),
-  roles: z.array(z.string().min(1)),
-  links: z.object({
-    github: z.url(),
-    linkedin: z.url(),
-    mentorcruise: z.url(),
-    calendar: z.url(),
-    cv: z.literal("/cv"),
-  }),
-  yearsShipping: z.number().int().positive(),
-})
-export type Site = z.infer<typeof siteSchema>
-
-/* -------------------------------------------------------------------------- */
-/* Pages                                                                      */
-/* -------------------------------------------------------------------------- */
-
-export const homeSchema = z.object({
-  hero: z.object({
-    eyebrow: z.array(z.string().min(1)),
-    /** `{braces}` mark the italic accent word. */
-    h1: z.string().min(1),
-    /** May contain `[[zf-scalar]]` / `[[tenderlift]]` inline chip tokens. */
-    lede: z.string().min(1),
-    scrollCue: z.string().min(1),
-  }),
-  work: z.object({
-    eyebrow: z.string().min(1),
-    allWorkLabel: z.string().min(1),
-  }),
-  history: z.object({
-    eyebrow: z.string().min(1),
-    rangeLabel: z.string().min(1),
-    employedLabel: z.string().min(1),
-    independentLabel: z.string().min(1),
-    alongsideLabel: z.string().min(1),
-  }),
-  mentoring: z.object({
-    eyebrow: z.string().min(1),
-    /** `{braces}` mark the italic accent word. */
-    h2: z.string().min(1),
-    lede: z.string().min(1),
-    pageLink: z.string().min(1),
-    externalLink: z.string().min(1),
-    /**
-     * A social-proof line under the testimonial bubbles ("See 50+ five-star
-     * ratings on mentors.to/ruzicic"). Optional: the section renders without
-     * it until copy exists.
-     */
-    proof: z.object({ label: z.string().min(1), href: z.url() }).optional(),
-  }),
-  footer: z.object({ copyright: z.string().min(1) }),
-  preloader: z.object({
-    finalVerb: z.literal("Shipping"),
-    verbs: z.array(z.string().min(1)).min(1),
-  }),
-})
-export type Home = z.infer<typeof homeSchema>
-
-export const mentoringSchema = z.object({
-  seo: z.object({
-    title: z.string().min(1),
-    description: z.string().min(1).max(160),
-  }),
-  eyebrow: z.array(z.string().min(1)).min(1),
-  /** `{braces}` mark the italic accent word. */
-  h1: z.string().min(1),
-  lede: z.string().min(1),
-  whoFor: z.array(z.string().min(1)),
-  howItWorks: z.array(
-    z.object({ title: z.string().min(1), body: z.string().min(1) })
-  ),
-  topics: z.array(z.string().min(1)),
-  expectations: z.array(z.string().min(1)),
-  cta: z.object({
-    label: z.string().min(1),
-    url: z.string().min(1),
-    note: z.string().min(1).optional(),
-  }),
-  /**
-   * A social-proof line under the testimonial grid ("See 50+ five-star
-   * ratings on mentors.to/ruzicic"). Optional: the section renders without
-   * it until copy exists.
-   */
-  proof: z.object({ label: z.string().min(1), href: z.url() }).optional(),
-  closing: z.object({
-    /** `{braces}` mark the italic accent word. */
-    h2: z.string().min(1),
-  }),
-})
-export type Mentoring = z.infer<typeof mentoringSchema>
-
 /**
- * `/work` index copy. `{count}` in `eyebrow` and `mirror.intro` is replaced
- * with the number of entries; `{braces}` in `h1` mark the italic accent word.
+ * One of the nine stories: `lib/content/index.ts` checks at load that each has
+ * its case-study `panel` and `column`.
  */
-export const workPageSchema = z.object({
-  seo: z.object({
-    title: z.string().min(1),
-    description: z.string().min(1).max(160),
-  }),
-  eyebrow: z.array(z.string().min(1)).min(1),
-  h1: z.string().min(1),
-  lede: z.string().min(1),
-  /** The `/md/work` mirror, which introduces the list rather than the page. */
-  mirror: z.object({
-    description: z.string().min(1).max(160),
-    intro: z.string().min(1),
-  }),
-})
-export type WorkPage = z.infer<typeof workPageSchema>
+export interface Story extends WorkEntry {
+  panel: StoryPanel
+  column: StoryItem[]
+}
 
-/** `app/not-found.tsx`. `{braces}` in `h1` mark the italic accent word. */
-export const notFoundSchema = z.object({
-  eyebrow: z.array(z.string().min(1)).min(1),
-  /** The oversized numeral. `aria-hidden`; the eyebrow carries it for AT. */
-  code: z.string().min(1),
-  h1: z.string().min(1),
-  lede: z.string().min(1),
-})
-export type NotFound = z.infer<typeof notFoundSchema>
-
-export const SITE_LINK_KEYS = [
-  "github",
-  "linkedin",
-  "mentorcruise",
-  "calendar",
-  "cv",
-] as const
-export type SiteLinkKey = (typeof SITE_LINK_KEYS)[number]
-
-export const pageFrontmatterSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1).max(160),
-  updated: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "expected YYYY-MM-DD"),
-  /**
-   * Page header copy. `{braces}` mark the italic accent word in `h1`;
-   * `[years]` / `[Years]` expands to `SITE.yearsShipping` spelled out, and
-   * `{updated}` in an eyebrow item expands to the `updated` date. Both are
-   * resolved by the loader, so consumers only ever see finished strings.
-   */
-  h1: z.string().min(1),
-  eyebrow: z.array(z.string().min(1)).min(1),
-  /**
-   * The designed links block. `key` points at `SITE.links`, so a URL is never
-   * written twice; `note` is the right-hand hint.
-   */
-  links: z
-    .array(
-      z.object({
-        key: z.enum(SITE_LINK_KEYS),
-        label: z.string().min(1),
-        note: z.string().min(1),
-      })
-    )
-    .optional(),
-})
-export type PageFrontmatter = z.infer<typeof pageFrontmatterSchema>
-
-export interface PageEntry extends PageFrontmatter {
-  slug: "about" | "uses"
-  body: string
+/** The stills a column shows (pictures and clip posters), for sitemaps, mirrors and JSON-LD. */
+export function columnStills(
+  column: StoryItem[]
+): { src: string; alt: string }[] {
+  return column.flatMap((item) =>
+    item.kind === "image"
+      ? [{ src: item.src, alt: item.alt }]
+      : item.kind === "clip"
+        ? [{ src: item.poster, alt: item.alt }]
+        : []
+  )
 }
 
 /* -------------------------------------------------------------------------- */
-/* Validation helper                                                          */
+/* Products, pages, shared shapes                                             */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Parses `value` and, on failure, throws an Error naming the source file and
- * every offending path — so `next build` fails loudly on bad content.
- */
-export function parseOrThrow<T extends z.ZodType>(
-  schema: T,
-  value: unknown,
-  source: string
-): z.infer<T> {
-  const result = schema.safeParse(value)
-  if (result.success) return result.data
-  const issues = result.error.issues
-    .map((i) => `  · ${i.path.join(".") || "(root)"}: ${i.message}`)
-    .join("\n")
-  throw new Error(`Invalid content in ${source}:\n${issues}`)
-}
+export * from "./schema-base"
+export * from "./schema-products"
+export * from "./schema-pages"

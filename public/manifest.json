@@ -1,16 +1,25 @@
 {
-  "name": "Mladen Ruzicic",
-  "short_name": "Mladen R.",
-  "description": "Software developer, mentor, and entrepreneur",
+  "name": "Mladen Ružičić",
+  "short_name": "Mladen Ružičić",
+  "description": "I find out what people need, build it, and keep it alive. Product + Tech, based in Switzerland.",
+  "lang": "en",
   "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#fcfcfa",
+  "theme_color": "#fcfcfa",
   "icons": [
     {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
       "src": "/mladen-ruzicic.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

@@ -1,32 +1,62 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 
-import { SITE } from "@/content/site"
+import { getHome, getSite } from "@/lib/content"
 
-/** Shared `metadataBase`, robots and OG defaults for every route. */
+/**
+ * Metadata for every route. The root layout exports `baseMetadata` and
+ * `baseViewport`; every page goes through `pageMetadata()`, which sets the
+ * canonical, the markdown twin, Open Graph and the Twitter card in one place.
+ * Titles and descriptions come from content (each page's `seo` block).
+ */
+
+const site = getSite()
+const home = getHome()
+
+/** `@ruzicic`, from the X profile URL in content. */
+const X_HANDLE = `@${new URL(site.links.x).pathname.replace(/^\/+|\/+$/g, "")}`
+
+/** The paper colour (`--color-paper` in `app/globals.css`): the light theme. */
+const PAPER = "#fcfcfa"
+
+/** The markdown twin of a page path. `/` has no segment, so it is `/index.md`. */
+function markdownPath(path: string): string {
+  return path === "/" ? "/index.md" : `${path}.md`
+}
+
+/** Shared `metadataBase`, title template, robots and card defaults. */
 export const baseMetadata: Metadata = {
-  metadataBase: new URL(SITE.url),
+  metadataBase: new URL(site.url),
   title: {
-    default: `${SITE.name} — ${SITE.roles[0]}`,
-    template: `%s · ${SITE.name}`,
+    default: home.seo.title,
+    template: `%s · ${site.name}`,
   },
-  description: SITE.description,
-  applicationName: SITE.name,
-  authors: [{ name: SITE.name, url: SITE.url }],
-  creator: SITE.name,
+  description: home.seo.description,
+  applicationName: site.name,
+  authors: [{ name: site.name, url: site.url }],
+  creator: site.name,
+  publisher: site.name,
   manifest: "/manifest.json",
-  alternates: { canonical: "/" },
+  formatDetection: { telephone: false, address: false, email: false },
+  // `/` itself has no `metadata` export, so its canonical and markdown twin
+  // live here. Every other page replaces `alternates` through `pageMetadata`.
+  alternates: {
+    canonical: "/",
+    types: { "text/markdown": markdownPath("/") },
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: SITE.name,
-    title: `${SITE.name} — ${SITE.roles[0]}`,
-    description: SITE.description,
-    url: SITE.url,
+    siteName: site.name,
+    title: home.seo.title,
+    description: home.seo.description,
+    url: site.url,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE.name} — ${SITE.roles[0]}`,
-    description: SITE.description,
+    site: X_HANDLE,
+    creator: X_HANDLE,
+    title: home.seo.title,
+    description: home.seo.description,
   },
   robots: {
     index: true,
@@ -41,65 +71,104 @@ export const baseMetadata: Metadata = {
   },
 }
 
+/** One light theme: the browser chrome matches the paper. */
+export const baseViewport: Viewport = {
+  themeColor: PAPER,
+  colorScheme: "light",
+}
+
 export interface PageMetadataInput {
   title: string
   description: string
   /** Path with a leading slash, e.g. `/work/tenderlift`. */
   path: string
   /**
-   * `og:type`. `article` for a case study, `website` for an index, `profile`
-   * for `/about`. Defaults to `article` because case studies are the majority.
+   * `og:type`. `article` for a story, `website` for an index, `profile` for
+   * `/about`. Defaults to `article` because stories are the majority.
    */
   type?: "article" | "website" | "profile"
+  /** `YYYY-MM-DD`: `article:modified_time` for a story. */
+  modified?: string
   /**
-   * Override the OG image. Omit and Next uses the colocated
-   * `opengraph-image.tsx` for the route, which is what every route wants — pass
-   * this only for an image that is not file-based.
+   * Override the OG image. Omit it and Next uses the route's colocated
+   * `opengraph-image.tsx`, which is what every route wants.
    *
-   * NOTE: it has to be colocated with the ROUTE. Returning an `openGraph`
-   * object here replaces the one in `baseMetadata` wholesale (Next merges
-   * metadata a top-level key at a time), so a route without its own image file
-   * ships no `og:image` at all — the root `app/opengraph-image.tsx` does not
-   * cascade into it.
+   * NOTE: the image file has to sit next to the ROUTE. The `openGraph` object
+   * returned here replaces the layout's wholesale (Next merges metadata one
+   * top-level key at a time), so a route without its own image file ships no
+   * `og:image`: the root `app/opengraph-image.tsx` does not cascade.
    */
   image?: string
 }
 
 /**
- * Per-route metadata with a correct canonical and `openGraph.url`.
- *
- * `alternates.canonical` is a path, resolved against `metadataBase` from
- * `baseMetadata`; `openGraph.url` is absolute because a few validators still
- * insist on it.
+ * Per-route metadata: canonical, markdown twin (`<link rel="alternate"
+ * type="text/markdown">`), Open Graph and Twitter. `alternates.canonical` is a
+ * path resolved against `metadataBase`; `openGraph.url` is absolute because a
+ * few validators still insist on it.
  */
 export function pageMetadata({
   title,
   description,
   path,
   type = "article",
+  modified,
   image,
 }: PageMetadataInput): Metadata {
-  const url = new URL(path, SITE.url).toString()
+  const url = path === "/" ? site.url : new URL(path, site.url).toString()
   const images = image ? [{ url: image }] : undefined
+  const person = {
+    firstName: site.name.split(" ")[0],
+    lastName: site.name.split(" ").slice(1).join(" "),
+    username: X_HANDLE.slice(1),
+  }
+
+  const openGraph: Metadata["openGraph"] =
+    type === "article"
+      ? {
+          type: "article",
+          authors: [`${site.url}/about`],
+          ...(modified ? { modifiedTime: modified } : null),
+          locale: "en_US",
+          siteName: site.name,
+          title,
+          description,
+          url,
+          ...(images ? { images } : null),
+        }
+      : type === "profile"
+        ? {
+            type: "profile",
+            ...person,
+            locale: "en_US",
+            siteName: site.name,
+            title,
+            description,
+            url,
+            ...(images ? { images } : null),
+          }
+        : {
+            type: "website",
+            locale: "en_US",
+            siteName: site.name,
+            title,
+            description,
+            url,
+            ...(images ? { images } : null),
+          }
+
   return {
     title,
     description,
     alternates: {
       canonical: path,
-      ...(path === "/" ? null : { types: { "text/markdown": `${path}.md` } }),
+      types: { "text/markdown": markdownPath(path) },
     },
-    openGraph: {
-      type,
-      // Re-stated because this object replaces `baseMetadata.openGraph`.
-      locale: "en_US",
-      siteName: SITE.name,
-      title,
-      description,
-      url,
-      ...(images ? { images } : null),
-    },
+    openGraph,
     twitter: {
       card: "summary_large_image",
+      site: X_HANDLE,
+      creator: X_HANDLE,
       title,
       description,
       ...(images ? { images } : null),

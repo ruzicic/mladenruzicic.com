@@ -1,117 +1,283 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 
 /* ---------------------------------------------------------------------------
-   Design tokens — docs/v3-redesign-plan.md §2, §5.5, §5.7.
-   Single dark theme. Everything downstream reads these; do not hardcode hexes
-   in components.
+   Design tokens: the 2027 site (docs/v4-build/PLAN.md §2).
+
+   One light theme. Every value is read off the six artboards in
+   docs/v4-ideation/board/project/Landing*.dc.html (1440 and 390 frames).
+   Components use these names only; the one inline hex allowed is a per-brand
+   colour that comes from content.
+
+   `@theme inline` so the font tokens resolve the next/font variables where
+   they are used. Every token below is also emitted on `:root`, so area CSS in
+   `app/styles/*.css` reads them as plain `var(--color-ink)` etc.
    --------------------------------------------------------------------------- */
 @theme inline {
-  /* Surfaces and ink */
-  --color-bg: #0b0b0c;
-  --color-fg: #f2f0ea;
-  --color-muted: #939597;
-  --color-dim: #c9c7c1;
-  --color-dim-2: #a8a6a0;
-  --color-accent: #f5df4d;
-  --color-surface: #141416;
-  --color-surface-2: #1c1c1f;
-  --color-surface-3: #111113;
-  --color-line: rgba(242, 240, 234, 0.12);
-  --color-line-soft: rgba(242, 240, 234, 0.07);
+  /* Drop Tailwind's default palette: only the tokens below exist. */
+  --color-*: initial;
+
+  /* Paper and ink */
+  --color-paper: #fcfcfa; /* the page sheet */
+  --color-surface: #ffffff; /* popovers, panels, inputs */
+  --color-ink: #111111; /* headings, names, links */
+  --color-ink-soft: #2a2a27; /* body paragraphs */
+  --color-ink-quiet: #5c5c58; /* the headline's "on …" line */
+  --color-muted: #696964; /* the line under the name, labels, captions. Was #6b6b66, 4.49:1 on --color-tile (MediaSlot labels); now 4.62:1 there, 5.37:1 on paper */
+  --color-faint: #8e8e88; /* placeholders only, never text that must be read */
+
+  /* Fills */
+  --color-wash: #f1f0ec; /* quiet hover fill, close buttons */
+  --color-wash-strong: #e6e5e0; /* pressed / hover on a wash */
+  --color-tile: #ecebe6; /* neutral product tile, image placeholders */
+  --color-card: #1b1b1a; /* dark media cards in the strip */
+  /* The plus and minus marks on /mentoring ("We may be a good fit if…"). Ink
+     on wash: 5.35:1 (fit) and 5.53:1 (not a fit); each wash is 1.16:1 and
+     1.22:1 on paper, a tint rather than a box. */
+  --color-fit-wash: #e3eedf;
+  --color-fit-ink: #2f6b3a;
+  --color-nofit-wash: #f4e2dd;
+  --color-nofit-ink: #9a3b2b;
+
+  /* Rules */
+  --color-rule: #e4e3de; /* list rules, section hairlines */
+  --color-rule-strong: #d6d5cf; /* round control borders */
+  --color-underline: #a3a29c; /* resting link underline */
+  /* Every button's edge (the Ask button's, Button primitive). */
+  --color-control-line: color-mix(
+    in srgb,
+    var(--color-underline) 60%,
+    var(--color-rule-strong)
+  );
+
+  /* The dark footer ("night") */
+  --color-night: #0b0b0a;
+  --color-night-ink: rgb(255 255 255 / 0.9);
+  --color-night-soft: #c9c8c2; /* footer nav links */
+  --color-night-muted: #a8a8a2; /* footer secondary copy */
+  --color-night-control-line: rgb(
+    255 255 255 / 0.34
+  ); /* button edge on night */
 
   /* Type */
-  --font-display: var(--font-gloock), Georgia, "Times New Roman", serif;
-  --font-serif-italic:
-    var(--font-instrument-serif-italic), Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
+  --font-display:
+    var(--font-geist-serif-regular), "Times New Roman", Times, serif;
+  --font-sans:
+    var(--font-geist-sans), -apple-system, "Helvetica Neue", Arial, sans-serif;
   --font-mono:
-    var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Easings */
-  --ease-reveal: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --ease-geometry: cubic-bezier(0.7, 0, 0.2, 1);
-  --ease-pill: cubic-bezier(0.2, 0.8, 0.2, 1);
-
-  /* Durations */
-  --duration-fast: 120ms;
-  --duration-base: 220ms;
-  --duration-slow: 450ms;
+  /* Type scale (desktop; the phone steps are on :root below). The roles,
+     on the design's steps (`--fs-*` on :root, times `--type-scale`). */
+  --text-label: var(--fs-11); /* mono labels, 0.08em tracking */
+  --text-label--letter-spacing: 0.08em;
+  --text-meta: var(--fs-12); /* mono counters, footer nav */
+  --text-small: var(--fs-13);
+  --text-ui: var(--fs-16); /* lists, captions, links under sections */
+  --text-ui--line-height: 1.45;
+  --text-body: var(--fs-18); /* the page's running text */
+  --text-quote: var(--fs-26); /* Geist Serif testimonial */
+  --text-quote--line-height: 1.3;
+  /* The cycling headline (68px before 16 Nov 2026): as large as keeps the
+     longest phrase on one line at 1440, where it runs past the column. */
+  --text-headline: 71px;
 
   /* Radii */
-  --radius-xs: 4px;
-  --radius-sm: 6px;
+  --radius-control: 4px; /* every button (the Ask shape), chips, inputs in the panel */
+  --radius-panel: 6px; /* Ask panel */
+  --radius-card: 20px; /* strip cards */
+  --radius-sheet: 24px; /* bottom sheets */
+  --radius-page: 40px; /* the paper sheet's bottom corners over the footer */
   --radius-pill: 999px;
 
-  /* Layout */
-  --spacing-gutter: 40px;
-  --container-page: 1400px;
-}
+  /* Easings */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1); /* pops, sheets, menus */
+  --ease-standard: cubic-bezier(0.2, 0.7, 0.2, 1); /* content, cards */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1); /* sheets leaving */
 
-:root {
-  color-scheme: dark;
-  scrollbar-width: thin;
-  scrollbar-color: #f5df4d transparent;
-  scrollbar-gutter: stable;
-  --gutter: 40px;
-}
-
-@media (max-width: 719px) {
-  :root {
-    --gutter: 24px;
-  }
-}
-
-body {
-  margin: 0;
-  background: var(--color-bg);
-  color: var(--color-fg);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  overflow-x: hidden;
-}
-
-::selection {
-  background: var(--color-accent);
-  color: var(--color-bg);
-}
-
-/* Layered so Tailwind colour utilities (also layered) win on anchors. */
-@layer base {
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  a:hover {
-    color: var(--color-accent);
-  }
-}
-
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: var(--radius-xs);
-}
-
-h1,
-h2,
-h3 {
-  text-wrap: balance;
-}
-
-p {
-  text-wrap: pretty;
-}
-
-html {
-  scroll-behavior: smooth;
+  /* Durations */
+  --duration-instant: 120ms; /* hover fills, arrow nudges */
+  --duration-fast: 160ms; /* underline colour, menus */
+  --duration-base: 200ms; /* fades */
+  --duration-moderate: 240ms; /* sheets in, headline swap */
+  --duration-slow: 320ms; /* list expand */
 }
 
 /* ---------------------------------------------------------------------------
-   View transitions — docs/v3-redesign-plan.md §5.3.
-   Classes are referenced by `app/components/primitives/PageTransition.tsx`.
+   Layout tokens that need math or a breakpoint. Plain custom properties, not
+   Tailwind theme keys.
+
+   The text column is the boards' 540px times the type scale (632px) and
+   starts 30px left of true centre (the boards' optical offset), 374px from
+   the left edge on the 1440 frame. Below that it keeps a 24px gutter on
+   both sides.
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+
+  /* The type scale (owner, 16 Nov 2026: "i think default font size
+     (smallest font size) on mobile is too small and i'd like it in general
+     all increased by 15-20% for sure! ... this should impact desktop as
+     well"). Every text size on the site is one of the design's steps (the
+     boards' pixel sizes, named by them: `--fs-11` is the boards' 11px),
+     times this factor, rounded to the half pixel; px line-heights paired
+     with them are `calc(<px> * var(--type-scale))`. Display type (the
+     headline, page titles, the story cover's name and numbers) has sizes
+     of its own that fit their room. One number retunes the whole site. */
+  --type-scale: 1.17;
+  --fs-10: round(nearest, 10px * var(--type-scale), 0.5px);
+  --fs-11: round(nearest, 11px * var(--type-scale), 0.5px);
+  --fs-12: round(nearest, 12px * var(--type-scale), 0.5px);
+  --fs-13: round(nearest, 13px * var(--type-scale), 0.5px);
+  --fs-14: round(nearest, 14px * var(--type-scale), 0.5px);
+  --fs-15: round(nearest, 15px * var(--type-scale), 0.5px);
+  --fs-16: round(nearest, 16px * var(--type-scale), 0.5px);
+  --fs-17: round(nearest, 17px * var(--type-scale), 0.5px);
+  --fs-18: round(nearest, 18px * var(--type-scale), 0.5px);
+  --fs-19: round(nearest, 19px * var(--type-scale), 0.5px);
+  --fs-20: round(nearest, 20px * var(--type-scale), 0.5px);
+  --fs-22: round(nearest, 22px * var(--type-scale), 0.5px);
+  --fs-23: round(nearest, 23px * var(--type-scale), 0.5px);
+  --fs-25: round(nearest, 25px * var(--type-scale), 0.5px);
+  --fs-26: round(nearest, 26px * var(--type-scale), 0.5px);
+  --fs-28: round(nearest, 28px * var(--type-scale), 0.5px);
+  --fs-32: round(nearest, 32px * var(--type-scale), 0.5px);
+
+  --gutter: 24px;
+  /* The text column widens with the type, so a line keeps about the same
+     number of characters: the boards' 540px (and its 30px optical offset
+     left of centre) times the scale. */
+  --w-column: calc(540px * var(--type-scale));
+  --column-width: min(var(--w-column), calc(100% - 2 * var(--gutter)));
+  --column-start: max(var(--gutter), calc(50% - var(--w-column) / 2 - 30px));
+  --page-pad-top: 64px; /* one header position on every page (owner, 12 Nov) */
+  --page-pad-bottom: 160px;
+  --section-gap: 96px;
+  --text-page: var(--text-body);
+  --text-headline-size: var(--text-headline);
+  /* Button heights (the Button primitive): the Ask size, the compact one
+     for dense places, and the icon-only square. */
+  --control-h: 48px;
+  --control-h-compact: 36px;
+  --control-icon: 36px;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --page-pad-top: 32px;
+    --page-pad-bottom: 144px;
+    --section-gap: 72px;
+    --text-page: var(--fs-17);
+    /* "I'm working with" on one line at 360. */
+    --text-headline-size: min(44px, 11.9vw);
+    /* 44px targets on phones. */
+    --control-h-compact: 44px;
+    --control-icon: 44px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+@layer base {
+  html {
+    /* The night colour shows below the paper sheet and on overscroll. */
+    background: var(--color-night);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-night);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-page);
+    line-height: 1.45;
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Geist Serif has one weight and no italic; never let the browser fake one. */
+  .font-display {
+    font-weight: 400;
+    font-style: normal;
+    font-synthesis: none;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  blockquote,
+  figcaption {
+    text-wrap: pretty;
+  }
+
+  a {
+    color: inherit;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    transition: text-decoration-color var(--duration-fast) ease;
+  }
+
+  /* Links inside running text: underlined, the underline darkens on hover. */
+  :where(p, li, figcaption, dd) > a:not([class]) {
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-underline);
+  }
+
+  :where(p, li, figcaption, dd) > a:not([class]):hover {
+    text-decoration-color: currentColor;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  /* Inside the dark footer the ring turns white. */
+  :where([data-surface="night"]) :focus-visible {
+    outline-color: #ffffff;
+  }
+
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  /* On a dark ground (`data-surface="night"`: the footer, the strip's cards,
+     a tooltip on night) the selection is the inverse: paper, ink words. */
+  [data-surface="night"]::selection,
+  :where([data-surface="night"]) ::selection {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  ::placeholder {
+    color: var(--color-faint);
+  }
+
+  img,
+  svg,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   View transitions. Classes are referenced by
+   `app/components/primitives/PageTransition.tsx`. A quiet crossfade only: the
+   owner dislikes slide-and-fade reveals.
    --------------------------------------------------------------------------- */
 ::view-transition {
   pointer-events: none;
@@ -129,105 +295,32 @@ html {
   }
 }
 
-@keyframes vt-slide-in-forward {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-}
-
-@keyframes vt-slide-out-forward {
-  to {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-}
-
-@keyframes vt-slide-in-back {
-  from {
-    opacity: 0;
-    transform: translateY(-12px);
-  }
-}
-
-@keyframes vt-slide-out-back {
-  to {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
-
 ::view-transition-old(.vt-fade) {
-  animation: vt-fade-out var(--duration-base) var(--ease-reveal) both;
+  animation: vt-fade-out var(--duration-fast) var(--ease-in) both;
 }
 
 ::view-transition-new(.vt-fade) {
-  animation: vt-fade-in var(--duration-base) var(--ease-reveal) both;
-}
-
-::view-transition-new(.vt-in) {
-  animation: vt-slide-in-forward var(--duration-slow) var(--ease-reveal) both;
-}
-
-::view-transition-old(.vt-out) {
-  animation: vt-slide-out-forward var(--duration-base) var(--ease-reveal) both;
-}
-
-::view-transition-new(.vt-in-back) {
-  animation: vt-slide-in-back var(--duration-slow) var(--ease-reveal) both;
-}
-
-::view-transition-old(.vt-out-back) {
-  animation: vt-slide-out-back var(--duration-base) var(--ease-reveal) both;
-}
-
-/* Shared-element morph: work card art → case-study hero media. */
-::view-transition-group(.vt-morph) {
-  animation-duration: var(--duration-slow);
-  animation-timing-function: var(--ease-geometry);
-}
-
-::view-transition-image-pair(.vt-morph) {
-  isolation: auto;
-}
-
-::view-transition-old(.vt-morph),
-::view-transition-new(.vt-morph) {
-  animation: none;
-  mix-blend-mode: normal;
-  height: 100%;
-  object-fit: cover;
+  animation: vt-fade-in var(--duration-moderate) var(--ease-standard) both;
 }
 
 /* ---------------------------------------------------------------------------
-   Grain overlay — replaces public/static/images/background-noise.png.
-   Zero JS, zero network: an inline SVG feTurbulence data URI.
-   Apply `.grain` to a positioned element; the noise paints as an ::after.
+   Reduced motion: everything that moves stops; state changes stay instant.
+   Components that need a gentler fallback than "off" set it themselves.
    --------------------------------------------------------------------------- */
-.grain {
-  position: relative;
-  isolation: isolate;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
-.grain::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.22;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
-  background-size: 160px 160px;
-  background-repeat: repeat;
-}
-
-/* ---------------------------------------------------------------------------
-   Reduced motion
-   --------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  * {
-    scroll-behavior: auto;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
   }
 
   ::view-transition-group(*),

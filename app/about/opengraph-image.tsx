@@ -1,26 +1,21 @@
 import { ImageResponse } from "next/og"
 
-import { getPage } from "@/lib/content"
+import { getAbout, getSite } from "@/lib/content"
 import { OG_CONTENT_TYPE, OG_SIZE, OgCard, ogFonts } from "@/lib/seo/og"
-
-import { displayToPlainText } from "../components/primitives/Display"
 
 export const size = OG_SIZE
 export const contentType = OG_CONTENT_TYPE
-export const alt = "About — Mladen Ružičić"
+export const alt = "About Mladen Ružičić: the longer story"
 
-/** `/about` card. Colocated for the reason documented in `pageMetadata`. */
+/**
+ * `/about` card. Colocated with the route because `pageMetadata()` returns its own
+ * `openGraph` object and the root card does not cascade. Node runtime (the
+ * default): Satori reads the TTFs in `assets/fonts`.
+ */
 export default async function Image() {
-  const page = getPage("about")
+  const about = getAbout()
   return new ImageResponse(
-    (
-      <OgCard
-        eyebrow={page.eyebrow.join(" · ")}
-        title={displayToPlainText(page.h1)}
-        line={page.description}
-        meta="/about"
-      />
-    ),
+    <OgCard title={about.title} line={getSite().line} meta={about.section} />,
     { ...size, fonts: await ogFonts() }
   )
 }

@@ -1,129 +1,176 @@
 import { expect, test } from "@playwright/test"
 
+import { ASK } from "@/content/ask"
+import { HOME } from "@/content/pages/home"
+import { TESTIMONIALS } from "@/content/testimonials"
+
+import { LIST, LIST_ROWS, PAGES, projectLinks, STRIP_REGION } from "./helpers"
+
 /**
- * "Nothing important lives only in a canvas" — docs/v3-redesign-plan.md §4.
- * Loads every route with JS disabled and checks the copy is still there:
- * `/`, `/work`, `/about`, `/uses`, `/mentoring` and one `/work/<slug>`.
+ * The site without JavaScript (PLAN.md §2 "Works without JavaScript"): all
+ * copy readable, the headline a full sentence showing its first phrase, the
+ * list complete, story cards plain links, Ask a link to the contact line,
+ * every testimonial present.
  */
 test.use({ javaScriptEnabled: false })
 
-const HERO_H1 = "I build products, platforms and the systems around them."
-
-test.describe("/ renders without JS", () => {
-  test("hero h1, work rows, timeline bands and mentoring bubbles are present", async ({
+for (const path of PAGES) {
+  test(`${path}: every block of copy is rendered and visible`, async ({
     page,
   }) => {
-    await page.goto("/")
+    await page.goto(path)
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
 
-    // Hero h1 — server-rendered, must not depend on hydration.
-    const h1 = page.getByRole("heading", { level: 1 })
-    await expect(h1).toHaveCount(1)
-    await expect(h1).toHaveText(HERO_H1)
-
-    // Selected-work rows. `work-rows` is the row container test id the shell
-    // agent is adding; count its direct children so this doesn't depend on
-    // the row's element type.
-    const workRows = page.locator('[data-testid="work-rows"]')
-    await expect(
-      workRows,
-      '[data-testid="work-rows"] container is present without JS'
-    ).toHaveCount(1)
-    const rowCount = await workRows.locator(":scope > *").count()
-    expect(
-      rowCount,
-      "at least 5 work rows render without JS"
-    ).toBeGreaterThanOrEqual(5)
-
-    // Work-history timeline bands.
-    const bands = page.locator('[data-testid="timeline-band"]')
-    const bandCount = await bands.count()
-    expect(
-      bandCount,
-      "at least 6 timeline bands render without JS"
-    ).toBeGreaterThanOrEqual(6)
-
-    // Mentoring bubbles — no dedicated test id in the brief, so this is
-    // scoped to the mentoring section landmark and checks quote content
-    // renders as static HTML (no client-side mount required).
-    const mentoringSection = page.locator("#mentoring")
-    await expect(mentoringSection).toHaveCount(1)
-    const bubbles = mentoringSection.locator("li")
-    const bubbleCount = await bubbles.count()
-    expect(
-      bubbleCount,
-      "mentoring bubbles render without JS"
-    ).toBeGreaterThanOrEqual(1)
-  })
-})
-
-test.describe("/work renders without JS", () => {
-  test("every case-study card is in the HTML document", async ({ page }) => {
-    await page.goto("/work")
-
-    const h1 = page.getByRole("heading", { level: 1 })
-    await expect(h1).toHaveCount(1)
-
-    // The index is a client island (the filter row) wrapping server-rendered
-    // cards. If the island ever goes dynamic again — `useSearchParams`,
-    // `cookies()`, a Suspense boundary around it — the cards fall out of the
-    // static HTML into the flight payload and this drops to zero.
-    const cards = page.locator('a[href^="/work/"]')
-    const cardCount = await cards.count()
-    expect(
-      cardCount,
-      "at least 20 case-study links render without JS"
-    ).toBeGreaterThanOrEqual(20)
-
-    const cardHeadings = page.getByRole("heading", { level: 3 })
-    expect(
-      await cardHeadings.count(),
-      "each card ships its own h3 without JS"
-    ).toBeGreaterThanOrEqual(20)
-  })
-})
-
-for (const path of ["/about", "/uses", "/mentoring"]) {
-  test.describe(`${path} renders without JS`, () => {
-    test("h1 and body copy are server-rendered", async ({ page }) => {
-      await page.goto(path)
-
-      const h1 = page.getByRole("heading", { level: 1 })
-      await expect(h1).toHaveCount(1)
-      expect((await h1.innerText()).trim().length).toBeGreaterThan(0)
-
-      const sectionHeadings = page.getByRole("heading", { level: 2 })
-      expect(
-        await sectionHeadings.count(),
-        "at least one section heading renders without JS"
-      ).toBeGreaterThanOrEqual(1)
-
-      const bodyText = await page.locator("main").innerText()
-      expect(
-        bodyText.trim().length,
-        "the page body is not empty without JS"
-      ).toBeGreaterThan(400)
+    // Every text block in main and the footer paints: nothing waits for
+    // JavaScript to fade in or to be revealed. Visually hidden text (the
+    // 1px screen-reader copy) is skipped; it is meant to be invisible.
+    const hidden = await page.evaluate(() => {
+      const blocks = document.querySelectorAll(
+        "main :is(h1, h2, h3, p, li, dt, dd, blockquote, figcaption), footer :is(p, li, a)"
+      )
+      const out: string[] = []
+      for (const el of blocks) {
+        const text = (el.textContent ?? "").trim()
+        if (!text) continue
+        const r = el.getBoundingClientRect()
+        if (r.width <= 1 && r.height <= 1) continue // visually hidden copy
+        if (el.closest("[aria-hidden='true']")) continue
+        // A closed <details> (a story's roles) is collapsed by the browser,
+        // not by script: its summary shows, and it opens without JavaScript
+        // (story-roles.spec.ts).
+        const fold = el.closest("details")
+        if (fold && !fold.open && !el.closest("summary")) continue
+        const visible = el.checkVisibility({
+          opacityProperty: true,
+          visibilityProperty: true,
+        })
+        if (!visible) out.push(`${el.tagName}: ${text.slice(0, 60)}`)
+      }
+      return out
     })
+    expect(hidden, `${path}: copy hidden without JavaScript`).toEqual([])
   })
 }
 
-test.describe("/work/tenderlift renders without JS", () => {
-  test("case-study body sections render", async ({ page }) => {
-    await page.goto("/work/tenderlift")
-
+test.describe("/", () => {
+  test("the headline is one full sentence and shows its first phrase", async ({
+    page,
+  }) => {
+    await page.goto("/")
     const h1 = page.getByRole("heading", { level: 1 })
-    await expect(h1).toHaveCount(1)
-    await expect(h1).toHaveText("TenderLift")
-
-    // Body sections come from the MDX `## ` headings (Summary, Role and
-    // scope, Context, Decisions, …) — content/v3-content-contract.md.
-    const sectionHeadings = page.getByRole("heading", { level: 2 })
-    const sectionCount = await sectionHeadings.count()
-    expect(
-      sectionCount,
-      "at least one MDX body section (## heading) renders without JS"
-    ).toBeGreaterThanOrEqual(1)
-
-    const bodyText = await page.locator("body").innerText()
-    expect(bodyText).toContain("Swiss public-procurement")
+    await expect(h1).toHaveAccessibleName(HOME.headline.srText)
+    await expect(h1).toContainText(HOME.headline.prefix)
+    await expect(h1).toContainText(HOME.headline.phrases[0].phrase)
+    // The swapping line paints the first phrase.
+    const slot = page.locator("#headline h1 > [aria-hidden='true']").last()
+    await expect(slot).toBeVisible()
+    await expect(slot).toHaveText(HOME.headline.phrases[0].phrase)
   })
+
+  test(`the list is complete: all ${LIST_ROWS} rows`, async ({ page }) => {
+    await page.goto("/")
+    const list = page.getByRole("region", { name: LIST.title })
+    await expect(list.getByRole("listitem")).toHaveCount(LIST_ROWS)
+    for (const group of LIST.groups)
+      for (const row of group.rows)
+        await expect(
+          list.getByRole("listitem").filter({ hasText: row.name }).first()
+        ).toBeVisible()
+    // The toggle needs JavaScript, so it is not offered.
+    await expect(list.getByRole("button")).toHaveCount(0)
+  })
+
+  test("card actions are plain links; the cards are not", async ({ page }) => {
+    await page.goto("/")
+    const strip = page.getByRole("region", { name: STRIP_REGION })
+    const studies = HOME.recentWork.cards.flatMap((c) => {
+      if (c.kind !== "work") return []
+      const href = projectLinks(c.ref, c.title).caseStudy?.href
+      return href ? [href] : []
+    })
+    expect(studies.length).toBeGreaterThan(0)
+    await expect(strip.locator(":scope > a:not(.lc-end)")).toHaveCount(0)
+    for (const href of new Set(studies)) {
+      const link = strip.locator(`.lc-acts a[href="${href}"]`)
+      await expect(link.first()).toBeVisible()
+      await expect(link.first()).not.toHaveAttribute("aria-haspopup", /.+/)
+    }
+    // Following one is a real navigation to the case study.
+    await strip.locator(`.lc-acts a[href="${studies[0]}"]`).first().click()
+    await expect(page).toHaveURL(new RegExp(`${studies[0]}$`))
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
+  })
+
+  test("the strip scrolls natively", async ({ page }) => {
+    await page.goto("/")
+    const strip = page.getByRole("region", { name: STRIP_REGION })
+    const before = await strip.evaluate((el) => el.scrollLeft)
+    await strip.evaluate((el) =>
+      el.scrollBy({ left: 600, behavior: "instant" })
+    )
+    await expect
+      .poll(() => strip.evaluate((el) => el.scrollLeft))
+      .toBeGreaterThan(before)
+  })
+})
+
+test("the Ask button is a link to the contact line on every page", async ({
+  page,
+}) => {
+  for (const path of PAGES) {
+    await page.goto(path)
+    const ask = page
+      .getByRole("banner")
+      .getByRole("link", { name: ASK.ariaOpen })
+    await expect(ask, path).toHaveAttribute("href", "#contact")
+    await expect(page.locator("#contact"), path).toBeVisible()
+    await expect(
+      page
+        .locator("#contact")
+        .locator('a[href="https://cal.com/ruzicic/15m-discovery-session"]'),
+      `${path}: the contact line has the booking link`
+    ).toBeAttached()
+  }
+})
+
+test("/mentoring: every testimonial is present and readable", async ({
+  page,
+}) => {
+  await page.goto("/mentoring")
+  const main = page.getByRole("main")
+  for (const t of TESTIMONIALS) {
+    await expect(main.getByText(t.author, { exact: true })).toBeVisible()
+    await expect(main.getByText(t.quote)).toBeVisible()
+  }
+  await expect(main.getByRole("figure")).toHaveCount(TESTIMONIALS.length)
+})
+
+test("/work lists every row with its id", async ({ page }) => {
+  await page.goto("/work")
+  for (const group of LIST.groups)
+    for (const row of group.rows)
+      await expect(page.locator(`[id="${row.ref}"]`)).toBeVisible()
+})
+
+// Owner, 12 Nov: no arrows in the footer. Links out still open a new tab.
+test("footer links to other sites open a new tab and carry no arrow", async ({
+  page,
+}) => {
+  for (const path of ["/", "/work/tenderlift", "/mentoring", "/about"]) {
+    await page.goto(path)
+    const footer = page.locator("[data-site-footer]")
+    const outbound = footer.locator('a[href^="http"]')
+    const count = await outbound.count()
+    expect(count, `${path}: has links out`).toBeGreaterThan(0)
+    for (let i = 0; i < count; i++) {
+      const link = outbound.nth(i)
+      const href = await link.getAttribute("href")
+      await expect(link, `${path} ${href}`).toHaveAttribute("target", "_blank")
+      await expect(link, `${path} ${href}`).toHaveAttribute("rel", /noopener/)
+    }
+    await expect(
+      footer.locator("svg.ico"),
+      `${path}: no arrows in the footer`
+    ).toHaveCount(0)
+  }
 })

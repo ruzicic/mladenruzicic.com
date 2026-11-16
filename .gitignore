@@ -47,3 +47,11 @@ docs/
 
 # agent worktrees
 .claude/worktrees/
+
+# Cloudflare Worker local state and account-specific config (workers/ask/README.md)
+.wrangler/
+workers/*/.dev.vars
+workers/*/.dev.vars.*
+!workers/*/.dev.vars.example
+workers/*/deploy.local.json
+workers/*/wrangler.deploy.json

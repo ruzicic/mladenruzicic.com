@@ -1,6 +1,9 @@
-import { llmsFullTxt, TXT_CONTENT_TYPE } from "@/lib/content/markdown"
+import { llmsFullTxt, TXT_CONTENT_TYPE } from "@/lib/seo/markdown"
 
-/** `/llms-full.txt` — every public page inlined as markdown. */
+/**
+ * `/llms-full.txt`: the prepared answers, everything built with its status,
+ * and every public page inlined as markdown.
+ */
 export function GET() {
   return new Response(llmsFullTxt(), {
     headers: {

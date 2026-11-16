@@ -1,109 +1,48 @@
 import type { Metadata } from "next"
 
-import { getWork, getWorkPage } from "@/lib/content"
-import {
-  breadcrumbJsonLd,
-  itemListJsonLd,
-  jsonLdScript,
-} from "@/lib/seo/jsonld"
+import { getWorkPage } from "@/lib/content"
 import { pageMetadata } from "@/lib/seo/metadata"
 
-import {
-  Container,
-  Display,
-  Eyebrow,
-  PageTransition,
-} from "../components/primitives"
-import {
-  FILTER_IDS,
-  groupOf,
-  GROUPS,
-  topicsFor,
-  WorkCard,
-  WorkExplorer,
-  type ExplorerGroup,
-  type FilterId,
-} from "../components/work-system"
+import { Container } from "../components/primitives/Container"
+import { JsonLd } from "../components/seo/JsonLd"
+import { PageFrame } from "../components/site/PageFrame"
+import { Ledger } from "../components/work/Ledger"
 
-const copy = getWorkPage()
+const page = getWorkPage()
 
 export const metadata: Metadata = pageMetadata({
-  title: copy.seo.title,
-  description: copy.seo.description,
+  title: page.seo.title,
+  description: page.seo.description,
   path: "/work",
   type: "website",
 })
 
 /**
- * The work index — docs/v3-redesign-plan.md §6.
- *
- * Grouped Featured → Company chapters → Independent products → Experiments and
- * archive, derived from `kind` / `status` / `featured` (see `groupOf`). The
- * cards are Server Components; only the filter row and the re-parenting live on
- * the client, inside `WorkExplorer`.
+ * `/work`: every product and job in one list with what happened to it. No
+ * board exists; it is built in the language of the sub-page boards
+ * (`Landing-Mentoring.dc.html`: 64px under the top block, a Geist Serif
+ * title at 46px / 38px, one plain intro line) followed by the landing's
+ * `Ledger`, complete, with the nine stories marked. Each row's `id` is its
+ * product slug, so `/work#<slug>` (where retired case-study URLs redirect)
+ * lands on it and `:target` washes it quietly.
  */
-export default function WorkIndexPage() {
-  const work = getWork()
-
-  const withTopics = work.map((entry) => ({
-    entry,
-    topics: topicsFor(entry),
-  }))
-
-  const counts = Object.fromEntries(
-    FILTER_IDS.map((id) => [
-      id,
-      id === "all"
-        ? work.length
-        : withTopics.filter((item) => item.topics.includes(id)).length,
-    ])
-  ) as Record<FilterId, number>
-
-  const groups: ExplorerGroup[] = GROUPS.map((group) => ({
-    ...group,
-    items: withTopics
-      .filter(({ entry }) => groupOf(entry) === group.id)
-      .map(({ entry, topics }) => ({
-        slug: entry.slug,
-        topics,
-        card: <WorkCard entry={entry} />,
-      })),
-  })).filter((group) => group.items.length > 0)
-
+export default function WorkPage() {
   return (
-    <PageTransition>
-      <div>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={jsonLdScript([
-            itemListJsonLd(work),
-            breadcrumbJsonLd([
-              { name: "Home", path: "/" },
-              { name: "Work", path: "/work" },
-            ]),
-          ])}
-        />
-
-        <Container className="py-[72px] md:py-[96px]">
-          <header className="max-w-[52ch]">
-            <Eyebrow
-              items={copy.eyebrow.map((item) =>
-                item.replace("{count}", String(work.length))
-              )}
-            />
-            <Display as="h1" size="section" className="mt-6">
-              {copy.h1}
-            </Display>
-            <p className="mt-6 mb-0 text-[19px] leading-[1.5] text-dim">
-              {copy.lede}
-            </p>
-          </header>
-
-          <div className="mt-12">
-            <WorkExplorer groups={groups} counts={counts} />
-          </div>
-        </Container>
-      </div>
-    </PageTransition>
+    <PageFrame>
+      <JsonLd page="work" />
+      <Container
+        as="header"
+        className="mt-12 flex flex-col gap-4 min-[721px]:mt-16 min-[721px]:gap-[18px]"
+      >
+        <h1
+          id="work-title"
+          className="m-0 mb-1.5 font-display text-[44px] leading-[1.04] tracking-[-0.01em] text-balance text-ink min-[721px]:mb-2 min-[721px]:text-[54px] min-[721px]:leading-[1.02]"
+        >
+          {page.title}
+        </h1>
+        <p className="m-0 text-pretty text-ink-soft">{page.intro}</p>
+      </Container>
+      <Ledger complete labelledBy="work-title" />
+    </PageFrame>
   )
 }

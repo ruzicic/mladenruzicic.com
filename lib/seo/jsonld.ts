@@ -1,206 +1,579 @@
-import type { WorkEntry } from "@/lib/content/schema"
-import { COMPANIES } from "@/content/companies"
-import { SITE } from "@/content/site"
+import {
+  getAbout,
+  getBuiltList,
+  getHome,
+  getMedia,
+  getMentoring,
+  getPress,
+  getProduct,
+  getSite,
+  getStory,
+  getWorkPage,
+} from "@/lib/content"
+import {
+  columnStills,
+  type Product,
+  type WorkEntry,
+} from "@/lib/content/schema"
+
+import {
+  canonical,
+  identity,
+  ownProducts,
+  productDescription,
+} from "./markdown"
 
 /**
- * JSON-LD builders. Values come from `content/`, so there is one source of truth
- * for the page copy, the markdown mirrors and the structured data.
+ * JSON-LD: one connected graph per page, with stable `@id`s, built from
+ * `lib/content` so the structured data says what the page says and nothing
+ * more.
  *
- * Everything here is a plain object: pass it through `jsonLdScript()` into a
- * `<script type="application/ld+json">`.
+ * The entity core (Person, WebSite, the organisations in his history and the
+ * products he made) is on every page, so each page's graph is self-contained
+ * and every `@id` it references resolves inside the same script. Page nodes
+ * (ProfilePage, CollectionPage + ItemList, Article + BreadcrumbList, Service)
+ * sit on top and point into the core.
+ *
+ * Cross-linking (the owner's "cross-link my projects to and from me"): every
+ * product he made names the Person as `creator`, and the Person lists them
+ * back with `@reverse: { creator }`; TenderLift the company names him as
+ * `founder` and appears in his `worksFor`.
+ *
+ * Deliberately absent:
+ *   · Employers in the identity. `description` and `jobTitle` are generic;
+ *     employers appear only as `worksFor` / `alumniOf`.
+ *   · Reviews. The mentee testimonials are first-party (hosted on his own
+ *     site, about his own service); Google's review-snippet policy treats
+ *     those as self-serving and ineligible, so they are not marked up as
+ *     `Review`s. They stay visible on `/mentoring` and in its markdown twin.
+ *   · Metrics of any kind, and anything not in `content/`.
+ *
+ * `@id` scheme: `<origin>/#person`, `/#website`, `/#headshot`,
+ * `/#org-tenderlift`; every list row's entity is `/work#<slug>`, the URL of
+ * that row on `/work`; page nodes are `<page url>#webpage`, `#breadcrumb`,
+ * `#article`, `#list`, `#service`.
  */
 
-const PERSON_ID = `${SITE.url}/#person`
-const WEBSITE_ID = `${SITE.url}/#website`
+const site = getSite()
+const ORIGIN = site.url
+
+const ID = {
+  person: `${ORIGIN}/#person`,
+  website: `${ORIGIN}/#website`,
+  headshot: `${ORIGIN}/#headshot`,
+  tenderliftOrg: `${ORIGIN}/#org-tenderlift`,
+  entity: (slug: string) => `${ORIGIN}/work#${slug}`,
+  page: (path: string) => `${canonical(path)}#webpage`,
+  breadcrumb: (path: string) => `${canonical(path)}#breadcrumb`,
+} as const
+
+type Node = Record<string, unknown>
+const ref = (id: string) => ({ "@id": id })
+
+/** Without diacritics, for searches typed on an English keyboard. */
+const ASCII_NAME = site.name.normalize("NFD").replace(/\p{Diacritic}/gu, "")
+
+const LANGUAGE_CODES: Record<string, string> = {
+  Serbian: "sr",
+  English: "en",
+  Italian: "it",
+}
 
 /* -------------------------------------------------------------------------- */
-/* Person / WebSite                                                           */
+/* Entities                                                                   */
 /* -------------------------------------------------------------------------- */
 
-export function personJsonLd() {
-  const current = COMPANIES.find((c) => c.to === "now")
-  const past = COMPANIES.filter((c) => c.to !== "now" && c.id !== "freelance")
+/** Employers, newest first: the first is current (`worksFor`), the rest `alumniOf`. */
+const EMPLOYERS = [
+  "zf-scalar",
+  "shopify",
+  "hegias",
+  "wolkabout",
+  "execom",
+  "nemestic",
+]
 
+/**
+ * Companies on the list that he did freelance work for (Internxt). Neither an
+ * employer (`worksFor` / `alumniOf`) nor a product he made (`creator`): a
+ * plain Organization, so the list row's `item` resolves.
+ */
+const CLIENTS = ["internxt"]
+
+/** Products he worked on inside a job: he contributed, the employer published. */
+const EMPLOYER_PRODUCTS: Record<string, string> = {
+  "evo-touch": "zf-scalar",
+  "shop-minis": "shopify",
+}
+
+/**
+ * schema.org type and `applicationCategory` per own product. An SEO judgement,
+ * not copy, so it lives here rather than in content. Retired products are
+ * plain `CreativeWork`s: there is nothing left to install or visit.
+ */
+const PRODUCT_TYPES: Record<string, { type: string; category?: string }> = {
+  tenderlift: { type: "WebApplication", category: "BusinessApplication" },
+  zarez: { type: "SoftwareApplication", category: "UtilitiesApplication" },
+  fontalternatives: { type: "WebSite" },
+  "studenti-rs": { type: "WebSite" },
+  ona: { type: "Organization" },
+  "evo-touch": { type: "SoftwareApplication", category: "BusinessApplication" },
+  "shop-minis": {
+    type: "SoftwareApplication",
+    category: "ShoppingApplication",
+  },
+}
+
+const IN_LANGUAGE: Record<string, string> = { "studenti-rs": "sr", zarez: "sr" }
+
+/** `YYYY` or `YYYY-MM` the product started, only where content confirms one. */
+function dateCreated(p: Product): string | undefined {
+  const story = p.story && p.story === p.slug ? getStory(p.story) : undefined
+  if (story) return story.period.from
+  return p.year?.match(/^\d{4}/)?.[0]
+}
+
+/** A story or list URL for a product: its story if it has one, else its row. */
+function entityPage(p: Product): string {
+  return p.story ? canonical(`/work/${p.story}`) : ID.entity(p.slug)
+}
+
+/** The story about a product, inline, so the `@id` resolves on every page. */
+function storyStub(slug: string): Node | undefined {
+  const story = getStory(slug)
+  if (!story) return undefined
+  const url = canonical(`/work/${slug}`)
   return {
-    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${url}#article`,
+    url,
+    headline: story.title,
+  }
+}
+
+/** Where content says what it runs on. Everything else is left unsaid. */
+const OPERATING_SYSTEM: Record<string, string> = {
+  tenderlift: "Web",
+}
+
+function productNode(p: Product): Node {
+  const typing = PRODUCT_TYPES[p.slug]
+  const retired = p.status === "Retired"
+  const type = retired ? "CreativeWork" : (typing?.type ?? "CreativeWork")
+  const employer = EMPLOYER_PRODUCTS[p.slug]
+
+  const node: Node = {
+    "@type": type,
+    "@id": ID.entity(p.slug),
+    name: p.name,
+    ...(productDescription(p) ? { description: productDescription(p) } : null),
+    ...(p.url ? { url: p.url } : null),
+    ...(p.story ? { subjectOf: storyStub(p.story) } : null),
+  }
+
+  if (type === "Organization") {
+    // ONA: he runs it, the bags are someone else's work; no founder claim.
+    node.member = ref(ID.person)
+    return node
+  }
+
+  if (typing?.category && !retired) node.applicationCategory = typing.category
+  if (OPERATING_SYSTEM[p.slug]) node.operatingSystem = OPERATING_SYSTEM[p.slug]
+  // "Day job" describes his role, not the product's state.
+  if (p.status && !employer) node.creativeWorkStatus = p.status
+  const created = dateCreated(p)
+  if (created) node.dateCreated = created
+  if (IN_LANGUAGE[p.slug]) node.inLanguage = IN_LANGUAGE[p.slug]
+
+  if (employer) {
+    node.contributor = ref(ID.person)
+    node.publisher = ref(ID.entity(employer))
+  } else {
+    node.creator = ref(ID.person)
+    node.author = ref(ID.person)
+    if (p.slug === "tenderlift") node.publisher = ref(ID.tenderliftOrg)
+  }
+  if (!p.url) node.mainEntityOfPage = entityPage(p)
+  return node
+}
+
+function employerNode(slug: string): Node {
+  const p = getProduct(slug)!
+  return {
+    "@type": "Organization",
+    "@id": ID.entity(slug),
+    name: p.name,
+  }
+}
+
+function clientNode(slug: string): Node {
+  const p = getProduct(slug)!
+  return {
+    "@type": "Organization",
+    "@id": ID.entity(slug),
+    name: p.name,
+    ...(p.url ? { url: p.url } : null),
+  }
+}
+
+function tenderliftOrgNode(): Node {
+  const p = getProduct("tenderlift")!
+  return {
+    "@type": "Organization",
+    "@id": ID.tenderliftOrg,
+    name: p.name,
+    url: p.url,
+    founder: ref(ID.person),
+    ...(dateCreated(p) ? { foundingDate: dateCreated(p) } : null),
+    location: { "@type": "Country", name: "Switzerland" },
+  }
+}
+
+function headshotNode(): Node {
+  const media = getMedia(site.headshot.src)
+  return {
+    "@type": "ImageObject",
+    "@id": ID.headshot,
+    url: `${ORIGIN}${site.headshot.src}`,
+    contentUrl: `${ORIGIN}${site.headshot.src}`,
+    ...(media ? { width: media.width, height: media.height } : null),
+    caption: site.headshot.alt,
+    creditText: site.name,
+  }
+}
+
+/** Products he made himself, the targets of the Person's `@reverse.creator`. */
+function madeProducts(): Product[] {
+  return ownProducts()
+}
+
+function personNode(): Node {
+  const [current, ...past] = EMPLOYERS
+  return {
     "@type": "Person",
-    "@id": PERSON_ID,
-    name: SITE.name,
-    url: SITE.url,
-    image: `${SITE.url}/mladen-ruzicic.png`,
-    jobTitle: SITE.roles,
-    description: SITE.tagline,
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: SITE.location.city,
-      addressCountry: SITE.location.country,
-    },
-    worksFor: [
-      ...(current ? [{ "@type": "Organization", name: current.name }] : []),
-      {
-        "@type": "Organization",
-        name: "TenderLift",
-        url: "https://tenderlift.ch",
+    "@id": ID.person,
+    name: site.name,
+    alternateName: ASCII_NAME,
+    givenName: site.name.split(" ")[0],
+    familyName: site.name.split(" ").slice(1).join(" "),
+    url: ORIGIN,
+    email: `mailto:${site.links.email}`,
+    image: ref(ID.headshot),
+    description: identity(),
+    // Generic roles, never tied to an employer.
+    jobTitle: ["Global Product Owner", "Founder", "Mentor"],
+    knowsLanguage: site.languages.map((name) => ({
+      "@type": "Language",
+      name,
+      ...(LANGUAGE_CODES[name]
+        ? { alternateName: LANGUAGE_CODES[name] }
+        : null),
+    })),
+    homeLocation: {
+      "@type": "Place",
+      name: site.location.label,
+      address: {
+        "@type": "PostalAddress",
+        addressRegion: site.location.region,
+        addressCountry: site.location.country,
       },
-    ],
-    alumniOf: past.map((c) => ({ "@type": "Organization", name: c.name })),
-    sameAs: [SITE.links.linkedin, SITE.links.github, SITE.links.mentorcruise],
+    },
     knowsAbout: [
-      "product management",
-      "design systems",
-      "React",
-      "TypeScript",
-      "AI-native product development",
-      "public procurement",
-      "mentoring",
+      "Product ownership",
+      "Building products with AI agents",
+      "Design systems",
+      "Frontend engineering",
+      "Swiss public procurement",
+      "Mentoring",
     ],
+    worksFor: [ref(ID.entity(current)), ref(ID.tenderliftOrg)],
+    alumniOf: past.map((slug) => ref(ID.entity(slug))),
+    memberOf: ownProducts()
+      .filter((p) => PRODUCT_TYPES[p.slug]?.type === "Organization")
+      .map((p) => ref(ID.entity(p.slug))),
+    sameAs: [
+      site.links.x,
+      site.links.linkedin,
+      site.links.github,
+      site.links.mentorcruise,
+    ],
+    "@reverse": {
+      creator: madeProducts()
+        .filter((p) => PRODUCT_TYPES[p.slug]?.type !== "Organization")
+        .map((p) => ref(ID.entity(p.slug))),
+      contributor: Object.keys(EMPLOYER_PRODUCTS).map((slug) =>
+        ref(ID.entity(slug))
+      ),
+    },
   }
 }
 
-/** The site itself. Emitted once, from the root layout. */
-export function webSiteJsonLd() {
+function websiteNode(): Node {
   return {
-    "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": WEBSITE_ID,
-    name: SITE.name,
-    url: SITE.url,
-    description: SITE.description,
+    "@id": ID.website,
+    name: site.name,
+    alternateName: ASCII_NAME,
+    url: ORIGIN,
+    description: getHome().seo.description,
     inLanguage: "en",
-    publisher: { "@id": PERSON_ID },
+    publisher: ref(ID.person),
+    author: ref(ID.person),
+    about: ref(ID.person),
   }
 }
 
+/** Person, WebSite, headshot, organisations and products: on every page. */
+function core(): Node[] {
+  return [
+    personNode(),
+    headshotNode(),
+    websiteNode(),
+    tenderliftOrgNode(),
+    ...EMPLOYERS.map(employerNode),
+    ...CLIENTS.map(clientNode),
+    ...madeProducts().map(productNode),
+    ...Object.keys(EMPLOYER_PRODUCTS).map((slug) =>
+      productNode(getProduct(slug)!)
+    ),
+  ]
+}
+
 /* -------------------------------------------------------------------------- */
-/* Pages                                                                      */
+/* Page nodes                                                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface PageJsonLdInput {
+interface Crumb {
   name: string
-  description: string
-  /** Path with a leading slash. */
   path: string
-  /** `YYYY-MM-DD`, when the content declares one. */
-  dateModified?: string
 }
 
-/** Generic `WebPage`. Used by `/mentoring` and `/uses`. */
-export function webPageJsonLd({
-  name,
-  description,
-  path,
-  dateModified,
-}: PageJsonLdInput) {
+function breadcrumbNode(path: string, crumbs: Crumb[]): Node {
   return {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name,
-    description,
-    url: `${SITE.url}${path}`,
-    inLanguage: "en",
-    isPartOf: { "@id": WEBSITE_ID },
-    about: { "@id": PERSON_ID },
-    ...(dateModified ? { dateModified } : null),
-  }
-}
-
-/** `/about` — a `ProfilePage` whose `mainEntity` is the Person. */
-export function profilePageJsonLd({
-  name,
-  description,
-  path,
-  dateModified,
-}: PageJsonLdInput) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "ProfilePage",
-    name,
-    description,
-    url: `${SITE.url}${path}`,
-    inLanguage: "en",
-    isPartOf: { "@id": WEBSITE_ID },
-    mainEntity: { "@id": PERSON_ID },
-    ...(dateModified ? { dateModified } : null),
-  }
-}
-
-/* -------------------------------------------------------------------------- */
-/* Work                                                                       */
-/* -------------------------------------------------------------------------- */
-
-export function creativeWorkJsonLd(entry: WorkEntry) {
-  const company = entry.company
-    ? COMPANIES.find((c) => c.id === entry.company)
-    : undefined
-
-  const from = entry.period.from
-  // ISO 8601 spells an open-ended interval `2024/..`. An empty right-hand side
-  // (`2024/`) is not a valid interval and schema.org consumers drop it.
-  const to = entry.period.to === "now" ? ".." : entry.period.to
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "CreativeWork",
-    "@id": `${SITE.url}/work/${entry.slug}#work`,
-    name: entry.title,
-    abstract: entry.line,
-    description: entry.detail,
-    url: `${SITE.url}/work/${entry.slug}`,
-    ...(entry.url ? { sameAs: [entry.url] } : null),
-    creator: { "@id": PERSON_ID },
-    author: { "@id": PERSON_ID },
-    ...(company
-      ? { sourceOrganization: { "@type": "Organization", name: company.name } }
-      : null),
-    temporalCoverage: `${from}/${to}`,
-    genre: entry.kind,
-    keywords: entry.tech.join(", "),
-    isPartOf: { "@id": WEBSITE_ID },
-  }
-}
-
-/** `/work` — the index, in the order the page renders it. */
-export function itemListJsonLd(
-  entries: WorkEntry[],
-  { name = "Work", path = "/work" } = {}
-) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name,
-    url: `${SITE.url}${path}`,
-    numberOfItems: entries.length,
-    itemListOrder: "https://schema.org/ItemListOrderAscending",
-    itemListElement: entries.map((entry, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: entry.title,
-      description: entry.line,
-      url: `${SITE.url}/work/${entry.slug}`,
-    })),
-  }
-}
-
-export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
-  return {
-    "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: items.map((item, i) => ({
+    "@id": ID.breadcrumb(path),
+    itemListElement: crumbs.map((c, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      name: item.name,
-      // `/` would give a trailing slash the home `<link rel=canonical>` and the
-      // sitemap `<loc>` do not have. Same document, same spelling everywhere.
-      item: item.path === "/" ? SITE.url : `${SITE.url}${item.path}`,
+      name: c.name,
+      item: canonical(c.path),
     })),
   }
+}
+
+function webPageNode(
+  type: string,
+  path: string,
+  name: string,
+  description: string,
+  extra: Node = {}
+): Node {
+  return {
+    "@type": type,
+    "@id": ID.page(path),
+    url: canonical(path),
+    name,
+    description,
+    inLanguage: "en",
+    isPartOf: ref(ID.website),
+    dateModified: site.updated,
+    ...(path === "/" ? null : { breadcrumb: ref(ID.breadcrumb(path)) }),
+    ...extra,
+  }
+}
+
+const HOME_CRUMB: Crumb = { name: "Home", path: "/" }
+
+function graph(nodes: Node[]) {
+  return { "@context": "https://schema.org", "@graph": nodes }
+}
+
+export function homeJsonLd() {
+  const home = getHome()
+  return graph([
+    webPageNode("ProfilePage", "/", home.seo.title, home.seo.description, {
+      mainEntity: ref(ID.person),
+      about: ref(ID.person),
+      primaryImageOfPage: ref(ID.headshot),
+    }),
+    ...core(),
+  ])
+}
+
+export function aboutJsonLd() {
+  const about = getAbout()
+  return graph([
+    webPageNode(
+      "ProfilePage",
+      "/about",
+      about.seo.title,
+      about.seo.description,
+      {
+        mainEntity: ref(ID.person),
+        about: ref(ID.person),
+        primaryImageOfPage: ref(ID.headshot),
+      }
+    ),
+    breadcrumbNode("/about", [
+      HOME_CRUMB,
+      { name: about.seo.title, path: "/about" },
+    ]),
+    ...core(),
+  ])
+}
+
+export function pressJsonLd() {
+  const press = getPress()
+  return graph([
+    webPageNode("WebPage", "/press", press.seo.title, press.seo.description, {
+      about: ref(ID.person),
+      primaryImageOfPage: ref(ID.headshot),
+    }),
+    breadcrumbNode("/press", [
+      HOME_CRUMB,
+      { name: press.seo.title, path: "/press" },
+    ]),
+    ...core(),
+  ])
+}
+
+export function workJsonLd() {
+  const copy = getWorkPage()
+  const rows = getBuiltList().groups.flatMap((g) => g.rows)
+  const listId = `${canonical("/work")}#list`
+  return graph([
+    webPageNode(
+      "CollectionPage",
+      "/work",
+      copy.seo.title,
+      copy.seo.description,
+      {
+        mainEntity: ref(listId),
+        about: ref(ID.person),
+      }
+    ),
+    {
+      "@type": "ItemList",
+      "@id": listId,
+      name: copy.title,
+      numberOfItems: rows.length,
+      itemListOrder: "https://schema.org/ItemListUnordered",
+      itemListElement: rows.map((row, i) => {
+        const p = getProduct(row.ref)
+        return {
+          "@type": "ListItem",
+          position: i + 1,
+          name: row.name,
+          description: row.what,
+          url: p?.story ? canonical(`/work/${p.story}`) : ID.entity(row.ref),
+          item: ref(ID.entity(row.ref)),
+        }
+      }),
+    },
+    breadcrumbNode("/work", [
+      HOME_CRUMB,
+      { name: copy.seo.title, path: "/work" },
+    ]),
+    ...core(),
+  ])
+}
+
+export function mentoringJsonLd() {
+  const copy = getMentoring()
+  const serviceId = `${canonical("/mentoring")}#service`
+  return graph([
+    webPageNode("WebPage", "/mentoring", copy.seo.title, copy.seo.description, {
+      mainEntity: ref(serviceId),
+      about: ref(ID.person),
+    }),
+    {
+      "@type": "Service",
+      "@id": serviceId,
+      name: copy.section,
+      serviceType: "Mentoring",
+      description: copy.seo.description,
+      url: canonical("/mentoring"),
+      provider: ref(ID.person),
+      availableChannel: {
+        "@type": "ServiceChannel",
+        serviceUrl: site.links.mentorcruise,
+        name: "MentorCruise",
+      },
+    },
+    breadcrumbNode("/mentoring", [
+      HOME_CRUMB,
+      { name: copy.section, path: "/mentoring" },
+    ]),
+    ...core(),
+  ])
+}
+
+/** What a story is about: its product, or the employer and the product inside it. */
+function storyAbout(entry: WorkEntry): { "@id": string }[] {
+  if (entry.slug === "zf-scalar")
+    return [ref(ID.entity("zf-scalar")), ref(ID.entity("evo-touch"))]
+  if (entry.slug === "shopify")
+    return [ref(ID.entity("shopify")), ref(ID.entity("shop-minis"))]
+  return [ref(ID.entity(entry.slug))]
+}
+
+export function storyJsonLd(slug: string) {
+  const entry = getStory(slug)
+  if (!entry) return undefined
+  const path = `/work/${entry.slug}`
+  const url = canonical(path)
+  const image = columnStills(entry.column)[0]?.src
+  const workPage = getWorkPage()
+  return graph([
+    webPageNode(
+      "WebPage",
+      path,
+      entry.seo.title ?? entry.title,
+      entry.seo.description,
+      {
+        mainEntity: ref(`${url}#article`),
+        about: storyAbout(entry),
+        dateModified: entry.updated ?? site.updated,
+      }
+    ),
+    {
+      "@type": "Article",
+      "@id": `${url}#article`,
+      headline: entry.title,
+      alternativeHeadline: entry.line,
+      description: entry.seo.description,
+      url,
+      mainEntityOfPage: ref(ID.page(path)),
+      isPartOf: ref(ID.website),
+      author: ref(ID.person),
+      publisher: ref(ID.person),
+      about: storyAbout(entry),
+      dateModified: entry.updated ?? site.updated,
+      inLanguage: "en",
+      image: image ? `${ORIGIN}${image}` : `${url}/opengraph-image`,
+      ...(entry.tech.length ? { keywords: entry.tech.join(", ") } : null),
+    },
+    breadcrumbNode(path, [
+      HOME_CRUMB,
+      { name: workPage.seo.title, path: "/work" },
+      { name: entry.title, path },
+    ]),
+    ...core(),
+  ])
 }
 
 /* -------------------------------------------------------------------------- */
 /* Serialisation                                                              */
 /* -------------------------------------------------------------------------- */
 
-/** Serialise for a `<script type="application/ld+json">` tag. */
-export function jsonLdScript(data: unknown) {
-  return { __html: JSON.stringify(data).replace(/</g, "\\u003c") }
+/**
+ * Serialise for a `<script type="application/ld+json">`. `<` is escaped so no
+ * string in content can close the script element; U+2028/2029 are escaped
+ * because they end a line in some JavaScript parsers.
+ */
+export function serializeJsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replaceAll(String.fromCharCode(0x2028), "\\u2028")
+    .replaceAll(String.fromCharCode(0x2029), "\\u2029")
 }

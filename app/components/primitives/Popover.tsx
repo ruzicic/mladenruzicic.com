@@ -1,13 +1,15 @@
 "use client"
 
-import { useEffect, useId, type ReactNode } from "react"
-
-import { cn } from "@/lib/utils"
+import { useEffect, useId, type CSSProperties, type ReactNode } from "react"
+// clsx, not `cn`: this renders inside client islands, and `cn` pulls
+// tailwind-merge (about 8 KB gzipped) into their chunks. No caller passes a
+// class that conflicts with the ones set here, so there is nothing to merge.
+import { clsx as cn } from "clsx"
 
 /**
- * Loads the CSS anchor-positioning polyfill once, and only where the browser
- * lacks native support (Safari ≤ 18, Firefox ≤ 146).
- * docs/v3-redesign-plan.md §5.6.
+ * CSS anchor positioning is not Baseline yet (checked with modern-web-guidance
+ * on 2026-11-11: "Limited availability"), so the polyfill stays. It loads once,
+ * and only where the browser lacks native support.
  */
 let polyfillPromise: Promise<unknown> | null = null
 function ensureAnchorPositioning() {
@@ -21,39 +23,50 @@ function ensureAnchorPositioning() {
 
 export interface PopoverProps {
   /**
-   * The invoker. Receives `popovertarget` and `popovertargetaction` props —
-   * render a `<button>` (or `Button` with no `href`).
+   * The invoker. Spread the props onto a real `<button>`: they carry
+   * `popoverTarget`, the trigger `id` and the explicit `anchor-name` the
+   * polyfill needs (it does not understand implicit popover anchors).
    */
   trigger: (props: {
     popoverTarget: string
     id: string
-    style: React.CSSProperties
+    style: CSSProperties
   }) => ReactNode
   children: ReactNode
   /**
-   * Where the panel sits relative to the anchor, as a `position-area` value.
-   * Default `block-end span-inline-end` (below, aligned to the start edge).
+   * Which side of the anchor the panel opens on. `below` (default) aligns the
+   * panel's start edge with the anchor's start edge; `above` mirrors it.
+   * Either one flips when it would overflow the viewport.
    */
-  positionArea?: string
-  /** `position-try-fallbacks` value. Default flips to the block-start side. */
-  fallbacks?: string
+  side?: "below" | "above"
   className?: string
-  /** Accessible label for the panel. */
+  /** Accessible label for the panel (named as a `group`). */
   label?: string
+  /**
+   * The panel's element. `span` lets a popover live inside a `<p>`: the
+   * panel is in the top layer while open, so it never lays out inline, and
+   * keeping it right after its trigger keeps the reading order. Its content
+   * must then be phrasing content (spans, links, buttons).
+   */
+  as?: "div" | "span"
 }
 
 /**
- * Popover API panel (`popover="auto"`: top layer, light dismiss, Escape) placed
- * with CSS anchor positioning. Keyboard and touch behave identically to mouse —
- * there is no hover-only path.
+ * Popover API panel (`popover="auto"`: top layer, light dismiss, Escape),
+ * tethered with CSS anchor positioning. Keyboard and touch behave the same as
+ * a mouse; there is no hover-only path.
+ *
+ * It positions with `anchor()` on the inset properties rather than
+ * `position-area`, because the polyfill cannot combine `position-area` with
+ * `position-try-fallbacks`.
  */
 export function Popover({
   trigger,
   children,
-  positionArea = "block-end span-inline-end",
-  fallbacks = "block-start span-inline-end, block-end span-inline-start, block-start span-inline-start",
+  side = "below",
   className,
   label,
+  as: Panel = "div",
 }: PopoverProps) {
   const raw = useId().replace(/[^a-zA-Z0-9]/g, "")
   const panelId = `pop-${raw}`
@@ -62,34 +75,41 @@ export function Popover({
     ensureAnchorPositioning()
   }, [])
 
+  const placement: CSSProperties =
+    side === "below"
+      ? { top: "anchor(bottom)", left: "anchor(left)", marginTop: "8px" }
+      : { bottom: "anchor(top)", left: "anchor(left)", marginBottom: "8px" }
+
   return (
     <>
       {trigger({
         popoverTarget: panelId,
         id: `${panelId}-trigger`,
-        style: { anchorName: anchorId } as React.CSSProperties,
+        style: { anchorName: anchorId } as CSSProperties,
       })}
-      <div
+      <Panel
         id={panelId}
         popover="auto"
+        role={label ? "group" : undefined}
         aria-label={label}
         className={cn(
-          "m-0 max-w-[min(92vw,360px)] rounded-sm border border-line bg-surface-2 p-4 text-fg",
+          "m-0 max-w-[min(calc(100vw-32px),360px)] rounded-panel border border-rule bg-surface p-4 text-ui text-ink",
+          "shadow-[0_1px_2px_rgb(17_17_17/0.05),0_18px_44px_-14px_rgb(17_17_17/0.18)]",
           "[&:not(:popover-open)]:hidden",
           className
         )}
         style={
           {
             positionAnchor: anchorId,
-            positionArea,
-            positionTryFallbacks: fallbacks,
-            marginBlock: "8px",
             inset: "auto",
-          } as React.CSSProperties
+            ...placement,
+            positionTryFallbacks:
+              "flip-block, flip-inline, flip-block flip-inline",
+          } as CSSProperties
         }
       >
         {children}
-      </div>
+      </Panel>
     </>
   )
 }

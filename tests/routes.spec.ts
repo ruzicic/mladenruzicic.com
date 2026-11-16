@@ -1,145 +1,213 @@
 import { expect, test } from "@playwright/test"
 
-import {
-  collectConsoleErrors,
-  readSitemapUrls,
-  toPathname,
-  waitForRouteReady,
-} from "./helpers"
+import nextConfig from "../next.config"
+import { collectConsoleErrors, PAGES, STORY_SLUGS } from "./helpers"
 
 /**
- * Route-level health check, driven entirely by `/sitemap.xml` so a new
- * `content/work/*.mdx` entry is covered without touching this file — see
- * docs/v3-content-contract.md.
- *
- * TIMING. Every route is checked in one test so the sitemap is fetched once and
- * one browser context is reused, but each route is its own `test.step` with its
- * own {@link PER_ROUTE_MS} budget: a route that hangs fails as that route
- * instead of eating the whole suite's clock and reporting as "test timeout".
- * The old shape waited for `networkidle` on every route, which never settles on
- * the pages with a hero canvas, a shader header or the scroll hairline running
- * rAF, so each of those silently burned its wait before a swallowed timeout —
- * hence the old 600 s budget. {@link waitForRouteReady} waits for document
- * load, the preloader and webfonts instead, all of which do settle.
+ * Route health: every real page answers 200 with one `<h1>`, a title, a meta
+ * description and a canonical; every redirect `next.config.ts` declares
+ * answers 308 to its destination; unknown paths answer 404 with a page of
+ * their own.
  */
 
-/** Per-route budget. Generous for a prod build; a hang still fails fast. */
-const PER_ROUTE_MS = 20_000
-/** 24 routes × PER_ROUTE_MS, plus room for the sitemap fetch and startup. */
-const SUITE_MS = 180_000
+const CANONICAL_ORIGIN = "https://mladenruzicic.com"
 
-test.describe("sitemap routes", () => {
-  test("every /sitemap.xml URL renders: 200, one <h1>, <title>, meta description, canonical, no console errors", async ({
-    page,
-    request,
-    baseURL,
-  }) => {
-    test.setTimeout(SUITE_MS)
+test.describe("pages", () => {
+  for (const path of PAGES) {
+    test(`${path} renders: 200, one h1, title, description, canonical`, async ({
+      page,
+    }) => {
+      const log = collectConsoleErrors(page)
+      const res = await page.goto(path)
+      expect(res?.status(), `${path} status`).toBe(200)
 
-    const urls = await readSitemapUrls(request, baseURL!)
-    expect(urls.length, "sitemap.xml lists at least one URL").toBeGreaterThan(0)
+      await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1)
+      await expect(page.locator("h1")).toHaveCount(1)
 
-    const consoleErrors = collectConsoleErrors(page)
-    /** Routes that failed at least one soft check, for the summary at the end. */
-    const failed: string[] = []
+      await expect(page).toHaveTitle(/\S/)
+      const description = page.locator('head meta[name="description"]')
+      await expect(description).toHaveCount(1)
+      expect(
+        (await description.getAttribute("content"))?.trim().length ?? 0,
+        `${path} meta description is not empty`
+      ).toBeGreaterThan(20)
 
-    for (const url of urls) {
-      const pathname = toPathname(url, baseURL!)
+      const canonical = page.locator('head link[rel="canonical"]')
+      await expect(canonical).toHaveCount(1)
+      const href = await canonical.getAttribute("href")
+      expect(
+        new URL(href ?? "", CANONICAL_ORIGIN).pathname.replace(/\/$/, "") ||
+          "/",
+        `${path} canonical points at itself`
+      ).toBe(path)
+      expect(href?.startsWith(CANONICAL_ORIGIN), "canonical is absolute").toBe(
+        true
+      )
 
-      await test.step(pathname, async () => {
-        const errorsBefore = consoleErrors.errors.length
-        const softFailuresBefore = test.info().errors.length
-        const deadline = Date.now() + PER_ROUTE_MS
-        const left = () => Math.max(1_000, deadline - Date.now())
+      await expect(page.getByRole("main")).toBeVisible()
+      await expect(page.getByRole("banner")).toBeVisible()
+      await expect(page.getByRole("contentinfo")).toBeVisible()
+      // `#contact` is where the no-JS Ask link points, on every page.
+      await expect(page.locator("#contact")).toHaveCount(1)
 
-        const response = await page.goto(pathname, { timeout: left() })
-        expect.soft(response?.status(), `${pathname} responds 200`).toBe(200)
-
-        await expect
-          .soft(page.locator("h1"), `${pathname} has exactly one <h1>`)
-          .toHaveCount(1, { timeout: left() })
-
-        await expect
-          .soft(page, `${pathname} has a non-empty <title>`)
-          .toHaveTitle(/.+/, { timeout: left() })
-
-        const description = page.locator('meta[name="description"]')
-        await expect
-          .soft(description, `${pathname} has a meta description tag`)
-          .toHaveCount(1, { timeout: left() })
-        const descriptionContent = await description
-          .getAttribute("content")
-          .catch(() => null)
-        expect
-          .soft(
-            descriptionContent !== null && descriptionContent.trim().length > 0,
-            `${pathname} meta description is non-empty`
-          )
-          .toBe(true)
-
-        const canonical = page.locator('link[rel="canonical"]')
-        await expect
-          .soft(canonical, `${pathname} has a canonical link`)
-          .toHaveCount(1, { timeout: left() })
-
-        // Hydration, the preloader and webfonts settle before errors are judged
-        // — a route with a continuous rAF loop never goes network-idle.
-        await waitForRouteReady(page, left())
-
-        const newErrors = consoleErrors.errors.slice(errorsBefore)
-        expect
-          .soft(newErrors, `${pathname} logs zero console errors`)
-          .toEqual([])
-
-        if (test.info().errors.length > softFailuresBefore)
-          failed.push(pathname)
-      })
-    }
-
-    test.info().annotations.push({
-      type: "routes:checked",
-      description: `${urls.length} sitemap route(s); ${failed.length} with failures${
-        failed.length ? `: ${failed.join(", ")}` : ""
-      }`,
+      expect(log.errors, `${path} console errors`).toEqual([])
     })
+  }
+})
+
+// The site's icon is its own mark (app/icon.svg), with PNG and ICO copies
+// made from it for the browsers and devices that take no SVG.
+test.describe("icons", () => {
+  const ICONS: [string, string][] = [
+    ["/favicon.ico", "image/x-icon"],
+    ["/icon.svg", "image/svg+xml"],
+    ["/icon1.png", "image/png"],
+    ["/apple-icon.png", "image/png"],
+  ]
+  for (const [path, type] of ICONS) {
+    test(`${path} answers 200 as ${type}`, async ({ request }) => {
+      const res = await request.get(path)
+      expect(res.status()).toBe(200)
+      expect(res.headers()["content-type"]).toContain(type)
+      expect((await res.body()).length).toBeGreaterThan(200)
+    })
+  }
+
+  test("the page head links the favicon, the icons and the apple icon", async ({
+    page,
+  }) => {
+    await page.goto("/")
+    const head = page.locator("head")
+    await expect(
+      head.locator('link[rel="icon"][href^="/favicon.ico"]')
+    ).toHaveCount(1)
+    await expect(
+      head.locator('link[rel="icon"][href^="/icon.svg"][type="image/svg+xml"]')
+    ).toHaveCount(1)
+    await expect(
+      head.locator('link[rel="icon"][href^="/icon1.png"][sizes="192x192"]')
+    ).toHaveCount(1)
+    await expect(
+      head.locator(
+        'link[rel="apple-touch-icon"][href^="/apple-icon.png"][sizes="180x180"]'
+      )
+    ).toHaveCount(1)
+    await expect(head.locator('link[href*="mladen-ruzicic"]')).toHaveCount(0)
   })
 })
 
-test.describe("redirects and error routes", () => {
-  test("/mentorship redirects 308 to /mentoring", async ({
+test.describe("redirects", () => {
+  test("every redirect in next.config.ts answers 308 to its destination", async ({
     request,
-    baseURL,
   }) => {
-    const redirect = await request.get(`${baseURL}/mentorship`, {
-      maxRedirects: 0,
+    const redirects = (await nextConfig.redirects?.()) ?? []
+    expect(redirects.length).toBeGreaterThan(0)
+    for (const r of redirects) {
+      expect(r.permanent, `${r.source} is permanent`).toBe(true)
+      const res = await request.get(r.source, { maxRedirects: 0 })
+      expect(res.status(), `${r.source} status`).toBe(308)
+      const location = new URL(res.headers()["location"] ?? "", "http://x")
+      expect(`${location.pathname}${location.hash}`, r.source).toBe(
+        r.destination
+      )
+    }
+  })
+
+  test("/uses lands on /about", async ({ page }) => {
+    await page.goto("/uses")
+    await expect(page).toHaveURL(/\/about$/)
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
+  })
+
+  test("a retired slug lands on its row on /work, or on /work", async ({
+    page,
+  }) => {
+    await page.goto("/work/boxium")
+    await expect(page).toHaveURL(/\/work$/)
+  })
+
+  // Removed from the site (13 Nov 2026): no page, no row, no tile.
+  for (const slug of ["avataurus", "montepop"]) {
+    test(`/work/${slug} lands on /work`, async ({ page }) => {
+      await page.goto(`/work/${slug}`)
+      await expect(page).toHaveURL(/\/work$/)
     })
-    expect(redirect.status()).toBe(308)
-    const location = redirect.headers()["location"]
-    expect(location).toBeTruthy()
-    expect(new URL(location!, baseURL).pathname).toBe("/mentoring")
+  }
 
-    const followed = await request.get(`${baseURL}/mentorship`)
-    expect(followed.status()).toBe(200)
-    expect(new URL(followed.url()).pathname).toBe("/mentoring")
+  // Every public path the previous site (main, v1) served or linked: none may
+  // 404. Entries are [path, status]; redirects are checked by the loop above.
+  const OLD_SITE: [string, number][] = [
+    ["/", 200],
+    ["/about", 200],
+    ["/work", 200],
+    ["/uses", 308],
+    ["/cv", 308],
+    ["/cv.pdf", 200],
+    ["/manifest.json", 200],
+    ["/mladen-ruzicic.png", 200],
+    ["/sitemap.xml", 200],
+    ["/robots.txt", 200],
+    ["/icon", 308],
+    ["/opengraph-image.png", 308],
+    ["/static/images/opengraph-image.png", 308],
+    ["/opengraph-image", 200],
+    ["/mentorship", 308],
+    ...[
+      "bruno",
+      "eyal",
+      "jobany",
+      "juliana",
+      "maciek",
+      "monikka",
+      "richard",
+    ].map((n): [string, number] => [`/static/mentees/${n}.webp`, 200]),
+  ]
+  for (const [path, status] of OLD_SITE) {
+    test(`old URL ${path} answers ${status}, not 404`, async ({ request }) => {
+      const res = await request.get(path, { maxRedirects: 0 })
+      expect(res.status()).toBe(status)
+    })
+  }
+
+  test("/mentorship lands on /mentoring", async ({ page }) => {
+    await page.goto("/mentorship")
+    await expect(page).toHaveURL(/\/mentoring$/)
   })
 
-  test("/cv redirects to /cv.pdf", async ({ request, baseURL }) => {
-    const redirect = await request.get(`${baseURL}/cv`, { maxRedirects: 0 })
-    expect([301, 302, 307, 308]).toContain(redirect.status())
-    const location = redirect.headers()["location"]
-    expect(location).toBeTruthy()
-    expect(new URL(location!, baseURL).pathname).toBe("/cv.pdf")
+  test("no story slug is redirected", async () => {
+    const redirects = (await nextConfig.redirects?.()) ?? []
+    const sources = redirects.map((r) => r.source)
+    for (const slug of STORY_SLUGS)
+      expect(sources).not.toContain(`/work/${slug}`)
+  })
+})
 
-    const followed = await request.get(`${baseURL}/cv`)
-    expect(followed.status()).toBe(200)
-    expect(followed.headers()["content-type"] ?? "").toContain("pdf")
+test.describe("not found", () => {
+  test("an unknown story's share card is a 404, not a render", async ({
+    request,
+  }) => {
+    for (const slug of ["nope", "boxium"]) {
+      const res = await request.get(`/work/${slug}/opengraph-image`)
+      expect(res.status(), slug).toBe(404)
+    }
   })
 
-  test("/work/does-not-exist renders the 404 page", async ({ page }) => {
-    const response = await page.goto("/work/does-not-exist")
-    expect(response?.status()).toBe(404)
-
-    await expect(page.locator("h1")).toHaveCount(1)
-    await expect(page.getByText("404", { exact: false }).first()).toBeVisible()
-  })
+  for (const path of ["/work/does-not-exist", "/no-such-page"]) {
+    test(`${path} answers 404 with the not-found page`, async ({ page }) => {
+      const res = await page.goto(path)
+      expect(res?.status()).toBe(404)
+      await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1)
+      await expect(page).toHaveTitle(/\S/)
+      await expect(
+        page.getByRole("main").getByRole("link", { name: "Home" })
+      ).toHaveAttribute("href", "/")
+      const robots = await page
+        .locator('meta[name="robots"]')
+        .evaluateAll((els) => els.map((e) => e.getAttribute("content") ?? ""))
+      expect(
+        robots.some((c) => /noindex/.test(c)),
+        "robots noindex"
+      ).toBe(true)
+    })
+  }
 })

@@ -1,36 +1,44 @@
 import { defineConfig, devices } from "@playwright/test"
 
 /**
- * E2E harness for the v3 redesign — docs/v3-redesign-plan.md §8 (gates) and §9
- * (budgets), docs/v3-workflow.md.
+ * E2E harness for the 2027 site (docs/v4-build/PLAN.md). What each spec
+ * covers, and how to run it, is in `tests/README.md`.
  *
- * Dev server port is fixed at 3104 for this worktree so it never collides with
- * the other wave-2 agents' dev servers (3101–3103).
+ * Three ways to point it at a server:
  *
- * Locally: run `pnpm dev -p 3104` in one terminal and `pnpm test:e2e` in
- * another — Playwright reuses that server. With no server running it starts
- * `pnpm dev -p 3104` itself. `CI=1 pnpm test:e2e` runs the production path
- * instead: it starts `pnpm start -p 3104` and never reuses a running server,
- * so build first (`pnpm build`), which is what e2e.yml does.
+ * - `PLAYWRIGHT_BASE_URL=http://localhost:3200 pnpm test:e2e` runs against a
+ *   server that is already up (the shared dev server while the site is being
+ *   built). No `webServer` is started.
+ * - `pnpm test:e2e` with nothing set starts `pnpm dev -p 3104` (or reuses
+ *   whatever already listens on 3104).
+ * - `CI=1 pnpm test:e2e` is the production path: it starts `pnpm start -p
+ *   3104` and never reuses a server, so build first (`pnpm build`), which is
+ *   what `.github/workflows/e2e.yml` does.
+ *
+ * A dev server compiles each route on its first hit, so outside CI the
+ * timeouts are generous and `tests/global-setup.ts` requests every route once
+ * before the first test.
  */
 
 const PORT = 3104
-const baseURL = `http://localhost:${PORT}`
+const external = process.env.PLAYWRIGHT_BASE_URL?.replace(/\/$/, "")
+const baseURL = external || `http://localhost:${PORT}`
+const ci = !!process.env.CI
 
 export default defineConfig({
   testDir: "./tests",
+  globalSetup: "./tests/global-setup.ts",
   fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 2 : undefined,
-  reporter: process.env.CI
-    ? [["html", { open: "never" }], ["github"], ["list"]]
-    : "list",
-  timeout: 30_000,
-  expect: { timeout: 5_000 },
+  forbidOnly: ci,
+  retries: ci ? 1 : 0,
+  workers: ci ? 2 : undefined,
+  reporter: ci ? [["html", { open: "never" }], ["github"], ["list"]] : "list",
+  timeout: ci ? 30_000 : 60_000,
+  expect: { timeout: ci ? 5_000 : 10_000 },
 
   use: {
     baseURL,
+    navigationTimeout: ci ? 15_000 : 45_000,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -55,22 +63,17 @@ export default defineConfig({
     },
     {
       /*
-       * Desktop WebKit over the specs where an engine difference would
-       * actually change the result: view transitions, focus, axe and the
-       * preloader/canvas timing. `motion.spec.ts` is anchored so it does not
-       * also pull in `reduced-motion.spec.ts`, which has its own project.
+       * Desktop WebKit over the specs where the engine changes the result:
+       * route changes with view transitions, and the Ask dialog (top layer,
+       * `closedby`, focus return). Keyboard Tab order is Chromium only: see
+       * "The WebKit caveat" in tests/README.md.
        */
       name: "Desktop Safari",
       use: {
         ...devices["Desktop Safari"],
         viewport: { width: 1440, height: 900 },
       },
-      testMatch: [
-        /transitions\.spec\.ts$/,
-        /keyboard\.spec\.ts$/,
-        /a11y\.spec\.ts$/,
-        /(^|[\\/])motion\.spec\.ts$/,
-      ],
+      testMatch: [/transitions\.spec\.ts$/, /ask\.spec\.ts$/],
     },
     {
       name: "reduced-motion",
@@ -83,20 +86,21 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    /*
-     * CI builds in its own workflow step (.github/workflows/e2e.yml) and
-     * starts the prerendered output here, so this only has to wait for
-     * `next start` — under a second. Building inside `webServer` made a cold
-     * Next 16 build on a 2-core runner race this timeout, and reported a
-     * compile error as "Timed out waiting for the web server". Run
-     * `pnpm build` yourself before `CI=1 pnpm test:e2e` locally.
-     */
-    command: process.env.CI ? "pnpm start -p 3104" : "pnpm dev -p 3104",
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    /* Belt and braces: a cold `pnpm dev` first compile is the slow path now. */
-    timeout: 600_000,
-    stdout: "pipe",
-  },
+  webServer: external
+    ? undefined
+    : {
+        /*
+         * CI builds in its own workflow step (.github/workflows/e2e.yml) and
+         * starts the prerendered output here, so this only waits for
+         * `next start`. Building inside `webServer` made a cold build race
+         * this timeout and report a compile error as "Timed out waiting for
+         * the web server". Run `pnpm build` yourself before `CI=1 pnpm
+         * test:e2e` locally.
+         */
+        command: ci ? `pnpm start -p ${PORT}` : `pnpm dev -p ${PORT}`,
+        url: baseURL,
+        reuseExistingServer: !ci,
+        timeout: 600_000,
+        stdout: "pipe",
+      },
 })

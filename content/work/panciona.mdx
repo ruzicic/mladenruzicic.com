@@ -1,44 +1,165 @@
 ---
 slug: "panciona"
 title: "Panciona"
-shortTitle: "Panciona"
-kind: "product"
-status: "archived"
-featured: false
+# From the code history: the freelance backend's first commit is April 2019
+# and the last commits on all three repositories fall on 21 to 23 July 2023.
+# The owner confirmed it on 2026-11-12: a freelance job from 2019, then a
+# product for about a year and a half (roughly late 2021 to early 2023).
 period:
-  from: "2021"
-  to: "2021"
-  approx: true
-role: "Solo founder"
-accent: "#A8574B"
-logo: "/static/logos/work/panciona.svg"
+  from: "2019-04"
+  to: "2023-07"
+updated: "2026-11-16"
+# The web app and the website are his alone; the first backend (2019 to 2020)
+# was built with one other developer, who is never named.
+role: "Founder, designer and developer"
+accent: "#5850EC"
 tech:
   - "React"
+  - "MUI"
+  - "Vite"
   - "Node.js"
-  - "Firebase"
-line: "A bootstrapped SaaS I built alone. It never found product-market fit."
-detail: "Panciona was my first serious attempt at building and selling software on my own. The product shipped and worked. The market and I were not a good match, and I stopped rather than keep paying for the lesson."
-# panciona.com does not resolve, and the only later capture (Apr 2025) is an
-# unrelated site on the resold domain — do not link it. The May 2022 snapshot
-# below is the real product; the Archive never captured its CSS or images, so
-# it renders as unstyled text and no screenshot is shipped. `url` stays out.
-links:
-  - label: "Archived site (Wayback Machine)"
-    url: "https://web.archive.org/web/20220505111038/https://panciona.com/"
+  - "Express"
+  - "Prisma"
+  - "PostgreSQL"
+  - "Stripe Connect"
+  - "Next.js"
+  - "Tailwind"
+line: "A white-label app for coaches, trainers and nutritionists to give to their own clients, on their own domain."
+detail: "Panciona was a white-label app for coaches, trainers and nutritionists to give to their own clients, on their own domain. It started in 2019 as a freelance job for one nutritionist, became a product with her help, and ran for about a year and a half with four paying customers before I retired it."
+# His own figures, given on 2026-11-12 for publication. "About a year and a
+# half" is his estimate, so the label says so.
+metrics:
+  - value: "4"
+    label: "paying customers"
+    confidence: "verified"
+  - value: "~1.5"
+    label: "years as a product"
+    confidence: "verified"
+  - value: "2019"
+    label: "started as a freelance job"
+    confidence: "verified"
+# No `url` and no `links`. panciona.com shows an unrelated site since 2025,
+# and the one Web Archive capture (May 2022) renders as unstyled text, so the
+# header's "Live" line would point at nothing useful. Every picture below was
+# made in November 2026 by building the original repositories locally; the
+# app runs with invented demo data (the coach workspace, the clients and every
+# number on screen are made up), the website is its own last commit. The
+# website's home-page dashboard screenshot ("$288.00") has a square of its
+# own (the owner's yes, 14 Nov 2026); in the wide still and the list capture
+# it stays blurred, with the stock portraits.
 confidentiality: "public"
+story: true
+# The case-study page (CaseStudy.dc.html, 12 Nov 2026): panel copy, numbers,
+# captions and the order of the squares are the board's, word for word. The
+# squares were shot in square windows from the rebuilt repositories, with the
+# invented demo data (docs/v4-build/dossier/panciona/notes.md).
+panel:
+  summary: "A white-label app for coaches, trainers and nutritionists to give to their own clients, on their own domain."
+  meta:
+    - "Retired"
+    - "2019 to 2023"
+    - "Founder, designer and developer"
+  numbers:
+    - value: "4"
+      lines: ["Paying", "customers"]
+    - value: "~1.5"
+      lines: ["years", "as a product"]
+    - value: "2019"
+      lines: ["Started as a", "freelance job"]
+  paragraphs:
+    - "It started in 2019 as a freelance job for one nutritionist, who then helped me turn it into a product: an app for coaches, trainers and nutritionists to give to their own clients, white-labelled on their own domain."
+    - "Product-market fit never came. Four customers paid. I underestimated how hard it is to reach fitness influencers, and I was the wrong founder for that market."
+    - "I ran it for about a year and a half while working at Shopify, which was nothing but supportive, and I finished Innosuisse’s Business Creation for Social Entrepreneurs course at Startup Campus along the way."
+  links:
+    heading: "Alongside"
+    items:
+      - title: "Innosuisse, the Swiss Innovation Agency"
+        href: "https://www.innosuisse.admin.ch/en/entrepreneurship-training"
+        icon: "/static/work/panciona/favicon-innosuisse.png"
+        color: "#FE0000"
+  plate: "#EFEEF9"
+column:
+  - kind: "image"
+    src: "/static/work/panciona/sq-program-board.webp"
+    short: "Programme board"
+    caption: "The programme board: a four-week strength programme · recreated 2026, demo data"
+    alt: "The programme board for “Strength Foundations”: a “Start here” column of notes, then columns for weeks 1 and 2, each a stack of exercise and recipe cards."
+  - kind: "clip"
+    src: "/static/work/panciona/sq-board-drag.mp4"
+    poster: "/static/work/panciona/sq-board-drag-poster.webp"
+    short: "Dragging a card"
+    caption: "One card dragged from week 3 to week 4 · recreated 2026, demo data"
+    alt: "The “Barbell Bench Press” card dragged from week 3 to week 4 of the programme board."
+  - kind: "image"
+    src: "/static/work/panciona/sq-meal-plan.webp"
+    short: "Meal plan"
+    caption: "The same board as a meal plan · recreated 2026, demo data"
+    alt: "The board as a meal plan called “Plant-Forward Reset”: one column per day, each a stack of recipe cards tagged Breakfast, Lunch or Dinner."
+  - kind: "image"
+    src: "/static/work/panciona/phone-program-board.webp"
+    short: "Programme board, phone"
+    caption: "The programme board on a phone · recreated 2026, demo data"
+    alt: "The programme board on a phone: the “Start here” column fills the screen, with week 1 peeking in from the right."
+  - kind: "image"
+    src: "/static/work/panciona/sq-dashboard.webp"
+    short: "Dashboard"
+    caption: "The coach’s dashboard: sign-ups to approve, programmes about to end · recreated 2026, demo data"
+    alt: "The coach dashboard: cards for earnings, clients, examinations and programmes over a “Coming up next” list of sign-ups to approve and programmes about to expire."
+  - kind: "image"
+    src: "/static/work/panciona/sq-check-ins.webp"
+    short: "Check-ins"
+    caption: "A client’s page, open at her check-ins · recreated 2026, demo data"
+    alt: "A client’s page: her name, age and coach, then the Examinations tab with a list of dated check-ins."
+  - kind: "image"
+    src: "/static/work/panciona/sq-public-page.webp"
+    short: "Public page"
+    caption: "A programme’s public page, where a client buys it · recreated 2026, demo data"
+    alt: "The public page for “Strength Foundations”: the coach’s logo, the price as a one-time payment, an “I want this!” button and two questions in an FAQ."
+  - kind: "image"
+    src: "/static/work/panciona/sq-website-home.webp"
+    short: "Website"
+    caption: "The website, built in 2026 from its July 2023 repository"
+    alt: "The Panciona website: the headline “Make a living selling fitness programs online”, a black “Get Started Free” button and three ticks."
+  # The owner, 14 Nov 2026: yes to the website's original dashboard
+  # screenshot, the one the home page showed under its headline.
+  - kind: "image"
+    src: "/static/work/panciona/website-dashboard-original.webp"
+    short: "Dashboard, original"
+    caption: "The original dashboard screenshot the website showed on its home page, not a recreation · from its July 2023 repository"
+    alt: "Panciona’s coach dashboard as the website showed it: $288.00 total earnings, 4 new users, 8 examinations and 4 programmes in the last 30 days, a summary chart of users, programmes and examinations, one sign-up awaiting approval and a list of programmes about to expire."
 seo:
-  title: "Panciona — a solo SaaS that did not find its market"
-  description: "A bootstrapped SaaS built solo. The product shipped; founder-market fit and distribution did not follow. Stopped, with the lessons kept."
+  title: "Panciona: a white-label app for coaches and nutritionists"
+  description: "A white-label app for coaches, trainers and nutritionists, on their own domain. A freelance job in 2019, then a product with four paying customers."
 ---
 
-## Summary
+## Where it started
 
-Panciona was a bootstrapped SaaS I designed, built and shipped by myself. It worked. It did not find product-market fit, and looking back the clearest reason is that my fit with that market was weak: I had no particular insight into the buyers and no route to reach them that did not start from zero.
+It started in 2019 as a freelance job for one nutritionist: a tool to keep her clients, their plans and their check-ins in one place. She then helped me turn it into a product for other people like her.
 
-## Outcome
+## What it was
 
-Stopped. No sustainable traction, and the honest read was that continuing meant paying tuition on a lesson I had already learned.
+Panciona was made for coaches, trainers and nutritionists. Each of them got an app for their own clients, fully white-labelled, on their own domain, where they could share programmes and sell them. The website's headline was "Make a living selling fitness programs online".
 
-## Learnings
+## The programme board
 
-Building the product is the easy part. Owning the market — knowing the buyer, having a distribution path, being credible in the domain — is the part that decides the outcome, and it is not a phase that starts after launch. Every product I have started since begins with the buyer.
+A programme is a board: one column per week or per day, each a stack of cards for notes, exercises and recipes that you drag into place. The same board makes a four-week strength block or a seven-day meal plan, and a coach can give it to a client for a set period.
+
+## Selling a programme
+
+Any programme could have a price and a public page. Someone opens the page, signs up with their email and a six-digit code, and the coach approves them from the dashboard.
+
+## What happened
+
+Product-market fit never came. Four customers paid. I underestimated how hard it is to reach fitness influencers, and I was the wrong founder for that market.
+
+## Alongside
+
+I ran it for about a year and a half while working at Shopify, which was nothing but supportive. In that time I also finished [Innosuisse's Business Creation for Social Entrepreneurs course at Startup Campus](https://www.innosuisse.admin.ch/en/entrepreneurship-training).
+
+## The website
+
+The website still builds from its repository, so these are its real pages, not a mock-up.
+
+## Stack
+
+React and Node.js on Postgres for the app, Next.js and Tailwind for the website.

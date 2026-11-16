@@ -1,30 +1,34 @@
+import { notFound } from "next/navigation"
 import { ImageResponse } from "next/og"
 
-import { getWorkBySlug, getWorkSlugs } from "@/lib/content"
-import { OG_CONTENT_TYPE, OG_SIZE, OgCard, ogFonts } from "@/lib/seo/og"
-
+import { getProductMark, getStories, getStory } from "@/lib/content"
+import { productStatusLine } from "@/lib/seo/markdown"
 import {
-  formatPeriod,
-  statusLabel,
-} from "../../components/work-system/taxonomy"
+  artDataUri,
+  markDataUri,
+  OG_CONTENT_TYPE,
+  OG_SIZE,
+  OgCard,
+  ogFonts,
+} from "@/lib/seo/og"
 
 export const size = OG_SIZE
 export const contentType = OG_CONTENT_TYPE
 
 /**
  * `alt` has to be a static export here: `generateImageMetadata` would give each
- * slug its own alt text, but it also inserts a `[__metadata_id__]` route segment
- * and a second URL level, which is not worth it for one image per case study.
+ * slug its own alt text, but it also inserts a `[__metadata_id__]` segment.
  */
-export const alt = "Case study — Mladen Ružičić"
+export const alt = "A case study by Mladen Ružičić"
 
+/** The nine stories only; every other `/work/<slug>` redirects. */
 export function generateStaticParams() {
-  return getWorkSlugs().map((slug) => ({ slug }))
+  return getStories().map((entry) => ({ slug: entry.slug }))
 }
 
 /**
- * Per-case-study OG card, tinted with the project accent. Node runtime (the
- * default in Next 16) because Satori needs the TTFs from `assets/fonts`.
+ * Per-story card: the product tile, the story's title and its one line.
+ * Node runtime (the default) because Satori reads the TTFs in `assets/fonts`.
  */
 export default async function Image({
   params,
@@ -32,22 +36,25 @@ export default async function Image({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const entry = getWorkBySlug(slug)
+  const entry = getStory(slug)
+  // Only the nine stories have a card; a retired or unknown slug is a 404, not
+  // a Satori render.
+  if (!entry) notFound()
+  const mark = getProductMark(slug)
+  const svg =
+    mark?.mark.kind === "art"
+      ? await artDataUri(mark.mark.src)
+      : mark?.mark.kind === "svg"
+        ? await markDataUri(mark.mark.src, mark.fg)
+        : undefined
 
   return new ImageResponse(
-    (
-      <OgCard
-        eyebrow={
-          entry
-            ? `${entry.kind} · ${formatPeriod(entry.period)} · ${entry.role}`
-            : "Work"
-        }
-        title={entry?.title ?? "Work"}
-        line={entry?.line}
-        meta={entry ? statusLabel(entry.status) : undefined}
-        accent={entry?.accent}
-      />
-    ),
+    <OgCard
+      title={entry.title}
+      line={entry.line}
+      meta={productStatusLine(slug)}
+      tile={mark ? { mark, svg } : undefined}
+    />,
     { ...size, fonts: await ogFonts() }
   )
 }

@@ -1,0 +1,114 @@
+// The Ask assistant's backend. Read README.md before changing anything here.
+//
+// This file is public, so it holds no account id, zone id, token, KV
+// namespace id or secret. The account comes from `wrangler login` (or
+// CLOUDFLARE_ACCOUNT_ID); the one id the deploy needs, the notes namespace,
+// lives in the git-ignored `deploy.local.json` and is merged in by
+// `pnpm run deploy` (scripts/deploy-config.ts), and so does the question
+// log's database id. Do not run `wrangler deploy` on this file directly:
+// Wrangler would create a second notes namespace (and a second database)
+// and write their ids back into this file.
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "mladenruzicic-ask",
+  "main": "src/index.ts",
+  // The date of the workerd release bundled with the pinned Wrangler, so
+  // local runs and the deployed Worker agree. Advance it with Wrangler.
+  "compatibility_date": "2026-10-23",
+  "send_metrics": false,
+  "upload_source_maps": true,
+
+  // Served only on its own subdomain (the zone is on Cloudflare; Wrangler
+  // creates the DNS record and certificate on deploy). No workers.dev
+  // address and no preview URLs: one public door.
+  "routes": [{ "pattern": "ask.mladenruzicic.com", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
+
+  // The knowledge context and the behaviour rules are bundled as text.
+  "rules": [{ "type": "Text", "globs": ["**/*.md"], "fallthrough": true }],
+
+  // Workers AI. The model id is ASK_MODEL below.
+  "ai": { "binding": "AI" },
+
+  // Per-visitor limit per minute, per Cloudflare location (approximate by
+  // design; the daily limits in AskLimits are the strict ones). `period`
+  // must be 10 or 60. `namespace_id` is a number of our choosing, unique
+  // within the account, not an identifier the account issued.
+  "ratelimits": [
+    {
+      "name": "ASK_RATE_LIMIT",
+      "namespace_id": "4121",
+      "simple": { "limit": 6, "period": 60 },
+    },
+  ],
+
+  // One instance holds the strict limits: the daily cap for everyone, the
+  // daily cap per visitor, and the short repeat memo.
+  "durable_objects": {
+    "bindings": [{ "name": "ASK_LIMITS", "class_name": "AskLimits" }],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AskLimits"] }],
+
+  // The owner's notes, one key (`ask-notes`). No id here: see the top of
+  // this file. Locally, `wrangler dev` uses an empty local namespace.
+  "kv_namespaces": [{ "binding": "ASK_NOTES" }],
+
+  // The question log (README.md "Question log"): one row per typed question,
+  // no address or identifier. No id here, as for the notes: it comes from
+  // `deploy.local.json`. Schema in `migrations/`. Locally, `wrangler dev`
+  // uses an empty local database (`pnpm run questions migrate --local`).
+  "d1_databases": [
+    {
+      "binding": "ASK_QUESTIONS",
+      "database_name": "mladenruzicic-ask-questions",
+      "migrations_dir": "migrations",
+    },
+  ],
+
+  // Once a day (03:17 UTC): delete logged questions older than
+  // ASK_LOG_RETENTION_DAYS.
+  "triggers": { "crons": ["17 3 * * *"] },
+
+  // Set with `wrangler secret put` (README.md "Secrets"); a deploy without
+  // them fails. Locally they come from `.dev.vars`.
+  "secrets": { "required": ["TURNSTILE_SECRET_KEY", "ASK_SIGNING_KEY"] },
+
+  "vars": {
+    // One value to change the model. Read README.md "Choosing the model".
+    "ASK_MODEL": "@cf/deepseek-ai/deepseek-v4.1-flash-1017",
+    // none | low | high | max, as the model page lists them.
+    "ASK_REASONING": "low",
+    // Hard cap on generated tokens (reasoning included).
+    "ASK_MAX_TOKENS": "1000",
+    "ASK_TEMPERATURE": "0.3",
+    // Whole request, and the wait for the first token, in milliseconds.
+    "ASK_TIMEOUT_MS": "25000",
+    "ASK_FIRST_TOKEN_MS": "15000",
+    // Questions answered per UTC day, for everyone. 0 switches Ask off.
+    "ASK_DAILY_CAP": "300",
+    // Questions per visitor (a keyed hash of the address) per UTC day.
+    "ASK_VISITOR_DAILY_CAP": "20",
+    // How long a passed Turnstile check lasts before the next one.
+    "ASK_SESSION_MINUTES": "30",
+    // Comma-separated exact origins allowed to call the Worker.
+    "ASK_ALLOWED_ORIGINS": "https://mladenruzicic.com,https://www.mladenruzicic.com",
+    // "true" also allows http://localhost:<port> and http://127.0.0.1:<port>
+    // and Cloudflare's published Turnstile test secrets. `.dev.vars` only.
+    "ASK_ALLOW_LOCALHOST": "false",
+    // Hostnames a Turnstile token must have been solved on.
+    "ASK_TURNSTILE_HOSTNAMES": "mladenruzicic.com,www.mladenruzicic.com",
+    // Optional AI Gateway id (empty: call Workers AI directly). Logging of
+    // prompts is switched off per request either way.
+    "ASK_GATEWAY_ID": "",
+    "ASK_GATEWAY_CACHE_TTL": "86400",
+    // Days a logged question is kept (at most 365). "0" switches the
+    // question log off. Read README.md "Question log".
+    "ASK_LOG_RETENTION_DAYS": "90",
+  },
+
+  // Off: the platform's request logs would record each visitor's address and
+  // headers. The question log keeps the questions without them. Read
+  // README.md "Logs".
+  "observability": { "enabled": false },
+}

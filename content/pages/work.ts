@@ -1,23 +1,40 @@
-import type { WorkPage } from "@/lib/content/schema"
+import {
+  parseOrThrow,
+  workPageSchema,
+  type WorkPage,
+} from "@/lib/content/schema"
 
 /**
- * `/work` index copy. `{count}` is replaced with the number of entries by the
- * page and by the `/md/work` mirror, so the figure can never drift from the
- * content directory.
+ * `/work`: every product and job in one list (`getBuiltList()`, the landing's
+ * list, complete) under a short intro. No board exists for the page; the
+ * title is the list's heading and the intro is the board's "Everything else"
+ * card (the strip's end card before it became "That's not all, folks!"),
+ * both from `Landing.dc.html`.
  */
-export const WORK_PAGE = {
-  seo: {
-    title: "Work",
-    description:
-      "Case studies and products: companies I have worked for, things I have built on my own, and the experiments worth keeping.",
+export const WORK_PAGE: WorkPage = parseOrThrow(
+  workPageSchema,
+  {
+    seo: {
+      title: "All work",
+      description:
+        "The products and jobs I put the most time into, with what happened to each.",
+    },
+    title: "Stuff I've put real time into",
+    // The owner's words of 15 Nov 2026: the list is a selection, not all.
+    intro:
+      "Below is a list of projects I put a fairly significant chunk of time into. There's a lot more, but it would make the list too noisy.",
+    story: {
+      numbers: "In numbers",
+      people: "Worked alongside",
+      roles: "Roles, oldest first",
+      next: "Next case study",
+      nextCue: "Next",
+      pause: "Pause clip",
+      play: "Play clip",
+      // The bar's link once it leads to the top of the page (owner, 16 Nov
+      // 2026); the project's name, which the bar then shows, comes first.
+      toTop: "{name}, back to top",
+    },
   },
-  eyebrow: ["Work", "{count} entries", "featured first, then most recent"],
-  // {shipped} renders in Instrument Serif Italic.
-  h1: "Everything I have {shipped} that is mine to show.",
-  lede: "Four employers, a handful of products I run on my own, and the experiments that taught me something. Company work is described at the level its confidentiality allows.",
-  mirror: {
-    description:
-      "Case studies and products: companies worked for, products built independently, and experiments worth keeping.",
-    intro: "{count} entries. Featured first, then most recent.",
-  },
-} satisfies WorkPage
+  "content/pages/work.ts"
+)

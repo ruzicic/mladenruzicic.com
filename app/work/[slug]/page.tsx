@@ -1,40 +1,27 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { MDXRemote } from "next-mdx-remote/rsc"
 
-import { getWorkBySlug, getWorkSlugs } from "@/lib/content"
-import {
-  breadcrumbJsonLd,
-  creativeWorkJsonLd,
-  jsonLdScript,
-} from "@/lib/seo/jsonld"
+import { getStories, getStory } from "@/lib/content"
 import { pageMetadata } from "@/lib/seo/metadata"
 
-import { Container, Eyebrow, PageTransition } from "../../components/primitives"
-import {
-  CaseStudyHeader,
-  ConfidentialityNotice,
-  MediaGallery,
-  MetricStrip,
-  PrevNextWork,
-  Prose,
-  RelatedWork,
-  WorkedAlongside,
-} from "../../components/work-system"
+import { JsonLd } from "../../components/seo/JsonLd"
+import { PageFrame } from "../../components/site/PageFrame"
+import { StoryBar } from "../../components/story/StoryBar"
+import { StoryPage } from "../../components/story/StoryPage"
 
 type Params = { slug: string }
 
 /**
- * Every slug is prerendered by `generateStaticParams`, but Cache Components
- * still builds a runtime fallback shell for unknown slugs — and Next's generated
- * `opengraph-image` metadata module awaits `params` there. That is a blocking
- * navigation by definition, so opt this segment out of instant validation.
- * (`dynamicParams` is not allowed alongside `cacheComponents`.)
+ * Every slug is prerendered, but Cache Components still builds a fallback
+ * shell for unknown slugs, and the generated `opengraph-image` metadata module
+ * awaits `params` there. Opt the segment out of instant validation
+ * (`dynamicParams` is not allowed alongside `cacheComponents`).
  */
 export const instant = false
 
+/** The nine stories (`STORY_SLUGS`). Every other work slug is a 308 to `/work#<slug>` in `next.config.ts`. */
 export function generateStaticParams(): Params[] {
-  return getWorkSlugs().map((slug) => ({ slug }))
+  return getStories().map((story) => ({ slug: story.slug }))
 }
 
 export async function generateMetadata({
@@ -43,96 +30,36 @@ export async function generateMetadata({
   params: Promise<Params>
 }): Promise<Metadata> {
   const { slug } = await params
-  const entry = getWorkBySlug(slug)
-  if (!entry) return {}
+  const story = getStory(slug)
+  if (!story) return {}
   return pageMetadata({
-    title: entry.seo.title ?? entry.title,
-    description: entry.seo.description,
-    path: `/work/${entry.slug}`,
+    title: story.seo.title ?? story.title,
+    description: story.seo.description,
+    path: `/work/${story.slug}`,
   })
 }
 
 /**
- * One case study — docs/v3-redesign-plan.md §5.2, §5.3, §6.
- *
- * Statically generated for every slug so `<Link>` can prefetch it, which is the
- * precondition for the shared-element morph: the art tile and the title carry
- * `work-art-<slug>` / `work-title-<slug>` on `/`, on `/work` and here.
+ * `/work/<slug>`: one of the nine case studies, the cover and then the
+ * two-column page (the pinned panel and the column of squares). A Server
+ * Component, fully prerendered; the client code is the shared shell, the
+ * bar's scroll watch, the panel's progress line and, on a story that has a
+ * clip, `StoryVideo`. No site header: the story's own bar takes its place
+ * (`StoryBar`, owner, 16 Nov 2026).
  */
-export default async function WorkDetailPage({
+export default async function CaseStudyPage({
   params,
 }: {
   params: Promise<Params>
 }) {
-  "use cache"
   const { slug } = await params
-  const entry = getWorkBySlug(slug)
-  if (!entry) notFound()
-
-  const publicMetrics = (entry.metrics ?? []).filter(
-    (metric) => metric.confidence !== "private"
-  )
+  const story = getStory(slug)
+  if (!story) notFound()
 
   return (
-    <PageTransition>
-      <div>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={jsonLdScript(creativeWorkJsonLd(entry))}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={jsonLdScript(
-            breadcrumbJsonLd([
-              { name: "Home", path: "/" },
-              { name: "Work", path: "/work" },
-              { name: entry.title, path: `/work/${entry.slug}` },
-            ])
-          )}
-        />
-
-        <CaseStudyHeader entry={entry} />
-
-        <Container className="py-[72px] md:py-[96px]">
-          <div className="grid gap-16">
-            {/* Notice first, then the numbers — the same order the markdown
-                mirror uses (lib/content/markdown.ts), and the only order in
-                which the promise is made before the reader can test it. */}
-            <ConfidentialityNotice confidentiality={entry.confidentiality} />
-
-            {publicMetrics.length > 0 ? (
-              <MetricStrip metrics={publicMetrics} />
-            ) : null}
-
-            <Prose>
-              <MDXRemote source={entry.body} />
-            </Prose>
-
-            {entry.media?.length ? (
-              <section aria-labelledby="case-media">
-                <Eyebrow as="h2" id="case-media" className="text-fg">
-                  Media
-                </Eyebrow>
-                <MediaGallery
-                  media={entry.media}
-                  title={entry.title}
-                  className="mt-8"
-                />
-              </section>
-            ) : null}
-          </div>
-        </Container>
-
-        <Container className="pb-[72px] md:pb-[96px]">
-          <div className="grid gap-16">
-            {/* After the body, before the neighbours: the people are part of
-                this chapter, not a suggestion of where to go next. */}
-            <WorkedAlongside entry={entry} />
-            <RelatedWork entry={entry} />
-            <PrevNextWork entry={entry} />
-          </div>
-        </Container>
-      </div>
-    </PageTransition>
+    <PageFrame bar={<StoryBar story={story} />}>
+      <JsonLd page="story" slug={story.slug} />
+      <StoryPage story={story} />
+    </PageFrame>
   )
 }

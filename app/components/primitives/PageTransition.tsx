@@ -1,29 +1,26 @@
 import { ViewTransition, type ReactNode } from "react"
 
 /**
- * Cross-page transitions — docs/v3-redesign-plan.md §5.3.
+ * Cross-page transitions. `<ViewTransition>` comes from the React that Next
+ * bundles, and `@types/react@19.3` declares it in `index.d.ts`, so no local
+ * augmentation is needed any more.
  *
- * `<ViewTransition>` ships in the React build Next 16.3 bundles; no
- * `experimental.viewTransition` flag exists any more. Types come from
- * `types/react-view-transition.d.ts`.
+ * The 2027 site uses one quiet crossfade in both directions (`vt-fade` in
+ * `app/globals.css`): no slides, no reveals. `NAV_FORWARD` / `NAV_BACK` stay
+ * as transition types so a later builder can give back-navigation its own
+ * class without touching the links.
  *
- * Wrap the BODY OF EACH `page.tsx` — not `layout.tsx`, or the persistent chrome
- * crossfades with the page.
+ * Wrap the BODY OF EACH `page.tsx`, not `layout.tsx`, or the persistent chrome
+ * crossfades with the page. `PageFrame` does this for you.
  */
 
 /** Transition types passed through `<Link transitionTypes>`. */
 export const NAV_FORWARD = "nav-forward"
-export const NAV_BACK = "nav-back"
+const NAV_BACK = "nav-back"
 
-const ENTER = {
-  [NAV_FORWARD]: "vt-in",
-  [NAV_BACK]: "vt-in-back",
-  default: "vt-fade",
-}
-
-const EXIT = {
-  [NAV_FORWARD]: "vt-out",
-  [NAV_BACK]: "vt-out-back",
+const FADE = {
+  [NAV_FORWARD]: "vt-fade",
+  [NAV_BACK]: "vt-fade",
   default: "vt-fade",
 }
 
@@ -33,32 +30,8 @@ export interface PageTransitionProps {
 
 export function PageTransition({ children }: PageTransitionProps) {
   return (
-    <ViewTransition enter={ENTER} exit={EXIT} default="none">
+    <ViewTransition enter={FADE} exit={FADE} default="none">
       {children}
     </ViewTransition>
   )
-}
-
-/**
- * Shared-element wrapper. Put the same `name` on the work-card art tile and on
- * the case-study hero media; the pair morphs when the destination is prefetched
- * and degrades to the page enter/exit otherwise.
- */
-export function SharedElement({
-  name,
-  children,
-}: {
-  name: string
-  children: ReactNode
-}) {
-  return (
-    <ViewTransition name={name} share="vt-morph">
-      {children}
-    </ViewTransition>
-  )
-}
-
-/** Stable name for a work item's art tile, used on `/`, `/work` and `/work/[slug]`. */
-export function workArtTransitionName(slug: string) {
-  return `work-art-${slug}`
 }

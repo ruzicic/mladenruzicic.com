@@ -1,10 +1,21 @@
-import type { NotFound } from "@/lib/content/schema"
+import {
+  notFoundSchema,
+  parseOrThrow,
+  type NotFound,
+} from "@/lib/content/schema"
 
-/** `app/not-found.tsx` — docs/v3-redesign-plan.md §5.2. */
-export const NOT_FOUND = {
-  eyebrow: ["404", "Not found"],
-  code: "404",
-  // {exist} renders in Instrument Serif Italic.
-  h1: "That page does not {exist}.",
-  lede: "It may have moved, or it may never have existed. The work index is a good place to start.",
-} satisfies NotFound
+/** `app/not-found.tsx`. Short, plain, first person; home and the list. */
+export const NOT_FOUND: NotFound = parseOrThrow(
+  notFoundSchema,
+  {
+    seo: { title: "Not found", description: "That page does not exist." },
+    label: "404",
+    title: "Nothing here.",
+    line: "That page does not exist, or it moved. Everything I've built is on one list now.",
+    links: [
+      { label: "Home", href: "/" },
+      { label: "Everything I've built", href: "/work" },
+    ],
+  },
+  "content/pages/not-found.ts"
+)

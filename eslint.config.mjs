@@ -12,6 +12,11 @@ export default tseslint.config(
       "node_modules/**",
       "public/**",
       "docs/**",
+      // The Ask Worker is its own package with its own types and checks
+      // (workers/ask/README.md); only its generated files are skipped here.
+      "workers/*/.wrangler/**",
+      "workers/*/dist/**",
+      "workers/*/worker-configuration.d.ts",
       // Playwright artefacts: minified vendor bundles that would otherwise
       // make `pnpm lint` fail after any local `pnpm test:e2e`. Both are
       // already in .gitignore.
