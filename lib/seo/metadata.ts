@@ -116,6 +116,11 @@ export function pageMetadata({
   image,
 }: PageMetadataInput): Metadata {
   const url = path === "/" ? site.url : new URL(path, site.url).toString()
+  // The card's title is the tab's: `<title>` comes from the layout's
+  // template (`%s · <name>`), which Next does not apply to `og:title` or
+  // `twitter:title`, so it is spelled out here. `/` has no `metadata` of its
+  // own and keeps the layout's.
+  const shared = path === "/" ? title : `${title} · ${site.name}`
   const images = image ? [{ url: image }] : undefined
   const person = {
     firstName: site.name.split(" ")[0],
@@ -131,7 +136,7 @@ export function pageMetadata({
           ...(modified ? { modifiedTime: modified } : null),
           locale: "en_US",
           siteName: site.name,
-          title,
+          title: shared,
           description,
           url,
           ...(images ? { images } : null),
@@ -142,7 +147,7 @@ export function pageMetadata({
             ...person,
             locale: "en_US",
             siteName: site.name,
-            title,
+            title: shared,
             description,
             url,
             ...(images ? { images } : null),
@@ -151,7 +156,7 @@ export function pageMetadata({
             type: "website",
             locale: "en_US",
             siteName: site.name,
-            title,
+            title: shared,
             description,
             url,
             ...(images ? { images } : null),
@@ -169,7 +174,7 @@ export function pageMetadata({
       card: "summary_large_image",
       site: X_HANDLE,
       creator: X_HANDLE,
-      title,
+      title: shared,
       description,
       ...(images ? { images } : null),
     },

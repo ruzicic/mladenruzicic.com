@@ -12,7 +12,7 @@ import { Diagram, DIAGRAM_IDS, diagramText } from "@/app/components/diagram"
  *
  * Development only. In a production build it is the site's 404 (the check is
  * on `NODE_ENV`, which `next build` sets to production), it is not in
- * app/sitemap.ts, and app/robots.ts disallows `/dev/`.
+ * app/sitemap.ts, and robots.txt (lib/seo/robots.ts) disallows `/dev/`.
  */
 
 export const metadata: Metadata = {

@@ -72,7 +72,7 @@ answer's final line or add links.
   point visitors anywhere new.
 - Sources are site paths, `mailto:` or `https:` only (the site map's one
   `http:` archive link is never offered), and ONA's row and shop are offered
-  only when the question names ONA (the family rule).
+  only when the question names ONA.
 - The streamed text loses links, URLs, unknown email addresses, markdown
   and angle brackets on its way out.
 - The panel renders the answer as text (React text nodes), never as HTML,

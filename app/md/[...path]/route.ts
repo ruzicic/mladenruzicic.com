@@ -1,5 +1,6 @@
 import { getSite } from "@/lib/content"
 import {
+  agentTextHeaders,
   markdownDoc,
   markdownRoutes,
   MD_CONTENT_TYPE,
@@ -17,8 +18,11 @@ import { markdownNotFound } from "@/lib/seo/twins"
  * stories, `/mentoring`, `/about`, `/press`. Nothing else: `/uses` and the
  * non-story slugs are gone and answer a markdown 404.
  *
- * The response is `noindex` and names its canonical HTML page, so a twin never
- * competes with the real URL in search.
+ * The response names its canonical HTML page. `X-Robots-Tag: noindex` is NOT
+ * set here: this handler cannot tell a `.md` URL from the negotiated answer
+ * on the canonical URL itself (both are rewrites to the same prerendered
+ * route), so `proxy.ts` adds it on the `.md` and `/md/` paths only. The
+ * canonical URL must never be told `noindex`, whatever its `Accept`.
  */
 
 export function generateStaticParams() {
@@ -44,15 +48,16 @@ export async function GET(
   }
 
   const canonical = doc.path === "/" ? site.url : `${site.url}${doc.path}`
-  return new Response(renderDoc(doc), {
+  const body = renderDoc(doc)
+  return new Response(body, {
     headers: {
       "Content-Type": MD_CONTENT_TYPE,
       "Cache-Control":
         "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
       "Last-Modified": new Date(`${doc.updated}T00:00:00Z`).toUTCString(),
-      "X-Robots-Tag": "noindex",
       Link: `<${canonical}>; rel="canonical"`,
       Vary: "Accept",
+      ...agentTextHeaders(body),
     },
   })
 }

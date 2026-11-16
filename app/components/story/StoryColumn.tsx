@@ -71,8 +71,11 @@ function MediaSquare({
           sizes={sizesFor(fit.shape === "square" ? undefined : fit.percent)}
           // The lead square comes up over the cover's foot, so it is in the
           // first screen: fetched at once, but not ahead of the name, which
-          // is the page's largest paint (no `preload`).
+          // is the page's largest paint (no `preload`). React's server
+          // renderer preloads any `<img>` that is not `lazy` unless its
+          // priority is `low`, so `fetchPriority` keeps it out of the head.
           loading={lead ? "eager" : undefined}
+          fetchPriority={lead ? "low" : undefined}
         />
         {item.kind === "clip" ? (
           <StoryVideo

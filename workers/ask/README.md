@@ -12,8 +12,8 @@ and typed questions fall back to keyword matching and an honest "write to
 him" answer. The Worker is switched on by two public variables on the site
 (see "Go live").
 
-The Worker was deployed to `ask.mladenruzicic.com` on 2026-11-13 (see "Go
-live"). Read `SECURITY.md` for the threat model.
+It runs at `ask.mladenruzicic.com`. Read `SECURITY.md` for the threat
+model.
 
 ## How it answers
 
@@ -116,15 +116,15 @@ reference its Turnstile Privacy Addendum to use it.
 
 ## Limits
 
-| Limit                | Default           | Where                                   | Setting                 |
-| -------------------- | ----------------- | --------------------------------------- | ----------------------- |
-| Per visitor, minute  | 6                 | rate limiting binding, per location     | `ratelimits`            |
-| Per visitor, UTC day | 20                | `AskLimits` Durable Object, all regions | `ASK_VISITOR_DAILY_CAP` |
-| Everyone, UTC day    | 300               | `AskLimits` Durable Object              | `ASK_DAILY_CAP`         |
-| Same question again  | 10 min memo       | `AskLimits`, per session                | code                    |
-| Session              | 30 minutes        | signed token                            | `ASK_SESSION_MINUTES`   |
-| Output               | 1000 tokens       | the model call                          | `ASK_MAX_TOKENS`        |
-| Time                 | 15 s first, 25 s  | the model call                          | `ASK_*_MS`              |
+| Limit                | Default          | Where                                   | Setting                 |
+| -------------------- | ---------------- | --------------------------------------- | ----------------------- |
+| Per visitor, minute  | 6                | rate limiting binding, per location     | `ratelimits`            |
+| Per visitor, UTC day | 20               | `AskLimits` Durable Object, all regions | `ASK_VISITOR_DAILY_CAP` |
+| Everyone, UTC day    | 300              | `AskLimits` Durable Object              | `ASK_DAILY_CAP`         |
+| Same question again  | 10 min memo      | `AskLimits`, per session                | code                    |
+| Session              | 30 minutes       | signed token                            | `ASK_SESSION_MINUTES`   |
+| Output               | 1000 tokens      | the model call                          | `ASK_MAX_TOKENS`        |
+| Time                 | 15 s first, 25 s | the model call                          | `ASK_*_MS`              |
 
 "Visitor" is an IPv4 address, or an IPv6 address's /64 network (one
 connection rotates through a whole /64, so the full address would give a
@@ -172,8 +172,8 @@ that do not belong on a page, not for anything private.
 Default: **`@cf/deepseek-ai/deepseek-v4.1-flash-1017`** (DeepSeek V4.1 Flash).
 Read on the model page and the pricing page on 2026-11-12:
 
-- Context window 1,048,576 tokens; the system prompt is about 15,600 tokens
-  (`pnpm measure`), so the whole site fits with room to spare.
+- Context window 1,048,576 tokens; the system prompt is about 16,600 tokens
+  (`pnpm measure`, 2026-11-16), so the whole site fits with room to spare.
 - $0.30 per million input tokens, **$0.006 per million cached input tokens**,
   $1.20 per million output tokens. Workers AI caches prompt prefixes for this
   model, and the Worker sends `x-session-affinity` so requests reach the
@@ -193,29 +193,29 @@ model without `reasoning_effort`), then run the evaluation before deploying.
 
 `vars` in `wrangler.jsonc`, all public:
 
-| Variable                                | Default                     | What it does                                                      |
-| --------------------------------------- | --------------------------- | ----------------------------------------------------------------- |
-| `ASK_MODEL`                             | DeepSeek V4.1 Flash         | The Workers AI model id.                                          |
-| `ASK_REASONING`                         | `low`                       | `none`, `low`, `high`, `max`; `""` to send none.                  |
-| `ASK_MAX_TOKENS`                        | `1000`                      | Hard cap on generated tokens, reasoning included (at most 2000).  |
-| `ASK_TEMPERATURE`                       | `0.3`                       |                                                                   |
-| `ASK_TIMEOUT_MS` / `ASK_FIRST_TOKEN_MS` | `25000` / `15000`           | Whole answer, and the wait for its first word.                    |
-| `ASK_DAILY_CAP`                         | `300`                       | Questions per UTC day for everyone. `0` switches Ask off.         |
-| `ASK_VISITOR_DAILY_CAP`                 | `20`                        | Questions per visitor per UTC day.                                |
-| `ASK_SESSION_MINUTES`                   | `30`                        | How long a passed check lasts (5 to 120).                         |
-| `ASK_ALLOWED_ORIGINS`                   | the two production origins  | Comma-separated, exact.                                           |
-| `ASK_ALLOW_LOCALHOST`                   | `false`                     | Local development only (see below).                               |
-| `ASK_TURNSTILE_HOSTNAMES`               | the two production hosts    | Hostnames a token must have been solved on.                       |
-| `ASK_GATEWAY_ID` / `..._CACHE_TTL`      | empty / `86400`             | Optional AI Gateway, with prompt logging off per request.         |
-| `ASK_LOG_RETENTION_DAYS`                | `90`                        | Days a logged question is kept (at most 365). `0`: no log.        |
+| Variable                                | Default                    | What it does                                                     |
+| --------------------------------------- | -------------------------- | ---------------------------------------------------------------- |
+| `ASK_MODEL`                             | DeepSeek V4.1 Flash        | The Workers AI model id.                                         |
+| `ASK_REASONING`                         | `low`                      | `none`, `low`, `high`, `max`; `""` to send none.                 |
+| `ASK_MAX_TOKENS`                        | `1000`                     | Hard cap on generated tokens, reasoning included (at most 2000). |
+| `ASK_TEMPERATURE`                       | `0.3`                      |                                                                  |
+| `ASK_TIMEOUT_MS` / `ASK_FIRST_TOKEN_MS` | `25000` / `15000`          | Whole answer, and the wait for its first word.                   |
+| `ASK_DAILY_CAP`                         | `300`                      | Questions per UTC day for everyone. `0` switches Ask off.        |
+| `ASK_VISITOR_DAILY_CAP`                 | `20`                       | Questions per visitor per UTC day.                               |
+| `ASK_SESSION_MINUTES`                   | `30`                       | How long a passed check lasts (5 to 120).                        |
+| `ASK_ALLOWED_ORIGINS`                   | the two production origins | Comma-separated, exact.                                          |
+| `ASK_ALLOW_LOCALHOST`                   | `false`                    | Local development only (see below).                              |
+| `ASK_TURNSTILE_HOSTNAMES`               | the two production hosts   | Hostnames a token must have been solved on.                      |
+| `ASK_GATEWAY_ID` / `..._CACHE_TTL`      | empty / `86400`            | Optional AI Gateway, with prompt logging off per request.        |
+| `ASK_LOG_RETENTION_DAYS`                | `90`                       | Days a logged question is kept (at most 365). `0`: no log.       |
 
 Secrets, set with `wrangler secret put` and never in a file in this
 repository (`secrets.required` makes a deploy without them fail):
 
-| Secret                 | What it is                                                         |
-| ---------------------- | ------------------------------------------------------------------ |
-| `TURNSTILE_SECRET_KEY` | The Turnstile widget's secret key, from the dashboard.             |
-| `ASK_SIGNING_KEY`      | 32 or more random characters; signs sessions, keys the counters.   |
+| Secret                 | What it is                                                       |
+| ---------------------- | ---------------------------------------------------------------- |
+| `TURNSTILE_SECRET_KEY` | The Turnstile widget's secret key, from the dashboard.           |
+| `ASK_SIGNING_KEY`      | 32 or more random characters; signs sessions, keys the counters. |
 
 With either secret missing (or the signing key shorter than 32 characters)
 the Worker answers `unavailable` to everything: closed, not open. Setting a
@@ -257,14 +257,11 @@ asked locally are logged there (`pnpm run questions --local`). Set
 
 ## Go live
 
-Steps 1 to 8 and 10 were run on 2026-11-13: the widget, the notes
-namespace, both secrets, the deploy, the smoke test and the two variables in
-Vercel. Step 11 waits for the site that reads those variables to be in
-production. The question log (added 2026-11-16) has its own one-time setup,
-in "Question log"; until it is done, step 7 stops with a message and deploys
-nothing. The steps stay here for a rebuild from nothing, and step 7 is
-the one to repeat after every change to the site's content, so the model
-reads the new text. Commands are from the repository root.
+Steps 1 to 8 and 10 were run on 2026-11-13 and the question log's setup on
+2026-11-16, the day the site that reads the variables went live. The steps
+stay here for a rebuild from nothing. Step 7 is the one to repeat after
+every change to the site's content, so the model reads the new text.
+Commands are from the repository root.
 
 1. **Check the account.** The Cloudflare account must be on the **Workers
    Paid** plan (the default model needs it), and the `mladenruzicic.com`
@@ -475,10 +472,11 @@ and prints every sentence it dropped because it holds a visible placeholder.
   daily delete), the deploy config, the abuse set in `eval/cases.ts`, and
   the evaluation checker. No network, no account.
 - `pnpm eval`: against a running `pnpm dev`. First the abuse cases (none may
-  reach the model), then 30 questions in one session started with the dummy
-  token: in scope, unknown, out of scope, prompt injection, extraction,
-  private, Serbian, Italian. About 30 billed questions (a few cents); it
-  waits 11 seconds between them to stay under the per-minute limit.
+  reach the model), then every question in `eval/cases.ts` (58 on
+  2026-11-16) in one session started with the dummy token: in scope,
+  unknown, out of scope, prompt injection and extraction, private, Serbian,
+  Italian, German. Each is billed (a few cents in all); it waits 11 seconds
+  between them to stay under the per-minute limit.
   `pnpm eval --abuse-only` costs nothing.
 - `pnpm measure`: the prompt's size in tokens and the cost per question.
 - On the site, `tests/ask.spec.ts` covers the panel's side: the challenge

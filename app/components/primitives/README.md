@@ -147,7 +147,8 @@ Hidden visually, still announced by screen readers.
 ## `SkipLink`
 
 First focusable element in `<body>`; ink pill, visible only while focused.
-Targets `#main`, which the root layout renders with `tabIndex={-1}`.
+Targets `#main`, which `PageMain` (`app/components/site/`) renders with
+`tabIndex={-1}`.
 
 ## `Popover`
 

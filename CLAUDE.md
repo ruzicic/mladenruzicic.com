@@ -61,7 +61,14 @@ redirect, see `next.config.ts`), `/mentoring` (`/mentorship` redirects),
 `/about` with the CV (`/uses` redirects), `/press`. For machines:
 `/llms.txt`, `/llms-full.txt`, a markdown version of every page (`.md` or
 `Accept: text/markdown`, rewritten by `proxy.ts` to `app/md/`), JSON-LD on
-every page (`lib/seo/jsonld.ts`), the read-only `/mcp` endpoint.
+every page (`lib/seo/jsonld.ts`), the read-only `/mcp` endpoint. Markdown
+wins when `text/markdown` has the highest q (ties included); `noindex` is
+only on the `.md` and `/md/` URLs and the llms files, never on the
+negotiated answer at the canonical URL. `/robots.txt` is a route
+(`lib/seo/robots.ts`, `CONTENT_SIGNAL` in every group and on every markdown
+response); `/.well-known/mcp/server-card.json` and `/.well-known/api-catalog`
+describe `/mcp` from `lib/mcp/info.ts` (its `serverInfo` and tool names), and
+`/`'s `Link` header points at both.
 `/dev/icons` and `/dev/diagrams` are specimen pages that 404 in production.
 
 ## Folders
@@ -261,6 +268,13 @@ every page (`lib/seo/jsonld.ts`), the read-only `/mcp` endpoint.
 - `next/font/local` variables are private and mapped to the public token
   names in `@theme inline`; using one name on both sides would be
   self-referential.
+- Font fallbacks are our own (2026-11-16): next/font's `adjustFontFallback`
+  is off for Geist and Geist Serif, and measured `@font-face` faces
+  (`local()` Arial, Roboto, Times New Roman, Noto Serif) in
+  `app/globals.css` follow the web font in `--font-sans` and
+  `--font-display`, so text wraps the same before and after the swap;
+  re-measure their `size-adjust` after a font or large copy change
+  (`app/fonts.ts`, "METRIC FALLBACKS").
 - `next-env.d.ts` flips between `.next/dev/types/*` and `.next/types/*`; the
   committed version is what `next build` produces.
 - ESLint ignores `.claude/**` and `content/**/*.mdx`.

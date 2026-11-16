@@ -515,7 +515,7 @@ Case study page: /work/wolkabout (source: /work/wolkabout)
 - In one line: Junior to senior in three years: Angular frontends for an IoT platform moving large volumes of live data. (source: /work/wolkabout)
 - WolkAbout made an IoT platform: backend software that connects devices and keeps their data, and WolkReact, the web and mobile apps on top of it. From 2017 to 2020 I built its modular Angular front end from the ground up, and the REST client and component library around it. (source: /work/wolkabout)
 - Link: @wolkabout/wolk-rest on npm, https://www.npmjs.com/package/@wolkabout/wolk-rest (source: /work/wolkabout)
-- Link: wolkabout.com (Web Archive), http://web.archive.org/web/20210616143417/https://wolkabout.com/ (source: /work/wolkabout)
+- Link: wolkabout.com (Web Archive), https://web.archive.org/web/20210616143417/https://wolkabout.com/ (source: /work/wolkabout)
 
 #### Summary
 
@@ -739,6 +739,6 @@ The only links an answer may point to, one per line: `- <href> | <label> | <what
 - /work#wolkabout | WolkAbout in the list | Its row in the list of work he has put real time into.
 - /work/wolkabout | WolkAbout case study | Junior to senior in three years: Angular frontends for an IoT platform moving large volumes of live data.
 - https://www.npmjs.com/package/@wolkabout/wolk-rest | @wolkabout/wolk-rest on npm | Linked from the WolkAbout case study
-- http://web.archive.org/web/20210616143417/https://wolkabout.com/ | wolkabout.com (Web Archive) | Linked from the WolkAbout case study
+- https://web.archive.org/web/20210616143417/https://wolkabout.com/ | wolkabout.com (Web Archive) | Linked from the WolkAbout case study
 - /work#execom | Execom in the list | Its row in the list of work he has put real time into.
 - /work#nemestic | Nemestic Studio in the list | Its row in the list of work he has put real time into.

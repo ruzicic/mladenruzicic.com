@@ -23,7 +23,9 @@ import { AboutEarly } from "./AboutEarly"
  *
  * The portrait is 96px and sits above the fold, so it loads eagerly; it is
  * not the page's largest paint (the heading and the paragraphs are), so it is
- * not preloaded.
+ * not preloaded. `fetchPriority="low"` is what keeps it out of the head:
+ * React's server renderer turns any `<img>` that is not `lazy` into a
+ * `<link rel="preload">` unless its priority is `low`.
  */
 export function AboutStory() {
   const { headshot, title, paragraphs, early } = getAbout()
@@ -39,6 +41,7 @@ export function AboutStory() {
           height={media.height}
           sizes="96px"
           loading="eager"
+          fetchPriority="low"
           placeholder="blur"
           blurDataURL={media.blurDataURL}
           className="ab-portrait"

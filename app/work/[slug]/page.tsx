@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { getStories, getStory } from "@/lib/content"
+import { LAST_UPDATED } from "@/lib/seo/markdown"
 import { pageMetadata } from "@/lib/seo/metadata"
 
 import { JsonLd } from "../../components/seo/JsonLd"
@@ -36,6 +37,9 @@ export async function generateMetadata({
     title: story.seo.title ?? story.title,
     description: story.seo.description,
     path: `/work/${story.slug}`,
+    // `article:modified_time`: the same date as the sitemap's `<lastmod>`
+    // and the Article's `dateModified`. No publish date: none is known.
+    modified: story.updated ?? LAST_UPDATED,
   })
 }
 
