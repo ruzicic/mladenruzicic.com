@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test"
 import { workCardSchema } from "@/lib/content/schema-pages"
 import { HOME } from "@/content/pages/home"
 
-import { gotoReady, projectLinks, timedDrag } from "./helpers"
+import { gotoReady, projectLinks, timedDrag, touchSwipe } from "./helpers"
 
 /**
  * "Recent work" by hand (owner, 15 Nov 2026: "click on unfocused items
@@ -480,18 +480,17 @@ test.describe("touch at 390", () => {
     isMobile: true,
   })
 
-  /** A native touch swipe (Chromium's synthetic gesture). */
+  /** A native touch swipe (CDP touch events; see `touchSwipe`). */
   async function swipe(page: Page, dx: number, dy: number, speed: number) {
-    const cdp = await page.context().newCDPSession(page)
     const b = (await strip(page).boundingBox())!
-    await cdp.send("Input.synthesizeScrollGesture", {
-      x: Math.round(b.x + (dx < 0 ? 300 : 80)),
-      y: Math.round(b.y + (dy < 0 ? 300 : 120)),
-      xDistance: dx,
-      yDistance: dy,
-      speed,
-      gestureSourceType: "touch",
-    })
+    await touchSwipe(
+      page,
+      b.x + (dx < 0 ? 300 : 80),
+      b.y + (dy < 0 ? 300 : 120),
+      dx,
+      dy,
+      speed
+    )
   }
 
   for (const speed of [400, 1500, 4000]) {

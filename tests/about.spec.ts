@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test"
 
 import { ABOUT } from "@/content/pages/about"
 
-import { gotoReady, timedDrag } from "./helpers"
+import { gotoReady, timedDrag, touchSwipe } from "./helpers"
 
 /**
  * `/about` after the owner's 15 Nov 2026 copy and layout: the story (the
@@ -395,15 +395,7 @@ test.describe("on a phone, by touch", () => {
       const r = rail(page)
       await r.scrollIntoViewIfNeeded()
       const b = (await r.boundingBox())!
-      const cdp = await page.context().newCDPSession(page)
-      await cdp.send("Input.synthesizeScrollGesture", {
-        x: Math.round(b.x + 280),
-        y: Math.round(b.y + 80),
-        xDistance: -200,
-        yDistance: 0,
-        speed,
-        gestureSourceType: "touch",
-      })
+      await touchSwipe(page, b.x + 280, b.y + 80, -200, 0, speed)
       await expect(count(page)).toHaveText(fmt(EARLY.counterFormat, 1))
       await expect.poll(() => visible(page)).toEqual([1])
     })
@@ -417,16 +409,8 @@ test.describe("on a phone, by touch", () => {
     const r = rail(page)
     await r.scrollIntoViewIfNeeded()
     const b = (await r.boundingBox())!
-    const cdp = await page.context().newCDPSession(page)
     const swipe = (dx: number) =>
-      cdp.send("Input.synthesizeScrollGesture", {
-        x: Math.round(b.x + (dx < 0 ? 280 : 60)),
-        y: Math.round(b.y + 80),
-        xDistance: dx,
-        yDistance: 0,
-        speed: 1200,
-        gestureSourceType: "touch",
-      })
+      touchSwipe(page, b.x + (dx < 0 ? 280 : 60), b.y + 80, dx, 0, 1200)
     await swipe(200)
     await expectAt(page, N - 1)
     await swipe(-200)

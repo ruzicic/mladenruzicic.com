@@ -241,6 +241,62 @@ export async function timedDrag(
 }
 
 /**
+ * A finger's swipe of (`dx`, `dy`) from (`x`, `y`) at `speed` px/s: a
+ * touchstart, moves a frame (`stepMs`) apart, then the lift. By default the
+ * finger rests `hold` ms before it lifts, so nothing flings, which is what
+ * `Input.synthesizeScrollGesture` did (its `preventFling` defaults to true);
+ * with `fling` it lifts on the last move, at `speed`. Sent through CDP
+ * (`Input.dispatchTouchEvent`) with explicit timestamps, which Chromium's
+ * gesture detector reads for the release velocity, so the swipe is the same
+ * on a busy machine.
+ *
+ * Not `Input.synthesizeScrollGesture`: on Linux (headless shell and full
+ * Chromium 158 alike) that gesture sends a touchstart and a touchend but no
+ * touchmove, so nothing scrolls, not even a plain overflow box on a blank
+ * page; the same probe scrolls on macOS (measured 16 Nov 2026, the first CI
+ * run). Chromium only.
+ */
+export async function touchSwipe(
+  page: Page,
+  x: number,
+  y: number,
+  dx: number,
+  dy: number,
+  speed: number,
+  {
+    stepMs = 16,
+    hold = 100,
+    fling = false,
+  }: { stepMs?: number; hold?: number; fling?: boolean } = {}
+): Promise<void> {
+  const cdp = await page.context().newCDPSession(page)
+  const duration = (Math.hypot(dx, dy) / speed) * 1000
+  const steps = Math.max(3, Math.ceil(duration / stepMs))
+  const t0 = Math.max(Date.now() / 1000, lastDragTs + 0.05)
+  const at = (ms: number) => (lastDragTs = t0 + ms / 1000)
+  const point = (i: number) => [
+    { x: x + (dx * i) / steps, y: y + (dy * i) / steps },
+  ]
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: point(0),
+    timestamp: at(0),
+  })
+  for (let i = 1; i <= steps; i++)
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: point(i),
+      timestamp: at((duration * i) / steps),
+    })
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchEnd",
+    touchPoints: [],
+    timestamp: at(duration + (fling ? 0 : hold)),
+  })
+  await cdp.detach()
+}
+
+/**
  * The headline's swapping line: the `aria-hidden` last child of the `<h1>`
  * (the `<h1>` itself carries the full sentence for assistive tech). Its text
  * changes whenever the phrase on show changes.
