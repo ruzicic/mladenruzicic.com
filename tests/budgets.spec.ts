@@ -129,8 +129,21 @@ test.describe("/ budgets", () => {
  * network and CPU throttling (Chromium, through CDP). The assertion is a
  * CLS ceiling, not line positions: a Linux runner sets the fallback in
  * Liberation Sans and Liberation Serif (Arial's and Times New Roman's
- * widths, the same faces) and rounds text metrics its own way. Measured on
- * macOS with the measured fallbacks: at most 0.001 on all four.
+ * widths, the same faces). Measured with the measured fallbacks: at most
+ * 0.001 on all four on macOS.
+ *
+ * It runs in the full Chromium build (`channel: "chromium"`, headless),
+ * not in the headless shell the other tests use. On Linux the shell gets
+ * no desktop font settings: every web font and `local()` face is hinted at
+ * a whole-pixel size with whole-pixel advances, while installed fonts named
+ * by family, and every font in full Chromium, are set at their fractional
+ * size with fractional advances, as in the browsers people use. Body copy
+ * set in the Liberation Sans fallback at 20px measured 104.7% of Geist's
+ * width in the shell (20px times 103.1% is drawn at 21px; any `size-adjust`
+ * from 100% to 102% is drawn at 20px, 97.5%), against 100.7% at every size
+ * from 13px to 44px in full Chromium on the same machine. In the shell `/`
+ * and `/mentoring` at 412 wide rewrapped and failed (0.105, 0.226); in full
+ * Chromium all four pass on Linux too. macOS draws the same in both builds.
  */
 const SWAP_CLS_BUDGET = 0.03
 const FONT_DELAY_MS = 1500
@@ -144,13 +157,17 @@ const SWAP_CASES = [
 test.describe("the font swap moves nothing (throttled)", () => {
   for (const { path, width } of SWAP_CASES) {
     test(`${path} at ${width} wide: CLS through the swap under ${SWAP_CLS_BUDGET}`, async ({
-      browser,
+      playwright,
       browserName,
+      baseURL,
     }) => {
       test.skip(browserName !== "chromium", "throttling goes through CDP")
       test.setTimeout(120_000)
       const phone = width < 1000
+      // Full Chromium, not the headless shell: see above.
+      const browser = await playwright.chromium.launch({ channel: "chromium" })
       const context = await browser.newContext({
+        baseURL,
         viewport: { width, height: phone ? 823 : 900 },
         deviceScaleFactor: phone ? 1.75 : 1,
         isMobile: phone,
@@ -198,9 +215,11 @@ test.describe("the font swap moves nothing (throttled)", () => {
           order.fcp,
           "the fallback paints before any web font arrives"
         ).toBeLessThan(order.firstFont)
-        expect(await getCls(page)).toBeLessThan(SWAP_CLS_BUDGET)
+        const cls = await getCls(page)
+        console.log(`font swap on ${path} at ${width}: CLS ${cls.toFixed(4)}`)
+        expect(cls).toBeLessThan(SWAP_CLS_BUDGET)
       } finally {
-        await context.close()
+        await browser.close()
       }
     })
   }

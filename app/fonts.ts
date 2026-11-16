@@ -99,10 +99,24 @@ import localFont from "next/font/local"
  * and 295 per 1000 in both families, no line gap) over the face's
  * `size-adjust`, so a line box is the same height in either font.
  *
+ * On Linux `local("Arial")` matches nothing: Chromium matches `local()`
+ * by a font's own full or PostScript name, and fontconfig's Arial to
+ * Liberation Sans alias applies only to family names. The face is reached
+ * by `local("Liberation Sans")`, and there (full Chromium, Ubuntu 24.04)
+ * the site's body copy measured 100.7% of Geist's width at every size from
+ * 13 to 44px.
+ *
  * Re-measure after a font change or a large copy change: the mean per
  * family and weight from `measureText` in both engines (web / fallback, in
  * percent), then check the wraps with the web fonts blocked, and the
  * throttled swap test in `tests/budgets.spec.ts`.
+ *
+ * NOTE ON FAMILY NAMES: next/font names each `@font-face` family after the
+ * const it is assigned to. Keep those names unlike any installed family or
+ * fontconfig alias: with the old `sans`, when the file failed to load,
+ * Chromium on Linux took `sans` as fontconfig's alias for sans-serif and
+ * set the text in whatever that picks (WenQuanYi Zen Hei in the Playwright
+ * image), never reaching the metric fallbacks.
  *
  * NOTE ON VARIABLE NAMES: next/font emits private variables
  * (`--font-geist-serif-regular`, `--font-geist-sans`, `--font-geist-mono`).
@@ -110,7 +124,7 @@ import localFont from "next/font/local"
  * `--font-sans`, `--font-mono` inside `@theme inline`. Do not give both sides
  * the same name: it would be self-referential.
  */
-const display = localFont({
+const geistSerif = localFont({
   src: "./fonts/geist-serif-regular-latin.woff2",
   variable: "--font-geist-serif-regular",
   weight: "400",
@@ -118,7 +132,7 @@ const display = localFont({
   adjustFontFallback: false,
 })
 
-const sans = localFont({
+const geistSans = localFont({
   src: "./fonts/geist-sans-latin.woff2",
   variable: "--font-geist-sans",
   weight: "400 600",
@@ -126,7 +140,7 @@ const sans = localFont({
   adjustFontFallback: false,
 })
 
-const mono = localFont({
+const geistMono = localFont({
   src: "./fonts/geist-mono-regular-latin.woff2",
   variable: "--font-geist-mono",
   weight: "400",
@@ -146,7 +160,7 @@ const mono = localFont({
 
 /** Space-separated class list for `<html>`; exposes the three variables. */
 export const fontVariables = [
-  display.variable,
-  sans.variable,
-  mono.variable,
+  geistSerif.variable,
+  geistSans.variable,
+  geistMono.variable,
 ].join(" ")
