@@ -15,6 +15,38 @@
   color: var(--color-ink);
 }
 
+/* A page with a measure of its own (`PageFrame measure="sheet"`, the CV):
+   wider than 820px the text column is that measure, centred, so the top
+   block, the page and the footer share its two edges. The page's area CSS
+   sets `--sheet-w`. Narrower, the site's column as everywhere. */
+@media (min-width: 821px) {
+  [data-page-frame][data-measure="sheet"] {
+    --column-width: min(var(--sheet-w), calc(100% - 2 * var(--gutter)));
+    --column-start: max(var(--gutter), calc(50% - var(--sheet-w) / 2));
+  }
+}
+
+/* A page with no site footer (`PageFrame footer={false}`, the CV): paper
+   to the bottom, the sheet square and still, a comfortable foot. */
+html:has([data-page-frame][data-footer="none"]),
+html:has([data-page-frame][data-footer="none"]) body {
+  background: var(--color-paper);
+}
+
+[data-page-frame][data-footer="none"] {
+  background: var(--color-paper);
+
+  & [data-page-sheet] {
+    border-radius: 0;
+    padding-bottom: 72px;
+    animation: none;
+
+    @media (max-width: 720px) {
+      padding-bottom: 48px;
+    }
+  }
+}
+
 [data-page-sheet] {
   flex: 1 0 auto;
   display: flex;

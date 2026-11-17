@@ -3,6 +3,7 @@ import {
   getAsk,
   getBuiltList,
   getCompanies,
+  getCv,
   getHome,
   getMentoring,
   getPeopleForCompany,
@@ -719,6 +720,66 @@ export function aboutDoc(): MarkdownDoc {
 }
 
 /* -------------------------------------------------------------------------- */
+/* /cv                                                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The CV as the page has it (and the PDF made from it): the contact line,
+ * the summary, then each section, a title line with its dates as a heading.
+ */
+export function cvDoc(): MarkdownDoc {
+  const cv = getCv()
+  const entry = (i: (typeof cv.projects.items)[number]) => [
+    `### ${[i.name, i.role, mdLink(i.domain, i.href)].filter(Boolean).join(" · ")} · ${i.dates}`,
+    "",
+    i.text,
+    "",
+  ]
+  return {
+    title: cv.seo.title,
+    description: cv.seo.description,
+    path: "/cv",
+    updated: LAST_UPDATED,
+    body: lines(
+      `# ${cv.seo.title}: ${cv.name}`,
+      "",
+      cv.headline.role,
+      cv.headline.location,
+      "",
+      cv.contact.map((c) => mdLink(c.text, c.href)).join(" · "),
+      "",
+      cv.summary.flatMap((p) => [p, ""]),
+      `PDF: ${mdLink(cv.download.label, cv.download.href)}`,
+      "",
+      `## ${cv.experience.title}`,
+      "",
+      cv.experience.jobs.flatMap((job) => [
+        `### ${[job.company, job.role, job.dates].filter(Boolean).join(" · ")}`,
+        "",
+        ...(job.line ? [job.line, ""] : []),
+        ...(job.bullets ? [...job.bullets.map((b) => `- ${b}`), ""] : []),
+        ...(job.roles ?? []).flatMap((r) => [
+          `#### ${r.title} · ${r.dates}`,
+          "",
+          ...r.bullets.map((b) => `- ${b}`),
+          "",
+        ]),
+      ]),
+      `## ${cv.projects.title}`,
+      "",
+      cv.projects.items.flatMap(entry),
+      `## ${cv.mentoring.title}`,
+      "",
+      cv.mentoring.items.flatMap(entry),
+      `## ${cv.skills.title}`,
+      "",
+      cv.skills.items.join(" · "),
+      ""
+    ),
+  }
+}
+
+/* -------------------------------------------------------------------------- */
 /* /press                                                                     */
 /* -------------------------------------------------------------------------- */
 
@@ -785,6 +846,7 @@ export function markdownDoc(route: string): MarkdownDoc | undefined {
   if (route === "work") return workIndexDoc()
   if (route === "mentoring") return mentoringDoc()
   if (route === "about") return aboutDoc()
+  if (route === "cv") return cvDoc()
   if (route === "press") return pressDoc()
   if (route.startsWith("work/")) return storyDoc(route.slice("work/".length))
   return undefined
@@ -891,6 +953,7 @@ export function llmsTxt(): string {
     `- [Home](${markdownUrl("/")}): ${getHome().seo.description}`,
     `- [All work](${markdownUrl("/work")}): ${getWorkPage().seo.description}`,
     `- [About](${markdownUrl("/about")}): ${getAbout().seo.description}`,
+    `- [CV](${markdownUrl("/cv")}): his CV: experience, projects, mentoring and skills. Also [as a PDF](${absolute(getCv().download.href)})`,
     `- [Mentoring](${markdownUrl("/mentoring")}): ${mentoring.title}`,
     `- [Press](${markdownUrl("/press")}): Short bio, one-liners, facts and headshot, ready to copy.`,
     "",
@@ -965,6 +1028,7 @@ export function llmsFullTxt(): string {
     [
       homeDoc(),
       aboutDoc(),
+      cvDoc(),
       workIndexDoc(),
       ...stories,
       mentoringDoc(),

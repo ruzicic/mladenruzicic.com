@@ -12,8 +12,8 @@ import { PAGES, STORY_SLUGS } from "./helpers"
  * the RSC payload legitimately hold arrays.
  */
 
-const MIRRORS = ["/", "/work", "/mentoring", "/about", "/press"].map((p) =>
-  p === "/" ? "/index.md" : `${p}.md`
+const MIRRORS = ["/", "/work", "/mentoring", "/about", "/cv", "/press"].map(
+  (p) => (p === "/" ? "/index.md" : `${p}.md`)
 )
 const STORY_MIRRORS = STORY_SLUGS.map((s) => `/work/${s}.md`)
 

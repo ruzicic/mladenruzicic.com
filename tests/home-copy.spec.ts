@@ -187,6 +187,8 @@ test.describe("About: the CV", () => {
     const cv = page.getByRole("link", { name: "Download my CV" })
     await expect(cv).toBeVisible()
     await expect(cv).toHaveAttribute("href", "/cv.pdf")
+    // Saved under his name (17 Nov 2026).
+    await expect(cv).toHaveAttribute("download", "Mladen-Ruzicic-CV.pdf")
     await expect(page.getByText("PDF", { exact: true })).toHaveCount(0)
   })
 })

@@ -217,6 +217,7 @@ test.describe("markdown twins", () => {
       "/work/:slug",
       "/mentoring",
       "/about",
+      "/cv",
       "/press",
     ]) {
       const rule = rules.find((r) => r.source === page)

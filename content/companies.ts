@@ -39,9 +39,11 @@ export const COMPANIES = [
     // the bag is #5E8E3E.
     color: "#95BF47",
     from: 2021.25,
-    to: 2023.5,
+    // The end of May 2023 (his CV, confirmed 17 Nov 2026: the May 2023
+    // layoffs), not June.
+    to: 2023.42,
     approx: false,
-    yearsLabel: "Apr 2021 – Jun 2023",
+    yearsLabel: "Apr 2021 – May 2023",
     role: "Senior Software Engineer, Shop Minis",
     summary:
       "Worked on Shop Minis from zero: a system for embedding mini React Native apps inside Shop.app, plus the SDK and partner ecosystem around it. Forward-deployed with the first partner builders, from submission and review through promotion. Also contributed to Shopify checkout and spent six months interviewing.",

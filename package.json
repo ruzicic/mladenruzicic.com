@@ -16,7 +16,8 @@
     "format:write": "prettier --write \"**/*.{ts,tsx,mdx,css}\" --cache",
     "format:check": "prettier --check \"**/*.{ts,tsx,mdx,css}\" --cache",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "cv:pdf": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/ts-register.mjs scripts/cv-pdf.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.4.0",

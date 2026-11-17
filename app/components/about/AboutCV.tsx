@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 import "@/app/styles/about.css"
 
 import { linkEvent } from "@/lib/analytics"
-import { getAbout, getProductMark } from "@/lib/content"
+import { getAbout, getProductMark, getSite } from "@/lib/content"
 import { Button } from "@/app/components/primitives/Button"
 import { Icon } from "@/app/components/primitives/Icon"
 import { ProductTile } from "@/app/components/primitives/ProductTile"
@@ -50,7 +50,7 @@ export function AboutCV() {
         <Button
           as="a"
           href={cv.download.href}
-          download=""
+          download={getSite().links.cvFilename}
           data-track={linkEvent(cv.download.href)}
         >
           <Icon name="download" size={16} />

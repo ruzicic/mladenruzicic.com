@@ -177,6 +177,40 @@ button.site-top__name {
   height: var(--top-row);
 }
 
+/* A page's own ends (`TopBlock start`/`end`, the CV): a control at the
+   left, centred on the row, and a button of the row's height at the right
+   edge, where Ask sits elsewhere. */
+.site-top__start {
+  justify-content: center;
+  height: var(--top-row);
+}
+
+.site-top__end {
+  align-self: start;
+  justify-self: end;
+  display: flex;
+  height: var(--top-row);
+
+  & > .btn {
+    --btn-h: var(--top-row);
+  }
+}
+
+.site-top[data-ends] {
+  @media (max-width: 720px) {
+    grid-template-rows: auto;
+
+    & .site-top__start {
+      grid-column: 1;
+    }
+
+    & .site-top__end {
+      grid-column: 2;
+      grid-row: 1;
+    }
+  }
+}
+
 /* Phones (owner, 16 Nov 2026: three rows beside the button "isnt the
    prettiest header for mobile"): two rows. The name and the compact Ask
    button share the first, the name centred on the button; the line under

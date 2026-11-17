@@ -45,6 +45,7 @@ const TWINNED_PAGES = [
   "/work/:slug",
   "/mentoring",
   "/about",
+  "/cv",
   "/press",
 ]
 
@@ -123,7 +124,6 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: "/cv", destination: "/cv.pdf", permanent: true },
       { source: "/mentorship", destination: "/mentoring", permanent: true },
       // The old `/uses` page; its contents live on `/about`.
       { source: "/uses", destination: "/about", permanent: true },

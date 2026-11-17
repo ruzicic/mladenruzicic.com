@@ -136,7 +136,8 @@ for (const width of [360, 390, 768, 1440]) {
       )
     }
     // Every way back draws its arrow at the same place (the stories apart,
-    // wider than 1100px).
+    // wider than 1100px). `/cv` has no way back of this kind: its top row
+    // is Close CV and Download PDF (`tests/cv.spec.ts`).
     const tips = PAGES.slice(1)
       .filter((p) => !(wide && boxes[p].cover))
       .map((p) => Math.round(boxes[p].tip! * 2) / 2)

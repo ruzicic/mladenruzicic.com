@@ -16,6 +16,7 @@ export const TWIN_ROUTES: readonly string[] = [
   ...STORY_SLUGS.map((slug) => `work/${slug}`),
   "mentoring",
   "about",
+  "cv",
   "press",
 ]
 

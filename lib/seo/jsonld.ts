@@ -1,6 +1,7 @@
 import {
   getAbout,
   getBuiltList,
+  getCv,
   getHome,
   getMedia,
   getMentoring,
@@ -423,6 +424,30 @@ export function aboutJsonLd() {
       HOME_CRUMB,
       { name: about.seo.title, path: "/about" },
     ]),
+    ...core(),
+  ])
+}
+
+/**
+ * `/cv`: a ProfilePage about the same Person node every page carries; the
+ * CV's facts are the page's text, not repeated here. The PDF is the page
+ * printed, named as the page's associated file.
+ */
+export function cvJsonLd() {
+  const cv = getCv()
+  return graph([
+    webPageNode("ProfilePage", "/cv", cv.seo.title, cv.seo.description, {
+      mainEntity: ref(ID.person),
+      about: ref(ID.person),
+      primaryImageOfPage: ref(ID.headshot),
+      associatedMedia: {
+        "@type": "MediaObject",
+        contentUrl: `${ORIGIN}${cv.download.href}`,
+        encodingFormat: "application/pdf",
+        name: `${site.name}, ${cv.seo.title}`,
+      },
+    }),
+    breadcrumbNode("/cv", [HOME_CRUMB, { name: cv.seo.title, path: "/cv" }]),
     ...core(),
   ])
 }

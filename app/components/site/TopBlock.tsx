@@ -1,4 +1,4 @@
-import { ViewTransition } from "react"
+import { ViewTransition, type ReactNode } from "react"
 
 import { askLiveConfig } from "@/lib/ask/site-config"
 import {
@@ -19,6 +19,13 @@ export interface TopBlockProps {
   line?: string
   /** `/`: the name is a button with the press menu, not a link home. */
   home?: boolean
+  /**
+   * The row's ends in place of the name and Ask (the CV, 17 Nov 2026: a
+   * close control at the left, its Download PDF at the right). Same row,
+   * height and edges; Ask is then not rendered at all.
+   */
+  start?: ReactNode
+  end?: ReactNode
 }
 
 /** Everything the Ask island needs, so the client never loads content code. */
@@ -124,7 +131,20 @@ export function AskSlot() {
  * do not move at all. Under reduced motion the transition has no duration,
  * a plain swap.
  */
-export function TopBlock({ line, home = false }: TopBlockProps) {
+export function TopBlock({ line, home = false, start, end }: TopBlockProps) {
+  if (start || end)
+    return (
+      <header id="top" className="site-top" data-ends="">
+        <div className="site-top__id site-top__start" data-top-id="">
+          {start}
+        </div>
+        {end ? (
+          <ViewTransition name="site-ask" share="vt-travel" default="none">
+            <div className="site-top__end">{end}</div>
+          </ViewTransition>
+        ) : null}
+      </header>
+    )
   const site = getSite()
   const press = getPress()
   const name = (

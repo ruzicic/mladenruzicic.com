@@ -1,0 +1,509 @@
+/* ---------------------------------------------------------------------------
+   /cv on screen, and /cv.pdf through `@media print` below: one markup
+   (`app/components/cv/CvPage.tsx`), two renderings. Owner, 17 Nov 2026:
+   Geist Serif for the name and the section headings, simple type with as
+   little variation as the site, no colour.
+
+   The screen page IS the A4 sheet, enlarged (owner, 17 Nov 2026: "it's too
+   narrow on the website … and not properly A4-paper-ratios"). Every size
+   below is a print size in points (or millimetres) times `--cv-scale`: 1
+   in print, 16px / 11pt (about 1.091) on a screen wider than 820px (the
+   11pt body becomes 16px, the 169.8mm text measure about 700px). One definition for both, so the
+   page and the PDF break their lines in the same places
+   (`tests/cv.spec.ts` holds them to it). Narrower than 820px the sheet no
+   longer fits beside the site's gutters: the page goes fluid, at the
+   site's text size, the portrait under the name.
+
+   Sizes and margins (17 Nov 2026, after a Swiss CV check: ETH's and USI's
+   career guides ask for at least 11pt, and lines ran about 106
+   characters): body 11pt, dates 9.5pt, 20mm side margins. The measure is
+   169.8mm, the most the PDF really gives between them: Chromium rounds the
+   A4 page down to 594.96pt, which leaves 169.89mm, and the screen sheet
+   must not be wider than the printed one or it would wrap differently.
+
+   One ink (--color-ink), one muted grey (--color-muted), one weight change
+   (600 on the title rows). No rules between sections, no icons, no
+   italics, no capitals; spacing does the work. Every line that carries a
+   date is one row: the title at the left, the date at the right in Geist
+   Mono, muted, one column of dates down the page.
+
+   The column and the fluid page title are About's (`.ab-col`, `.ab-h1`,
+   app/styles/about.css). Unlayered, like the other area files.
+
+   Changing anything here changes the PDF: regenerate it (`pnpm cv:pdf`),
+   or `pnpm cv:pdf --check` (CI) fails.
+   --------------------------------------------------------------------------- */
+
+/* The sheet's scale and measure, on the frame: `PageFrame measure="sheet"`
+   (`app/styles/shell.css`) puts the top block, the page and the footer on
+   these edges wider than 820px. */
+[data-page-frame][data-measure="sheet"] {
+  /* The 11pt body at 16px. */
+  --cv-scale: calc(16 / (11 * 4 / 3));
+  --sheet-w: calc(169.8mm * var(--cv-scale));
+}
+
+.cv {
+  /* One print point, at the page's scale; every size is a multiple. */
+  --cv-pt: calc(1pt * var(--cv-scale, 1));
+  --cv-photo: calc(34mm * var(--cv-scale, 1));
+  --cv-photo-gap: calc(8mm * var(--cv-scale, 1));
+
+  margin-top: 64px;
+  color: var(--color-ink);
+  font-size: calc(11 * var(--cv-pt));
+  --cv-lh: 1.35;
+
+  line-height: var(--cv-lh);
+
+  /* No specificity: the spacing rules below set the margins. */
+  & :where(p, ul, h3, h4) {
+    margin: 0;
+  }
+
+  /* Links: the ink, a thin underline (not the Download PDF button). */
+  & a:not(.btn) {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-underline);
+    text-decoration-thickness: 1px;
+    text-underline-offset: calc(2.5 * var(--cv-pt));
+  }
+
+  & a:not(.btn):hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* Too narrow for the sheet: the site's own text size, and every point
+   scaled from it, so the rhythm stays the sheet's. */
+@media screen and (max-width: 820px) {
+  .cv {
+    --cv-pt: calc(var(--text-page) / 11);
+    --cv-photo: 128px;
+    --cv-photo-gap: 24px;
+
+    --cv-lh: 1.45;
+
+    @media (max-width: 720px) {
+      margin-top: 48px;
+    }
+  }
+}
+
+/* ============================== Header ================================== */
+/* The name, the contact line and the summary at the left, the portrait at
+   the right; on a fluid page the portrait comes under the name. */
+.cv-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--cv-photo);
+  grid-template-areas:
+    "name photo"
+    "headline photo"
+    "contact photo"
+    "summary photo";
+  grid-template-rows: auto auto auto 1fr;
+  column-gap: var(--cv-photo-gap);
+  align-items: start;
+}
+
+.cv-name.ab-h1 {
+  grid-area: name;
+  margin: 0 0 calc(3 * var(--cv-pt));
+  font-size: calc(28 * var(--cv-pt));
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.cv-photo {
+  grid-area: photo;
+  display: block;
+  width: var(--cv-photo);
+  height: var(--cv-photo);
+  object-fit: cover;
+  background: var(--color-tile);
+}
+
+/* Two lines under the name (owner, 17 Nov 2026): his role in ink, where
+   he lives in the muted grey, no separator; then the contact line. */
+.cv-headline {
+  grid-area: headline;
+
+  & > span {
+    display: block;
+  }
+}
+
+.cv-headline__place {
+  color: var(--color-muted);
+}
+
+.cv-contact {
+  grid-area: contact;
+  margin-top: calc(4 * var(--cv-pt));
+  overflow-wrap: anywhere;
+}
+
+.cv-summary {
+  grid-area: summary;
+  margin-top: calc(8 * var(--cv-pt));
+  display: flex;
+  flex-direction: column;
+  gap: calc(5 * var(--cv-pt));
+}
+
+@media screen and (max-width: 820px) {
+  .cv-head {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "name"
+      "photo"
+      "headline"
+      "contact"
+      "summary";
+    grid-template-rows: none;
+  }
+
+  /* The site's page title (`.ab-h1`) at its own sizes. */
+  .cv-name.ab-h1 {
+    margin: 0 0 8px;
+    font-size: 60px;
+    line-height: 1.02;
+
+    @media (max-width: 720px) {
+      font-size: 44px;
+      line-height: 1.04;
+    }
+  }
+
+  .cv-photo {
+    margin: 8px 0 20px;
+    border-radius: var(--radius-control);
+  }
+
+  .cv-summary {
+    margin-top: 16px;
+    gap: 12px;
+  }
+}
+
+/* ============================= Sections ================================= */
+
+.cv-sec {
+  margin-top: calc(18 * var(--cv-pt));
+}
+
+.cv-h2 {
+  margin: 0 0 calc(6 * var(--cv-pt));
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: normal;
+  font-synthesis: none;
+  font-size: calc(16 * var(--cv-pt));
+  line-height: 1.25;
+  color: var(--color-ink);
+}
+
+/* A company, a project: 10pt above, none right under its heading. */
+.cv-job,
+.cv-entry {
+  margin-top: calc(10 * var(--cv-pt));
+}
+
+.cv-h2 + :is(.cv-job, .cv-entry) {
+  margin-top: 0;
+}
+
+/* ============================= Role tree ================================ */
+/* A job with several roles (ZF; owner, 17 Nov 2026: "it should be obvious
+   all those are sub-roles … tree-like-UI would help"): the roles indented
+   under the company, a filled node on each role's title row, and a
+   hairline spine joining the nodes like a timeline: from the first node's
+   centre to the last node's centre, and no further (owner, 17 Nov 2026:
+   "vertikalna linija treba da se zavrsi na … bulletpointu"). Only the left
+   side indents; the dates keep their column.
+
+   Drawn without positioning anything that holds text: Chromium paints a
+   positioned box after the flow, and its text then comes out of the PDF
+   after everything else. The roles touch (the 8pt between them is the
+   next role's top padding), each draws its stretch of the spine as its
+   own background: from its node down to its bottom, and from its top down
+   to its node, so the stretches meet with no gap and the line ends on the
+   last node. `print-color-adjust: exact` so the PDF has them without
+   background printing. Each node is an empty round box before its role,
+   moved onto the spine. None holds a character. */
+.cv-roles {
+  --tree-indent: calc(14 * var(--cv-pt));
+  --tree-spine: calc(4 * var(--cv-pt));
+  --tree-line: calc(0.75 * var(--cv-pt));
+  --tree-node: calc(5 * var(--cv-pt));
+  --tree-gap: calc(8 * var(--cv-pt));
+  /* The title's x-height centre below the row's top: half the line, plus
+     Geist's (ascent 1.005, descent 0.295, x-height 0.53 em) offset. */
+  --tree-node-y: calc((var(--cv-lh) / 2 + 0.09) * 1em);
+  --tree-x: calc(var(--tree-spine) - var(--tree-line) / 2);
+  --tree-ink: linear-gradient(
+    var(--color-rule-strong),
+    var(--color-rule-strong)
+  );
+
+  margin-top: calc(4 * var(--cv-pt));
+  padding-left: 0;
+  list-style: none;
+}
+
+.cv-role {
+  padding-left: var(--tree-indent);
+  background-repeat: no-repeat;
+  print-color-adjust: exact;
+
+  & + & {
+    padding-top: var(--tree-gap);
+  }
+
+  /* The first role: from its node down. */
+  &:first-child:not(:last-child) {
+    background-image: var(--tree-ink);
+    background-position: var(--tree-x) var(--tree-node-y);
+    background-size: var(--tree-line) calc(100% - var(--tree-node-y));
+  }
+
+  /* A role in the middle: from its top through its node, on down. */
+  & + &:not(:last-child) {
+    background-image: var(--tree-ink);
+    background-position: var(--tree-x) 0;
+    background-size: var(--tree-line) 100%;
+  }
+
+  /* The last role: from its top to its node, and no further. */
+  & + &:last-child {
+    background-image: var(--tree-ink);
+    background-position: var(--tree-x) 0;
+    background-size: var(--tree-line) calc(var(--tree-gap) + var(--tree-node-y));
+  }
+}
+
+/* The node: an empty round box before each role, of no height in the
+   flow (its negative margin takes back its own), moved onto the spine and
+   down to the title's x-height centre. Only the dot is positioned, and it
+   holds no text. */
+.cv-role::before {
+  content: "";
+  position: relative;
+  top: calc(var(--tree-node-y) - var(--tree-node) / 2);
+  left: calc(var(--tree-spine) - var(--tree-indent) - var(--tree-node) / 2);
+  display: block;
+  width: var(--tree-node);
+  height: var(--tree-node);
+  margin-bottom: calc(-1 * var(--tree-node));
+  border-radius: 50%;
+  /* A background, not a border: borders snap to whole pixels, and the dot
+     would come out a pixel short and sit off the spine. */
+  background: var(--color-ink);
+  print-color-adjust: exact;
+}
+
+/* A fluid page: the same tree in pixels. */
+@media screen and (max-width: 820px) {
+  .cv-roles {
+    --tree-indent: 12px;
+    --tree-spine: 3.5px;
+    --tree-line: 1px;
+    --tree-node: 7px;
+  }
+}
+
+/* ============================ Dated rows ================================ */
+/* The title at the left, the date at the right end on the same baseline;
+   where both do not fit, the date drops under the title, at the left,
+   whole. */
+.cv-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  column-gap: calc(12 * var(--cv-pt));
+}
+
+.cv-title {
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-wrap: pretty;
+}
+
+/* A title's parts keep together where they fit, so a narrow screen breaks
+   a title after its dot (`Parts`); a part longer than the line still
+   wraps inside itself. */
+.cv-part {
+  display: inline-block;
+}
+
+/* A project's domain: a regular-weight link after the name and role. */
+.cv-title__link {
+  font-weight: 400;
+}
+
+.cv-date {
+  font-family: var(--font-mono);
+  font-size: calc(9.5 * var(--cv-pt));
+  font-weight: 400;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Under a row: 2pt, then the sentence or the bullets. */
+.cv-line,
+.cv-text,
+.cv-list {
+  margin-top: calc(2 * var(--cv-pt));
+}
+
+/* Bullets: a plain disc hanging in a 12pt indent, 2pt apart. Still a
+   list of `li`s; the disc is drawn, not a marker glyph (owner, 17 Nov
+   2026: "bullet points cut off by 1-2px"). The marker "• " at 11pt is
+   wider than the 12pt indent, so it started left of the list, outside
+   the PDF's text area, and the page clipped it. The drawn disc sits in
+   the item's own indent, 3pt clear of the list's edge, centred on the
+   first line's x-height; it is a block of no height in the flow, moved
+   down to the line (only the empty disc is positioned, so the text keeps
+   its place in the PDF's reading order) and holds no character. */
+.cv-list {
+  --bullet: calc(4 * var(--cv-pt));
+  --bullet-x: calc(3 * var(--cv-pt));
+
+  padding-left: 0;
+  list-style: none;
+
+  & li {
+    padding-left: calc(12 * var(--cv-pt));
+  }
+
+  & li + li {
+    margin-top: calc(2 * var(--cv-pt));
+  }
+
+  & li::before {
+    content: "";
+    position: relative;
+    top: calc((var(--cv-lh) / 2 + 0.09) * 1em - var(--bullet) / 2);
+    left: calc(var(--bullet-x) - 12 * var(--cv-pt));
+    display: block;
+    width: var(--bullet);
+    height: var(--bullet);
+    margin-bottom: calc(-1 * var(--bullet));
+    border-radius: 50%;
+    background: var(--color-ink);
+    print-color-adjust: exact;
+  }
+}
+
+.cv-skills {
+  margin-top: 0;
+}
+
+/* ============================ Print fonts =============================== */
+/* The PDF's Geist: static Regular and SemiBold cuts (`geist@1.9.2`'s
+   `Geist-Regular.woff2` and `Geist-SemiBold.woff2`, the Latin subset of
+   `app/fonts.ts`). The site's Geist is the variable font, which Chromium
+   embeds in a PDF as Type 3 glyphs: no real spaces between the words of a
+   600 line ("GlobalProductOwner" in a text extraction), and a font many
+   applicant-tracking parsers cannot read. Static faces embed as TrueType,
+   with the variable font's advances. Used only under `@media print`, so a
+   screen never downloads them. */
+@font-face {
+  font-family: "Geist CV Print";
+  src: url("../fonts/geist-sans-regular-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Geist CV Print";
+  src: url("../fonts/geist-sans-semibold-latin.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: block;
+}
+
+/* =============================== Print ================================== */
+/* The PDF (`scripts/cv-pdf.ts`, Chromium's print of this page): A4, the
+   margins below, no page numbers, no header or footer, a white page with
+   only the CV on it, at scale 1. A role, a job and a project never break
+   across two pages; a heading never ends a page. Only where the CV is the
+   page (`:has([data-cv])`): a client navigation can leave this sheet in
+   the document. */
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm 20mm;
+  }
+
+  html:has([data-cv]),
+  html:has([data-cv]) body {
+    background: var(--color-surface);
+  }
+
+  html:has([data-cv]) {
+    /* Pt sizes at their size: no text inflation, no zoom. */
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+
+    & .site-top,
+    & [data-site-footer],
+    & body > a[href="#main"] {
+      display: none !important;
+    }
+
+    & [data-page-frame],
+    & [data-page-sheet] {
+      display: block;
+      min-height: 0;
+      padding: 0;
+      background: none;
+      border-radius: 0;
+      animation: none;
+      scale: none;
+      transform: none;
+    }
+  }
+
+  .cv.ab-col {
+    --cv-scale: 1;
+
+    width: 169.8mm;
+    margin: 0;
+    font-family: "Geist CV Print", var(--font-sans);
+
+    & a:not(.btn) {
+      text-decoration-color: currentColor;
+      text-decoration-thickness: 0.5pt;
+    }
+  }
+
+  .cv-h2 {
+    break-after: avoid;
+  }
+
+  .cv-job,
+  .cv-entry {
+    break-inside: avoid;
+  }
+
+  /* ZF is longer than the others: its head and first role stay together,
+     and each role keeps its own lines together. */
+  .cv-job--roles {
+    break-inside: auto;
+  }
+
+  .cv-row,
+  .cv-line {
+    break-after: avoid;
+  }
+
+  .cv-role {
+    break-inside: avoid;
+  }
+}
