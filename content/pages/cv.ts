@@ -86,7 +86,6 @@ export const CV: Cv = parseOrThrow(
               bullets: [
                 "Own the vision, roadmap, and delivery of driver products for commercial vehicles, mobile, and in-vehicle, and keep their roadmaps aligned.",
                 "Work with existing customers on what their drivers need and what the law asks of them, including the European rules on eco-driving.",
-                "Moved into product ownership after delivering Velocity as its engineering manager.",
               ],
             },
             {
@@ -94,7 +93,7 @@ export const CV: Cv = parseOrThrow(
               dates: "Jun 2024 to May 2025",
               bullets: [
                 "Led the team that built Velocity, the company's design system, and stayed about half hands-on.",
-                "At handover, 50% of 300 engineers had adopted Velocity.",
+                "At handover in May 2025, 50% of 300 engineers had adopted Velocity.",
               ],
             },
             {
@@ -136,7 +135,7 @@ export const CV: Cv = parseOrThrow(
           role: "Senior Frontend Engineer",
           dates: "Jul 2017 to Jun 2020",
           bullets: [
-            "Built the Angular screens of an IoT platform: dashboards of live data, device lists, rules. Joined as a junior, team lead by the end.",
+            "Built the Angular screens of an IoT platform: dashboards of live data, device lists, rules. Joined as a junior, senior and team lead by the end.",
             "Started and led the WolkAbout SDK, and led a team of four on a client project.",
             "Led Ready2Wash, the customer app for self-service car wash stations, and built the X-Cloud mobile app alone in React Native.",
           ],
@@ -171,8 +170,9 @@ export const CV: Cv = parseOrThrow(
           dates: "Sep 2022 to present",
           domain: "studenti.rs",
           href: url("studenti-rs"),
-          // The owner, 17 Nov 2026: "at my first job", as the site says it.
-          text: "A student community in Serbia: 250k sign-ups since 2008 and 40k shared documents. I built it at my first job, bought it back in 2022 and rebuilt it in 2026.",
+          // The owner, 17 Nov 2026: one number style, and "the original" (the
+          // CV's first job starts in 2016).
+          text: "A student community in Serbia: 250,000 sign-ups since 2008 and 40,000 shared documents. I built the original, bought it back in 2022 and rebuilt it in 2026.",
         },
         {
           ref: "fontalternatives",
@@ -181,7 +181,7 @@ export const CV: Cv = parseOrThrow(
           dates: "2026",
           domain: "fontalternatives.com",
           href: url("fontalternatives"),
-          text: "Free alternatives to paid typefaces. About 16.4K visits a month, all from search (mid-2026).",
+          text: "Free alternatives to paid typefaces. About 16,400 visits a month, all from search (mid-2026).",
         },
         {
           ref: "zarez",
@@ -199,7 +199,8 @@ export const CV: Cv = parseOrThrow(
       items: [
         {
           name: "MentorCruise",
-          dates: "2021 to present",
+          // He stopped in January 2026 (owner, 17 Nov 2026).
+          dates: "2021 to Jan 2026",
           domain: "mentors.to/ruzicic",
           href: SITE.links.mentorcruise,
           // The owner, 17 Nov 2026: the year is the row's, not repeated.
@@ -209,25 +210,41 @@ export const CV: Cv = parseOrThrow(
     },
     skills: {
       title: "Skills",
-      items: [
-        "Product strategy, discovery and roadmaps",
-        "Stakeholder management",
-        "Design systems",
-        "Developer experience",
-        "Team leadership",
-        "B2B SaaS",
-        "AI agents and automation",
-        "Agent skills and MCP",
-        "LLM evaluation",
-        "TypeScript",
-        "JavaScript",
-        "React",
-        "React Native",
-        "Angular",
-        "Node.js",
-        "AWS",
-        "CI/CD",
-        "Mobile apps",
+      // Three labelled lines (owner, 17 Nov 2026).
+      groups: [
+        {
+          label: "Product",
+          items: [
+            "Product strategy, discovery and roadmaps",
+            "Stakeholder management",
+            "Team leadership",
+            "B2B SaaS",
+          ],
+        },
+        {
+          label: "Engineering",
+          items: [
+            "Design systems",
+            "Developer experience",
+            "TypeScript",
+            "JavaScript",
+            "React",
+            "React Native",
+            "Angular",
+            "Node.js",
+            "AWS",
+            "CI/CD",
+            "Mobile apps",
+          ],
+        },
+        {
+          label: "AI",
+          items: [
+            "AI agents and automation",
+            "Agent skills and MCP",
+            "LLM evaluation",
+          ],
+        },
       ],
     },
   },

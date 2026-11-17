@@ -807,9 +807,17 @@ export const cvSchema = z.object({
     title: z.string().min(1),
     items: z.array(cvProjectSchema).min(1),
   }),
+  /** Labelled lines ("Product: …"), one line each. */
   skills: z.object({
     title: z.string().min(1),
-    items: z.array(z.string().min(1)).min(1),
+    groups: z
+      .array(
+        z.object({
+          label: z.string().min(1),
+          items: z.array(z.string().min(1)).min(1),
+        })
+      )
+      .min(1),
   }),
 })
 export type Cv = z.infer<typeof cvSchema>

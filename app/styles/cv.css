@@ -399,8 +399,15 @@
   }
 }
 
+/* Skills: three labelled lines, 2pt apart, the label at the title weight. */
 .cv-skills {
-  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(2 * var(--cv-pt));
+}
+
+.cv-skills__label {
+  font-weight: 600;
 }
 
 /* ============================ Print fonts =============================== */

@@ -5,6 +5,7 @@ import { cvBulletGaps, cvRenderedLines } from "@/lib/cv/lines"
 import { CV } from "@/content/pages/cv"
 import { SITE } from "@/content/site"
 
+import { launchFullChromium } from "./full-chromium"
 import { gotoReady } from "./helpers"
 
 /**
@@ -168,20 +169,34 @@ for (const width of [360, 390, 768, 820]) {
 }
 
 test("the 1440 page is the PDF's sheet: every line breaks where print does", async ({
-  page,
+  playwright,
+  browserName,
+  baseURL,
 }) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
-  await gotoReady(page, "/cv")
-  const screen = await page.evaluate(cvRenderedLines)
-  await page.emulateMedia({ media: "print" })
-  await page.evaluate(async () => {
-    await document.fonts.load('400 10pt "Geist CV Print"')
-    await document.fonts.load('600 10pt "Geist CV Print"')
-    await document.fonts.ready
-  })
-  const print = await page.evaluate(cvRenderedLines)
-  expect(screen.length).toBeGreaterThan(20)
-  expect(screen).toEqual(print)
+  test.skip(browserName !== "chromium", "the PDF is Chromium's print")
+  // Full Chromium, as `pnpm cv:pdf` prints with: the headless shell sets
+  // text at whole pixels on Linux, so 16px and 11pt wrap apart there
+  // (`tests/full-chromium.ts`).
+  const browser = await launchFullChromium(playwright.chromium)
+  try {
+    const page = await browser.newPage({
+      baseURL,
+      viewport: { width: 1440, height: 900 },
+    })
+    await gotoReady(page, "/cv")
+    const screen = await page.evaluate(cvRenderedLines)
+    await page.emulateMedia({ media: "print" })
+    await page.evaluate(async () => {
+      await document.fonts.load('400 10pt "Geist CV Print"')
+      await document.fonts.load('600 10pt "Geist CV Print"')
+      await document.fonts.ready
+    })
+    const print = await page.evaluate(cvRenderedLines)
+    expect(screen.length).toBeGreaterThan(20)
+    expect(screen).toEqual(print)
+  } finally {
+    await browser.close()
+  }
 })
 
 test("wider than 820: the top row and the sheet share two edges", async ({

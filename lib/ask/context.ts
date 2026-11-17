@@ -564,7 +564,9 @@ export function buildAskContext(root = process.cwd()): AskContext {
     "",
     `### ${cv.skills.title}`,
     "",
-    c.fact(cv.skills.items.join(" · "), "/cv"),
+    cv.skills.groups.map((g) =>
+      c.fact(`${g.label}: ${g.items.join(" · ")}`, "/cv")
+    ),
     ""
   )
 

@@ -580,10 +580,9 @@ The pictures were recreated in 2026 with invented data: no campus, building, dev
 - At ZF, Global Product Owner, May 2025 to present. (source: /cv)
 - At ZF, as Global Product Owner: Own the vision, roadmap, and delivery of driver products for commercial vehicles, mobile, and in-vehicle, and keep their roadmaps aligned. (source: /cv)
 - At ZF, as Global Product Owner: Work with existing customers on what their drivers need and what the law asks of them, including the European rules on eco-driving. (source: /cv)
-- At ZF, as Global Product Owner: Moved into product ownership after delivering Velocity as its engineering manager. (source: /cv)
 - At ZF, Engineering Manager, UI Platform team, Jun 2024 to May 2025. (source: /cv)
 - At ZF, as Engineering Manager, UI Platform team: Led the team that built Velocity, the company's design system, and stayed about half hands-on. (source: /cv)
-- At ZF, as Engineering Manager, UI Platform team: At handover, 50% of 300 engineers had adopted Velocity. (source: /cv)
+- At ZF, as Engineering Manager, UI Platform team: At handover in May 2025, 50% of 300 engineers had adopted Velocity. (source: /cv)
 - At ZF, Senior Software Engineer, then UI Platform Engineer, Oct 2023 to Jun 2024. (source: /cv)
 - At ZF, as Senior Software Engineer, then UI Platform Engineer: Joined as an individual contributor in the middle of a platform migration, wrote up why everyday interface work was slow, and proposed a shared design system. (source: /cv)
 - At ZF, as Senior Software Engineer, then UI Platform Engineer: Built its proof of concept, made the case for it across the organisation, and became technical lead of the new project, Velocity. (source: /cv)
@@ -597,7 +596,7 @@ The pictures were recreated in 2026 with invented data: no campus, building, dev
 - At HEGIAS: Moved a monolithic Node.js app to an event-driven architecture on AWS, migrated in steps. (source: /cv)
 - At HEGIAS: Built a design system and released it as a UI library used across internal projects. (source: /cv)
 - WolkAbout, Senior Frontend Engineer, Jul 2017 to Jun 2020. (source: /cv)
-- At WolkAbout: Built the Angular screens of an IoT platform: dashboards of live data, device lists, rules. Joined as a junior, team lead by the end. (source: /cv)
+- At WolkAbout: Built the Angular screens of an IoT platform: dashboards of live data, device lists, rules. Joined as a junior, senior and team lead by the end. (source: /cv)
 - At WolkAbout: Started and led the WolkAbout SDK, and led a team of four on a client project. (source: /cv)
 - At WolkAbout: Led Ready2Wash, the customer app for self-service car wash stations, and built the X-Cloud mobile app alone in React Native. (source: /cv)
 - Execom, Frontend Engineer, Feb 2016 to Jul 2017. (source: /cv)
@@ -606,17 +605,19 @@ The pictures were recreated in 2026 with invented data: no campus, building, dev
 ### Projects
 
 - TenderLift · Co-founder · Sep 2025 to present · tenderlift.ch: Swiss public tenders, sorted by what a company can actually win. 30,000+ tenders read, 1,500 open on average (October 2026). (source: /cv)
-- studenti.rs · Owner and sole developer · Sep 2022 to present · studenti.rs: A student community in Serbia: 250k sign-ups since 2008 and 40k shared documents. I built it at my first job, bought it back in 2022 and rebuilt it in 2026. (source: /cv)
-- FontAlternatives · Founder · 2026 · fontalternatives.com: Free alternatives to paid typefaces. About 16.4K visits a month, all from search (mid-2026). (source: /cv)
+- studenti.rs · Owner and sole developer · Sep 2022 to present · studenti.rs: A student community in Serbia: 250,000 sign-ups since 2008 and 40,000 shared documents. I built the original, bought it back in 2022 and rebuilt it in 2026. (source: /cv)
+- FontAlternatives · Founder · 2026 · fontalternatives.com: Free alternatives to paid typefaces. About 16,400 visits a month, all from search (mid-2026). (source: /cv)
 - Zarez · Founder · 2026 · zarez.rs: A spelling checker for Serbian, in Latin and Cyrillic. (source: /cv)
 
 ### Mentoring
 
-- MentorCruise · 2021 to present · mentors.to/ruzicic: 5.0 average from 51 reviews. (source: /cv)
+- MentorCruise · 2021 to Jan 2026 · mentors.to/ruzicic: 5.0 average from 51 reviews. (source: /cv)
 
 ### Skills
 
-- Product strategy, discovery and roadmaps · Stakeholder management · Design systems · Developer experience · Team leadership · B2B SaaS · AI agents and automation · Agent skills and MCP · LLM evaluation · TypeScript · JavaScript · React · React Native · Angular · Node.js · AWS · CI/CD · Mobile apps (source: /cv)
+- Product: Product strategy, discovery and roadmaps · Stakeholder management · Team leadership · B2B SaaS (source: /cv)
+- Engineering: Design systems · Developer experience · TypeScript · JavaScript · React · React Native · Angular · Node.js · AWS · CI/CD · Mobile apps (source: /cv)
+- AI: AI agents and automation · Agent skills and MCP · LLM evaluation (source: /cv)
 
 ## Mentoring
 

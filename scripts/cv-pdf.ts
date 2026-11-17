@@ -21,7 +21,12 @@
  * characters, and every link a real link. Without poppler (CI) it is
  * skipped with a note; the hash is still checked.
  */
-import { execFileSync, spawn, type ChildProcess } from "node:child_process"
+import {
+  execFileSync,
+  spawn,
+  spawnSync,
+  type ChildProcess,
+} from "node:child_process"
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -32,6 +37,7 @@ process.chdir(ROOT)
 
 const { CV } = await import("../content/pages/cv")
 const { cvBulletGaps, cvRenderedLines } = await import("../lib/cv/lines")
+const { launchFullChromium } = await import("../tests/full-chromium")
 const { CV_HASH_PREFIX, cvFingerprint, pdfFingerprint } =
   await import("../lib/cv/fingerprint")
 
@@ -94,7 +100,7 @@ function readingOrder(): string[] {
     CV.mentoring.title,
     ...CV.mentoring.items.flatMap(entry),
     CV.skills.title,
-    CV.skills.items.join(" · "),
+    ...CV.skills.groups.map((g) => `${g.label}: ${g.items.join(" · ")}`),
   ]
 }
 
@@ -146,9 +152,14 @@ function withInfo(pdf: Buffer, info: Record<string, string>): Buffer {
         `(?:^|\\n)${infoRef} 0 obj\\s*<<([\\s\\S]*?)>>\\s*endobj`
       ).exec(text)?.[1]
     : undefined
-  const kept = ["Creator", "Producer", "CreationDate", "ModDate"]
+  // A literal string may hold escaped parentheses: full Chromium's Creator
+  // is its user agent, "Mozilla/5.0 \(Macintosh; …\)".
+  const kept = ["Producer", "CreationDate", "ModDate"]
+    .filter((key) => !(key in info))
     .map((key) =>
-      new RegExp(`/${key} (\\([^)]*\\)|<[0-9A-Fa-f]*>)`).exec(old ?? "")
+      new RegExp(`/${key} (\\((?:\\\\.|[^\\\\)])*\\)|<[0-9A-Fa-f]*>)`).exec(
+        old ?? ""
+      )
     )
     .filter((m): m is RegExpExecArray => Boolean(m))
     .map((m) => m[0])
@@ -228,7 +239,9 @@ let printedLines: string[][] = []
 
 async function render(base: string): Promise<Buffer> {
   const { chromium } = await import("@playwright/test")
-  const browser = await chromium.launch()
+  // Full Chromium, the build `tests/cv.spec.ts` compares the page and print
+  // in: the headless shell sets text at whole pixels on Linux.
+  const browser = await launchFullChromium(chromium)
   try {
     // Twice the pixels for the portrait's `srcset`: 34mm at about 290 dpi.
     const context = await browser.newContext({ deviceScaleFactor: 2 })
@@ -318,7 +331,14 @@ const run = (cmd: string, args: string[]) =>
 /** Every problem an applicant-tracking parser would trip on; empty when none. */
 function verify(file: string, raw: string): string[] {
   const problems: string[] = []
-  const info = run("pdfinfo", ["-enc", "UTF-8", file])
+  // A malformed object (a broken Info dictionary) is only a warning on
+  // stderr to poppler: count it as a problem.
+  const probe = spawnSync("pdfinfo", ["-enc", "UTF-8", file], {
+    encoding: "utf8",
+  })
+  if (/error/i.test(probe.stderr))
+    problems.push(`poppler reports: ${probe.stderr.trim().split("\n")[0]}`)
+  const info = probe.stdout
   const field = (name: string) =>
     new RegExp(`^${name}:\\s*(.*)$`, "m").exec(info)?.[1]?.trim()
   if (field("Pages") !== "2") problems.push(`${field("Pages")} pages, not 2`)
@@ -425,6 +445,8 @@ if (!check) {
         Author: CV.name,
         Subject: CV.seo.description,
         Keywords: `${CV_HASH_PREFIX}${want}`,
+        // Not the user agent full Chromium writes there.
+        Creator: "Chromium",
       })
     )
   } finally {

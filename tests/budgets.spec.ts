@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test"
 
 import { HOME } from "@/content/pages/home"
 
+import { launchFullChromium } from "./full-chromium"
 import {
   getCls,
   getLcp,
@@ -132,18 +133,10 @@ test.describe("/ budgets", () => {
  * widths, the same faces). Measured with the measured fallbacks: at most
  * 0.001 on all four on macOS.
  *
- * It runs in the full Chromium build (`channel: "chromium"`, headless),
- * not in the headless shell the other tests use. On Linux the shell gets
- * no desktop font settings: every web font and `local()` face is hinted at
- * a whole-pixel size with whole-pixel advances, while installed fonts named
- * by family, and every font in full Chromium, are set at their fractional
- * size with fractional advances, as in the browsers people use. Body copy
- * set in the Liberation Sans fallback at 20px measured 104.7% of Geist's
- * width in the shell (20px times 103.1% is drawn at 21px; any `size-adjust`
- * from 100% to 102% is drawn at 20px, 97.5%), against 100.7% at every size
- * from 13px to 44px in full Chromium on the same machine. In the shell `/`
- * and `/mentoring` at 412 wide rewrapped and failed (0.105, 0.226); in full
- * Chromium all four pass on Linux too. macOS draws the same in both builds.
+ * It runs in the full Chromium build, not in the headless shell the other
+ * tests use (`launchFullChromium`, `tests/full-chromium.ts`, has why): in
+ * the shell on Linux `/` and `/mentoring` at 412 wide rewrapped and failed
+ * (0.105, 0.226); in full Chromium all four pass on Linux too.
  */
 const SWAP_CLS_BUDGET = 0.03
 const FONT_DELAY_MS = 1500
@@ -165,7 +158,7 @@ test.describe("the font swap moves nothing (throttled)", () => {
       test.setTimeout(120_000)
       const phone = width < 1000
       // Full Chromium, not the headless shell: see above.
-      const browser = await playwright.chromium.launch({ channel: "chromium" })
+      const browser = await launchFullChromium(playwright.chromium)
       const context = await browser.newContext({
         baseURL,
         viewport: { width, height: phone ? 823 : 900 },

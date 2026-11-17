@@ -127,7 +127,14 @@ export function CvPage() {
         <h2 id="cv-skills" className="cv-h2">
           {cv.skills.title}
         </h2>
-        <p className="cv-skills">{cv.skills.items.join(" · ")}</p>
+        <div className="cv-skills">
+          {cv.skills.groups.map((g) => (
+            <p key={g.label}>
+              <span className="cv-skills__label">{g.label}:</span>{" "}
+              {g.items.join(" · ")}
+            </p>
+          ))}
+        </div>
       </section>
     </article>
   )

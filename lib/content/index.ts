@@ -578,7 +578,7 @@ function checkCv() {
   const rating = number((l) => l === "average rating")
   const reviews = number((l) => l.startsWith("reviews"))
   const since = MENTORING.seo.description.match(/since (\d{4})/)?.[1]
-  // The year is the row's ("2021 to present"), the figures the sentence's.
+  // The start year is the row's ("2021 to Jan 2026"), the figures the sentence's.
   const states = `${rating} average from ${reviews} reviews.`
   if (mc.text !== states)
     fail(

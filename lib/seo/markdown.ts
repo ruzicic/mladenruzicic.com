@@ -773,7 +773,7 @@ export function cvDoc(): MarkdownDoc {
       cv.mentoring.items.flatMap(entry),
       `## ${cv.skills.title}`,
       "",
-      cv.skills.items.join(" · "),
+      cv.skills.groups.map((g) => `- **${g.label}:** ${g.items.join(" · ")}`),
       ""
     ),
   }

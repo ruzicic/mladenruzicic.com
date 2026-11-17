@@ -11,7 +11,7 @@ export function cvRenderedLines(): string[][] {
   const root = document.querySelector("[data-cv]")
   if (!root) return []
   const blocks = root.querySelectorAll(
-    ".cv-contact, .cv-summary p, .cv-line, .cv-text, .cv-list li, .cv-skills"
+    ".cv-contact, .cv-summary p, .cv-line, .cv-text, .cv-list li, .cv-skills p"
   )
   return [...blocks].map((el) => {
     const lines: { top: number; text: string }[] = []
