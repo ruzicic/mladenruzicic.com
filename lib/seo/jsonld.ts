@@ -23,6 +23,7 @@ import {
   ownProducts,
   productDescription,
 } from "./markdown"
+import { dateTime } from "./metadata"
 
 /**
  * JSON-LD: one connected graph per page, with stable `@id`s, built from
@@ -244,7 +245,13 @@ function headshotNode(): Node {
     contentUrl: `${ORIGIN}${site.headshot.src}`,
     ...(media ? { width: media.width, height: media.height } : null),
     caption: site.headshot.alt,
+    // Google's image metadata (Search Console, 2026-11-17): his own picture,
+    // offered for download on the press kit, which is where it is licensed.
+    creator: ref(ID.person),
     creditText: site.name,
+    copyrightNotice: `© ${site.name}`,
+    license: canonical("/press"),
+    acquireLicensePage: canonical("/press"),
   }
 }
 
@@ -382,7 +389,7 @@ function webPageNode(
     description,
     inLanguage: "en",
     isPartOf: ref(ID.website),
-    dateModified: site.updated,
+    dateModified: dateTime(site.updated),
     ...(path === "/" ? null : { breadcrumb: ref(ID.breadcrumb(path)) }),
     ...extra,
   }
@@ -563,7 +570,7 @@ export function storyJsonLd(slug: string) {
       {
         mainEntity: ref(`${url}#article`),
         about: storyAbout(entry),
-        dateModified: entry.updated ?? site.updated,
+        dateModified: dateTime(entry.updated ?? site.updated),
       }
     ),
     {
@@ -578,7 +585,7 @@ export function storyJsonLd(slug: string) {
       author: ref(ID.person),
       publisher: ref(ID.person),
       about: storyAbout(entry),
-      dateModified: entry.updated ?? site.updated,
+      dateModified: dateTime(entry.updated ?? site.updated),
       inLanguage: "en",
       image: image ? `${ORIGIN}${image}` : `${url}/opengraph-image`,
       ...(entry.tech.length ? { keywords: entry.tech.join(", ") } : null),

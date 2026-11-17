@@ -97,6 +97,8 @@ export const PRESS: Press = parseOrThrow(
         "/static/press/mladen-ruzicic-1024.webp",
         "/static/press/mladen-ruzicic-512.webp",
       ],
+      // The owner's choice, 2026-11-17: open use, with credit.
+      terms: `Free to use in articles, talks and event listings about me, with credit to ${SITE.name}.`,
     },
     copy: { label: "Copy", copiedLabel: "Copied", failedLabel: "Copy failed" },
     facts: {

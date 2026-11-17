@@ -3,6 +3,14 @@ import type { Metadata, Viewport } from "next"
 import { getHome, getSite } from "@/lib/content"
 
 /**
+ * Content dates are `YYYY-MM-DD`; Google reads `dateModified` as a DateTime
+ * and flags a bare date on ProfilePage (Search Console, 2026-11-17).
+ */
+export function dateTime(date: string): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? `${date}T00:00:00Z` : date
+}
+
+/**
  * Metadata for every route. The root layout exports `baseMetadata` and
  * `baseViewport`; every page goes through `pageMetadata()`, which sets the
  * canonical, the markdown twin, Open Graph and the Twitter card in one place.
@@ -87,7 +95,7 @@ export interface PageMetadataInput {
    * `/about`. Defaults to `article` because stories are the majority.
    */
   type?: "article" | "website" | "profile"
-  /** `YYYY-MM-DD`: `article:modified_time` for a story. */
+  /** `YYYY-MM-DD`: `article:modified_time` for a story (as a DateTime). */
   modified?: string
   /**
    * Override the OG image. Omit it and Next uses the route's colocated
@@ -133,7 +141,7 @@ export function pageMetadata({
       ? {
           type: "article",
           authors: [`${site.url}/about`],
-          ...(modified ? { modifiedTime: modified } : null),
+          ...(modified ? { modifiedTime: dateTime(modified) } : null),
           locale: "en_US",
           siteName: site.name,
           title: shared,
