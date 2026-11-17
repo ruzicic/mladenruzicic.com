@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import type { TrackEvent } from "@/lib/analytics"
+
 import { hex, href, kebab, publicPath } from "./schema-base"
 import {
   linkSchema,
@@ -184,7 +186,8 @@ export interface ProjectLink {
 /** A project's links on `/`: either, both or neither. */
 export interface ProjectLinks {
   caseStudy?: ProjectLink
-  website?: ProjectLink & { domain: string }
+  /** `track`: its Fathom event, `website: <slug>` (`lib/analytics.ts`). */
+  website?: ProjectLink & { domain: string; track: TrackEvent }
 }
 
 /**

@@ -10,6 +10,7 @@ import {
   useSyncExternalStore,
 } from "react"
 
+import { track } from "@/lib/analytics"
 import { haptic } from "@/lib/haptics"
 
 import "../../styles/ask.css"
@@ -179,6 +180,7 @@ export function AskButton({ data }: AskButtonProps) {
           setOpen(true)
           // Opening only; closing is the panel's own button or Escape.
           haptic("tap")
+          track("ask: open")
         }}
       >
         {face}

@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react"
 
+import { websiteEvent } from "@/lib/analytics"
 import { getProductMark, getProjectLinks } from "@/lib/content"
 import type { Story } from "@/lib/content/schema"
 import { ExternalLink } from "@/app/components/primitives/ExternalLink"
@@ -62,7 +63,11 @@ export function StoryCover({ story }: { story: Story }) {
           <p className="cs-meta">{panel.meta.join(" · ")}</p>
           {live ? (
             <p className="cs-live-line">
-              <ExternalLink href={live.href} className="cs-live">
+              <ExternalLink
+                href={live.href}
+                className="cs-live"
+                data-track={websiteEvent(story.slug)}
+              >
                 {live.label}
               </ExternalLink>
             </p>

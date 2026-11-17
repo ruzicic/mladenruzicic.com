@@ -206,6 +206,7 @@ export default function IconSpecimen() {
                 domain: "tenderlift.ch",
                 name: "TenderLift website, tenderlift.ch, opens in a new tab",
                 rowName: "TenderLift, website, opens in a new tab",
+                track: "website: tenderlift",
               },
             }}
             className="lk-pop-acts"

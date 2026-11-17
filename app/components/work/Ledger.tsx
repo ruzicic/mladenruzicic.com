@@ -136,6 +136,7 @@ function RowActions({ caseStudy, website }: ProjectLinks) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={website.name}
+          data-track={website.track}
         >
           {website.domain}
           <Icon name="arrow-up-right" className="ledger-dest-ico" />
@@ -177,6 +178,7 @@ function RowLink({ caseStudy, website }: ProjectLinks) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={website.rowName}
+        data-track={website.track}
       >
         <Icon name="arrow-up-right" className="ledger-go-ico" />
       </a>

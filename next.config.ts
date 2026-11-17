@@ -101,6 +101,20 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+  experimental: {
+    // Each page's CSS goes into its HTML as one `<style>` instead of five to
+    // eight render-blocking stylesheets (the area files, split by the entry
+    // components that import them). On a slow phone the paint waited for the
+    // last of them; PageSpeed (17 Nov 2026) saw it at 3.4 s, and its Speed
+    // Index weighs that unthrottled paint 1.4 times (5.6 s). Lighthouse 13.6,
+    // mobile, devtools throttling, local production build, median of 3, on
+    // `/`: first paint 2.44 s to 0.94 s, Speed Index 2.76 s to 1.32 s.
+    // The cost: each HTML document grows by 16 to 25 KB compressed (Next
+    // also keeps the CSS text in the page's RSC payload, which is how a
+    // client navigation gets its CSS), and no stylesheet is cached between
+    // full loads. The CSP's `style-src 'unsafe-inline'` allows the `<style>`.
+    inlineCss: true,
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [75],

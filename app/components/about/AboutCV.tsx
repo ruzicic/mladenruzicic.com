@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 
 import "@/app/styles/about.css"
 
+import { linkEvent } from "@/lib/analytics"
 import { getAbout, getProductMark } from "@/lib/content"
 import { Button } from "@/app/components/primitives/Button"
 import { Icon } from "@/app/components/primitives/Icon"
@@ -46,7 +47,12 @@ export function AboutCV() {
         })}
       </ol>
       <div className="ab-cv__foot">
-        <Button as="a" href={cv.download.href} download="">
+        <Button
+          as="a"
+          href={cv.download.href}
+          download=""
+          data-track={linkEvent(cv.download.href)}
+        >
           <Icon name="download" size={16} />
           <span>{cv.download.label}</span>
         </Button>
