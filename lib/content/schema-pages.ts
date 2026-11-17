@@ -852,6 +852,8 @@ export const pressSchema = z.object({
     /** The file the download link serves, and its saved name. */
     download: z.object({ href: publicPath, filename: z.string().min(1) }),
     variants: z.array(publicPath),
+    /** How the headshot may be used; also its license in the JSON-LD. */
+    terms: z.string().min(1),
   }),
   facts: z.object({
     label: z.string().min(1),

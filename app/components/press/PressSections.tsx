@@ -120,18 +120,21 @@ export function PressHeadshot() {
             className="pr-shot__img"
           />
         ) : null}
-        <ul className="pr-files" aria-label={menu.downloadLabel}>
-          {files.map((f) => (
-            <li key={f.src}>
-              <a className="pr-file" href={f.src} download={f.filename}>
-                <Icon name="download" size={16} />
-                <VisuallyHidden>{menu.downloadLabel}, </VisuallyHidden>
-                <span className="pr-file__ext">{f.ext}</span>
-                <span className="pr-file__size">{f.size}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <div>
+          <ul className="pr-files" aria-label={menu.downloadLabel}>
+            {files.map((f) => (
+              <li key={f.src}>
+                <a className="pr-file" href={f.src} download={f.filename}>
+                  <Icon name="download" size={16} />
+                  <VisuallyHidden>{menu.downloadLabel}, </VisuallyHidden>
+                  <span className="pr-file__ext">{f.ext}</span>
+                  <span className="pr-file__size">{f.size}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p className="pr-terms">{headshot.terms}</p>
+        </div>
       </div>
     </section>
   )

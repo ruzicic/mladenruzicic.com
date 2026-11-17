@@ -172,6 +172,12 @@
   transition: text-decoration-color var(--duration-fast) ease;
 }
 
+.pr-terms {
+  margin: 12px 0 0;
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+
 .pr-file__size {
   margin-left: auto;
   font-family: var(--font-mono);

@@ -822,6 +822,8 @@ function pressDoc(): MarkdownDoc {
       "",
       press.headshot.variants.map((v) => `- ${absolute(v)}`),
       "",
+      press.headshot.terms,
+      "",
       "## Contact",
       "",
       contactMarkdown(),
