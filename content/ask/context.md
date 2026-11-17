@@ -415,8 +415,8 @@ Case study page: /work/shopify (source: /work/shopify)
 - This was employed work. The site describes the role and the shape of the contribution only; private metrics, internal screenshots and system details are left out on purpose. (source: /work/shopify)
 - Public number: 30M+ monthly active users on Shop.app. (source: /work/shopify)
 - Public number: 10 first building partners on Shop Minis. (source: /work/shopify)
-- Link: Shop Minis, https://shop.app/minis (source: /work/shopify)
-- Link: Shop.app, https://shop.app (source: /work/shopify)
+- Link: Shop Minis, https://shop.com/minis (source: /work/shopify)
+- Link: Shop.app, https://shop.com (source: /work/shopify)
 
 #### Summary
 
@@ -729,8 +729,8 @@ The only links an answer may point to, one per line: `- <href> | <label> | <what
 - /work/zf-scalar | ZF SCALAR case study | From individual contributor to engineering manager of the platform team, to product owner of several products.
 - /work#shopify | Shopify in the list | Its row in the list of work he has put real time into.
 - /work/shopify | Shopify case study | Shop Minis from zero: mini React Native apps inside Shop.app, plus the SDK and partner ecosystem.
-- https://shop.app/minis | Shop Minis | Linked from the Shopify case study
-- https://shop.app | Shop.app | Linked from the Shopify case study
+- https://shop.com/minis | Shop Minis | Linked from the Shopify case study
+- https://shop.com | Shop.app | Linked from the Shopify case study
 - /work#hegias | HEGIAS in the list | Its row in the list of work he has put real time into.
 - /work/hegias | HEGIAS case study | Moving an AR/VR MVP toward production: 3D pipelines, microservices on AWS, in-app voice.
 - https://hegias.com | HEGIAS | Linked from the HEGIAS case study
