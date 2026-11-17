@@ -1,3 +1,4 @@
+import { linkEvent } from "@/lib/analytics"
 import { getMentoring } from "@/lib/content"
 import type { RichText } from "@/lib/content/schema"
 import { Button } from "@/app/components/primitives/Button"
@@ -29,6 +30,7 @@ export function MentoringCta() {
             target="_blank"
             rel="noopener"
             data-external=""
+            data-track={linkEvent(cta.action.href)}
           >
             {cta.action.label}
             <VisuallyHidden> (opens in a new tab)</VisuallyHidden>
@@ -60,7 +62,7 @@ function renderAlt(text: RichText) {
         </TransitionLink>
       )
     return (
-      <a key={i} href={seg.href}>
+      <a key={i} href={seg.href} data-track={linkEvent(seg.href)}>
         {seg.text}
       </a>
     )

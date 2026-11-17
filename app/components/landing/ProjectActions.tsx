@@ -60,6 +60,7 @@ export function ProjectActions({
           className={cn(linkClassName)}
           aria-label={website.name}
           data-action="website"
+          data-track={website.track}
           data-rail-primary={markPrimary && !caseStudy ? "" : undefined}
         >
           {website.label}

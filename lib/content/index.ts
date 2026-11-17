@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import matter from "gray-matter"
 
+import { websiteEvent } from "@/lib/analytics"
 import { ASK } from "@/content/ask"
 import { COMPANIES } from "@/content/companies"
 import { MEDIA } from "@/content/media"
@@ -510,6 +511,7 @@ export function getProjectLinks(ref: string, name: string): ProjectLinks {
       name: fill(words.websiteName, domain),
       rowName: fill(words.rowWebsiteName, domain),
       domain,
+      track: websiteEvent(ref),
     }
   }
   return links

@@ -1,3 +1,4 @@
+import { linkEvent } from "@/lib/analytics"
 import { getSite } from "@/lib/content"
 import type { RichText, Site } from "@/lib/content/schema"
 import { newsletterTurnstileSiteKey } from "@/lib/newsletter/turnstile"
@@ -89,6 +90,7 @@ function FooterNav({ links }: { links: Site["footer"]["links"] }) {
             href={l.href}
             download=""
             className="site-foot__navlink"
+            data-track={linkEvent(l.href)}
           >
             {l.label}
           </a>
@@ -155,7 +157,12 @@ function Rich({ text }: { text: RichText }) {
           )
         }
         return (
-          <a key={i} href={seg.href} className="site-foot__link">
+          <a
+            key={i}
+            href={seg.href}
+            className="site-foot__link"
+            data-track={linkEvent(seg.href)}
+          >
             {seg.text}
           </a>
         )

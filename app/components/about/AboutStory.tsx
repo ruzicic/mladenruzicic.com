@@ -4,6 +4,7 @@ import Image from "next/image"
 import "@/app/styles/about.css"
 import "@/app/styles/brand-link.css"
 
+import { linkEvent } from "@/lib/analytics"
 import { getAbout, getMedia, getProductMark } from "@/lib/content"
 import type { RichText } from "@/lib/content/schema"
 import { ExternalLink } from "@/app/components/primitives/ExternalLink"
@@ -82,7 +83,7 @@ function Rich({ text }: { text: RichText }) {
           ) : (
             // `mailto:`: the site's ordinary inline link (the base styles
             // underline a classless link in running text).
-            <a key={i} href={seg.href}>
+            <a key={i} href={seg.href} data-track={linkEvent(seg.href)}>
               {seg.text}
             </a>
           )

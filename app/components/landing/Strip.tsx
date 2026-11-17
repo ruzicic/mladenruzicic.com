@@ -4,6 +4,7 @@ import "@/app/styles/rail.css"
 import type { CSSProperties, ReactNode } from "react"
 import { getImageProps } from "next/image"
 
+import { recentWorkEvent } from "@/lib/analytics"
 import {
   getHome,
   getMedia,
@@ -324,6 +325,9 @@ function Card({
     "data-on": first ? "" : undefined,
     "data-tablet": card.media?.tablet ? "" : undefined,
     "data-poster": card.media ? undefined : "",
+    // Opened through the card itself (`useRail`): `recent work: <slug>`.
+    "data-track-open":
+      links.caseStudy || links.website ? recentWorkEvent(card.ref) : undefined,
     style,
   }
 

@@ -4,6 +4,8 @@ import type { AnchorHTMLAttributes, ReactNode } from "react"
 // class that conflicts with the ones set here, so there is nothing to merge.
 import { clsx as cn } from "clsx"
 
+import { linkEvent } from "@/lib/analytics"
+
 import { Icon } from "./Icon"
 import { VisuallyHidden } from "./VisuallyHidden"
 
@@ -50,6 +52,7 @@ export function ExternalLink({
       rel={[...relTokens].join(" ")}
       target={newTab ? "_blank" : undefined}
       data-external=""
+      data-track={linkEvent(href)}
       className={cn(
         "group/ext inline-flex items-baseline gap-[0.25em]",
         className

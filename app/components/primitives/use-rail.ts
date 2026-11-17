@@ -13,6 +13,8 @@ import {
   type PointerEvent,
 } from "react"
 
+import { isTrackEvent, track, trackLink } from "@/lib/analytics"
+
 /**
  * A rail: a native horizontal scroller with snap whose children are its
  * items, one in focus at a time. Shared by "Recent work" on `/`
@@ -283,9 +285,15 @@ export function useRail(total: number, { loop = false }: RailOptions = {}) {
     const link = on?.querySelector<HTMLAnchorElement>("a[data-rail-primary]")
     if (!link) return false
     e.preventDefault()
-    if (e.metaKey || e.ctrlKey || e.shiftKey)
+    // The item's own event, if it has one (a strip card's `recent work:
+    // <slug>`, `lib/analytics.ts`); the link counts itself on its click
+    // (`FathomAnalytics`), or here when it is opened without one.
+    const opened = on?.getAttribute("data-track-open")
+    if (isTrackEvent(opened)) track(opened)
+    if (e.metaKey || e.ctrlKey || e.shiftKey) {
+      trackLink(link)
       window.open(link.href, "_blank", "noopener")
-    else link.click()
+    } else link.click()
     return true
   }
 

@@ -14,6 +14,7 @@ import {
 } from "react"
 import Image from "next/image"
 
+import { track } from "@/lib/analytics"
 import type { AskCard } from "@/lib/content/schema"
 
 import { Button } from "../primitives/Button"
@@ -487,9 +488,14 @@ export default function AskDialog({
     if (!finished) wordTimer.current = window.setInterval(tick, WORD_MS)
   }
 
-  const ask = (text: string) => {
+  /** `prepared`: one of the question chips; `typed`: the field. */
+  const ask = (text: string, from: "prepared" | "typed") => {
     if (phase !== "open" && phase !== "in") return
     if (busy || limitReached) return
+    // Which kind of question, never its text (`lib/analytics.ts`).
+    track(
+      from === "prepared" ? "ask: prepared question" : "ask: typed question"
+    )
     clearAll()
     const feed: Feed = { text: "", final: null }
     const controller = new AbortController()
@@ -540,7 +546,7 @@ export default function AskDialog({
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const v = draft.trim()
-    if (v) ask(v)
+    if (v) ask(v, "typed")
   }
 
   const copyBio = async () => {
@@ -780,7 +786,7 @@ export default function AskDialog({
                     key={q.id}
                     size="compact"
                     className="ask-chip"
-                    onClick={() => ask(q.question)}
+                    onClick={() => ask(q.question, "prepared")}
                   >
                     <span className="ask-chip__t">{q.chip}</span>
                   </Button>

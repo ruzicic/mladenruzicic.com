@@ -83,7 +83,10 @@ describe `/mcp` from `lib/mcp/info.ts` (its `serverInfo` and tool names), and
   file path.
 - `app/components/{site,landing,work,story,diagram,mentoring,about,press,ask,seo,primitives}/`;
   area CSS in `app/styles/<area>.css`, imported by the area's entry
-  component; tokens in `app/globals.css`.
+  component; tokens in `app/globals.css`. A page's CSS is inlined into its
+  HTML (`experimental.inlineCss`, 2026-11-17, `next.config.ts`), so no
+  stylesheet blocks the first paint; keep `style-src 'unsafe-inline'` in
+  the CSP.
 - `lib/seo/` (metadata, JSON-LD, markdown mirrors, OG), `lib/ask/` (the Ask
   context and the protocol shared with the Worker).
 - `workers/ask/`: the Cloudflare Worker for typed Ask questions.
@@ -222,6 +225,21 @@ describe `/mcp` from `lib/mcp/info.ts` (its `serverInfo` and tool names), and
 - **Haptics** (`lib/haptics.ts`): three call sites only (Ask opens, a
   testimonial card is sent to the back by the visitor, the newsletter
   confirms). Add none without the owner asking.
+- **Analytics** (2026-11-17, "dodaj svih 6 eventova"): Fathom page
+  views, the newsletter's goal, and six named events through `track()` in
+  `lib/analytics.ts` (`trackEvent`; a no-op unless a production build has
+  `NEXT_PUBLIC_FATHOM_SITE_ID`; never throws): `ask: open`,
+  `ask: prepared question`, `ask: typed question`; `website: <slug>` (a
+  list row's Website, a phone's row when it goes to the website, a strip
+  card's pill, a story's cover); `cv: download`;
+  `mentoring: mentorcruise`, `mentoring: call` (the booking link, wherever
+  it is); `contact: email` (any email link); `recent work: <slug>` (a strip
+  card opened through the card in focus, `data-track-open` read by
+  `useRail`). Links are counted by one listener in `FathomAnalytics.tsx`:
+  `data-track`, else `linkEvent(href)`; an email link carries `data-track`
+  because Cloudflare rewrites `mailto:`. Names are typed (`TrackEvent`);
+  only fixed names and product slugs, never a question's text, an address
+  or a URL. Add none without the owner asking.
 - **Hidden products**: `hidden: true` in `content/products.ts` removes an
   entry from every page, mirror, `/mcp`, JSON-LD and the Ask context
   (Bistoletti, until the owner says otherwise). `bare: true` draws a tile
