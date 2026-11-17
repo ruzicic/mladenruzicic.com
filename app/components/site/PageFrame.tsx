@@ -33,6 +33,24 @@ export interface PageFrameProps {
    * sheet then starts at the very top (`data-cover`, `app/styles/story.css`).
    */
   bar?: ReactNode
+  /**
+   * `sheet`: the page sets its own measure (`--sheet-w`, in its area CSS)
+   * and the top block, the page and the footer all take it instead of the
+   * text column, wider than 820px (`app/styles/shell.css`). The CV, whose
+   * screen page is its A4 sheet enlarged (17 Nov 2026).
+   */
+  measure?: "sheet"
+  /**
+   * The top row's two ends in place of the name and Ask (`TopBlock`): the
+   * CV's close control and its Download PDF (17 Nov 2026).
+   */
+  start?: ReactNode
+  end?: ReactNode
+  /**
+   * `false`: no site footer; the page ends with its own sheet, on paper to
+   * the bottom (the CV: "everything below this is actually my cv").
+   */
+  footer?: boolean
 }
 
 /**
@@ -55,6 +73,10 @@ export function PageFrame({
   topLine,
   home = false,
   bar,
+  measure,
+  start,
+  end,
+  footer = true,
 }: PageFrameProps) {
   const line =
     topLine ??
@@ -65,20 +87,24 @@ export function PageFrame({
         : undefined)
 
   return (
-    <div data-page-frame="">
+    <div
+      data-page-frame=""
+      data-measure={measure}
+      data-footer={footer ? undefined : "none"}
+    >
       <div
         data-page-sheet=""
         data-home={home ? "" : undefined}
         data-cover={bar ? "" : undefined}
       >
-        {bar ?? <TopBlock line={line} home={home} />}
+        {bar ?? <TopBlock line={line} home={home} start={start} end={end} />}
         <PageMain>
           <PageTransition>
             <div className="flex flex-col">{children}</div>
           </PageTransition>
         </PageMain>
       </div>
-      <SiteFooter />
+      {footer ? <SiteFooter /> : null}
     </div>
   )
 }

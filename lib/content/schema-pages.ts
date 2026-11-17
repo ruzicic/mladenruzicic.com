@@ -52,6 +52,8 @@ export const siteSchema = z.object({
     github: z.url(),
     mentorcruise: z.url(),
     cv: z.literal("/cv.pdf"),
+    /** The name the CV is saved under (`download`): ASCII, his name. */
+    cvFilename: z.string().regex(/^[A-Za-z0-9-]+\.pdf$/),
   }),
   headshot: mediaSchema,
   newsletter: z.object({
@@ -698,6 +700,129 @@ export const aboutSchema = z
     path: ["early", "after"],
   })
 export type About = z.infer<typeof aboutSchema>
+
+/* -------------------------------------------------------------------------- */
+/* /cv                                                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A CV period, as he writes it: "Oct 2023 to present", "Apr 2021 to May
+ * 2023", "2021 to present", or one year ("2026"). Never capitals, never a
+ * dash (the site's copy rules).
+ */
+const cvDates = z
+  .string()
+  .regex(
+    /^(?:(?:[A-Z][a-z]{2} )?\d{4} to (?:(?:[A-Z][a-z]{2} )?\d{4}|present)|\d{4})$/,
+    'expected "Mon YYYY to Mon YYYY", "YYYY to present" or "YYYY"'
+  )
+
+/** One sentence or bullet of his CV, word for word. */
+const cvText = z.string().min(1)
+
+const cvRoleSchema = z.object({
+  title: z.string().min(1),
+  dates: cvDates,
+  bullets: z.array(cvText).min(1),
+})
+
+/**
+ * One job. A job with one role names it (`role`) and has its `bullets`; a
+ * job with several (ZF) has the progression `line` and its `roles`, newest
+ * first. `ref` ties it to `content/products.ts` and to the About CV row
+ * (`checkCv` in `lib/content/index.ts`).
+ */
+const cvJobSchema = z
+  .object({
+    ref: productSlugSchema,
+    company: z.string().min(1),
+    dates: cvDates,
+    role: z.string().min(1).optional(),
+    line: cvText.optional(),
+    bullets: z.array(cvText).min(1).optional(),
+    roles: z.array(cvRoleSchema).min(2).optional(),
+  })
+  .refine(
+    (j) =>
+      j.role && j.bullets
+        ? !j.roles && !j.line
+        : Boolean(j.roles && j.line && !j.bullets),
+    {
+      message:
+        "a job has either `role` and `bullets`, or `line` and two or more `roles`",
+    }
+  )
+
+/** A project or the mentoring entry: name · role · dates · domain, then a sentence. */
+const cvProjectSchema = z.object({
+  ref: productSlugSchema.optional(),
+  name: z.string().min(1),
+  role: z.string().min(1).optional(),
+  dates: cvDates,
+  /** The link's text, as he writes it ("tenderlift.ch", "mentors.to/ruzicic"). */
+  domain: z.string().regex(/^[a-z0-9.-]+\.[a-z]{2,}(?:\/[\w-]+)?$/),
+  href: z.url(),
+  text: cvText,
+})
+
+/**
+ * `/cv` and `/cv.pdf` (owner, 17 Nov 2026: "/cv postaje stranica na sajtu,
+ * sa opcijom 'download PDF'"). His CV document word for word, except the
+ * contact line, which is the site's own (no phone, ever).
+ */
+export const cvSchema = z.object({
+  seo: seoSchema,
+  name: z.literal("Mladen Ružičić"),
+  /** The two lines under the name: his role, then where he lives. No employer. */
+  headline: z.object({
+    role: z.string().min(1),
+    location: z.literal("Ticino, Switzerland"),
+  }),
+  headshot: mediaSchema,
+  /** The contact line: the site's email, domain and LinkedIn, as text and link. */
+  contact: z
+    .array(
+      z.object({
+        text: z.string().min(1),
+        href: z.string().regex(/^(mailto:|https:\/\/)/),
+      })
+    )
+    .min(1),
+  summary: z.array(cvText).min(1).max(3),
+  download: z.object({
+    label: z.string().min(1),
+    href: z.literal("/cv.pdf"),
+  }),
+  /** The top row's close control: back where the visitor came from, else `href`. */
+  close: z.object({ label: z.string().min(1), href: z.literal("/about") }),
+  experience: z.object({
+    title: z.string().min(1),
+    jobs: z.array(cvJobSchema).min(1),
+  }),
+  projects: z.object({
+    title: z.string().min(1),
+    items: z.array(cvProjectSchema).min(1),
+  }),
+  mentoring: z.object({
+    title: z.string().min(1),
+    items: z.array(cvProjectSchema).min(1),
+  }),
+  /** Labelled lines ("Product: …"), one line each. */
+  skills: z.object({
+    title: z.string().min(1),
+    groups: z
+      .array(
+        z.object({
+          label: z.string().min(1),
+          items: z.array(z.string().min(1)).min(1),
+        })
+      )
+      .min(1),
+  }),
+})
+export type Cv = z.infer<typeof cvSchema>
+export type CvJob = Cv["experience"]["jobs"][number]
+export type CvEntry = Cv["projects"]["items"][number]
 
 /* -------------------------------------------------------------------------- */
 /* Press                                                                      */

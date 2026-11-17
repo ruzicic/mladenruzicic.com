@@ -5,7 +5,7 @@ import { columnStills } from "@/lib/content/schema"
 import { LAST_UPDATED } from "@/lib/seo/markdown"
 
 /**
- * Real pages only, built from `content/`: the five pages and the nine stories.
+ * Real pages only, built from `content/`: the six pages and the nine stories.
  * Every other `/work/<slug>` 308s to `/work#<slug>` and `/uses` 308s to
  * `/about`, so none of them is listed. `lastModified` is a story's own
  * `updated` where it has one and the content date (`SITE.updated`) otherwise,
@@ -34,6 +34,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${site.url}/about`,
       changeFrequency: "monthly",
       priority: 0.8,
+      lastModified: LAST_UPDATED,
+      images: [headshot],
+    },
+    {
+      url: `${site.url}/cv`,
+      changeFrequency: "monthly",
+      priority: 0.7,
       lastModified: LAST_UPDATED,
       images: [headshot],
     },

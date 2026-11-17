@@ -156,16 +156,31 @@ test.describe("2. A product's website", () => {
 })
 
 test.describe("3. The CV", () => {
-  test("the footer's CV link and About's button", async ({ page }) => {
+  test("About's button and /cv's Download PDF; the footer's CV is the page", async ({
+    page,
+  }) => {
     await gotoReady(page, "/about")
-    const footer = page.getByRole("contentinfo")
     let download = page.waitForEvent("download")
-    await footer.locator(`a[href="${SITE.links.cv}"]`).click()
-    await download
-    await expectEvents(page, ["cv: download"])
-    download = page.waitForEvent("download")
     await page.getByRole("main").locator(`a[href="${SITE.links.cv}"]`).click()
-    await download
+    expect((await download).suggestedFilename()).toBe(SITE.links.cvFilename)
+    await expectEvents(page, ["cv: download"])
+
+    // The footer's "CV" opens the page (owner, 17 Nov 2026): no download,
+    // no event of its own.
+    await page
+      .getByRole("contentinfo")
+      .getByRole("link", { name: "CV" })
+      .click()
+    await expect(page).toHaveURL(/\/cv$/)
+    await expectEvents(page, ["cv: download"])
+
+    // /cv's Download PDF is in its top row, where Ask is elsewhere.
+    download = page.waitForEvent("download")
+    await page
+      .getByRole("banner")
+      .getByRole("link", { name: "Download PDF" })
+      .click()
+    expect((await download).suggestedFilename()).toBe(SITE.links.cvFilename)
     await expectEvents(page, ["cv: download", "cv: download"])
   })
 })

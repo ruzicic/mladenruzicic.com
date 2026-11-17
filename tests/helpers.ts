@@ -36,12 +36,20 @@ export const STORY_SLUGS = [
   "wolkabout",
 ] as const
 
+/**
+ * The pages without the site's chrome: `/cv` is only the CV (owner, 17 Nov
+ * 2026), with its own top row (Close CV, Download PDF), no Ask, no name in
+ * the header and no site footer. Specs about that chrome skip it.
+ */
+export const BARE_PAGES: readonly string[] = ["/cv"]
+
 /** Every real HTML page, in sitemap order. */
 export const PAGES = [
   "/",
   "/work",
   "/mentoring",
   "/about",
+  "/cv",
   "/press",
   ...STORY_SLUGS.map((s) => `/work/${s}`),
 ] as const
@@ -172,6 +180,15 @@ export const TESTIMONIAL_QUOTES = TESTIMONIALS.map((t) => t.quote)
  * swap is the cheapest reliable "this page is interactive" signal.
  */
 export async function waitForHydration(page: Page): Promise<void> {
+  // A page with its own top row (`/cv`) has no Ask: its close control is
+  // the client island, hydrated once React has attached its props.
+  if (await page.locator("header#top[data-ends]").count()) {
+    await page.waitForFunction(() => {
+      const el = document.querySelector("header#top .site-top__close")
+      return !!el && Object.keys(el).some((k) => k.startsWith("__reactProps"))
+    })
+    return
+  }
   await expect(
     page.getByRole("banner").getByRole("button", { name: ASK.ariaOpen })
   ).toBeVisible()

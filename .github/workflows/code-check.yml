@@ -38,4 +38,9 @@ jobs:
 
       - run: pnpm typecheck
 
+      # The committed CV PDF was printed from today's CV content and design
+      # (the source hash in its metadata; no Chromium needed). Its text
+      # checks run only where poppler is installed.
+      - run: pnpm cv:pdf --check
+
       - run: pnpm build

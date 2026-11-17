@@ -38,6 +38,8 @@ export const SITE: Site = parseOrThrow(
       github: "https://github.com/ruzicic",
       mentorcruise: "https://mentors.to/ruzicic",
       cv: "/cv.pdf",
+      // Saved under his name, not "cv.pdf" (17 Nov 2026).
+      cvFilename: "Mladen-Ruzicic-CV.pdf",
     },
     headshot: { src: "/mladen-ruzicic.png", alt: "Mladen Ružičić" },
     newsletter: {
@@ -100,9 +102,9 @@ export const SITE: Site = parseOrThrow(
         { label: "All work", href: "/work" },
         { label: "Mentoring", href: "/mentoring" },
         { label: "About", href: "/about" },
-        // The CV (owner, 16 Nov 2026): the file About's button downloads,
-        // and downloaded the same way.
-        { label: "CV", href: "/cv.pdf", download: true },
+        // The CV (owner, 17 Nov 2026): the page, with its "Download PDF"
+        // (before that, 16 Nov, the file About's button downloads).
+        { label: "CV", href: "/cv" },
         {
           label: "GitHub",
           href: "https://github.com/ruzicic",

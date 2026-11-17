@@ -1,5 +1,6 @@
 import {
   aboutJsonLd,
+  cvJsonLd,
   homeJsonLd,
   mentoringJsonLd,
   pressJsonLd,
@@ -9,7 +10,7 @@ import {
 } from "@/lib/seo/jsonld"
 
 type JsonLdProps =
-  | { page: "home" | "work" | "mentoring" | "about" | "press" }
+  | { page: "home" | "work" | "mentoring" | "about" | "cv" | "press" }
   | { page: "story"; slug: string }
 
 /**
@@ -30,6 +31,7 @@ export function JsonLd(props: JsonLdProps) {
           work: workJsonLd,
           mentoring: mentoringJsonLd,
           about: aboutJsonLd,
+          cv: cvJsonLd,
           press: pressJsonLd,
         }[props.page]()
   if (!data) return null

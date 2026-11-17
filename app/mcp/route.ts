@@ -74,6 +74,7 @@ function profile(): string {
     `- From: ${site.from}`,
     `- Languages: ${site.languages.join(", ")}`,
     `- Building websites since: ${site.buildingSince}`,
+    `- CV: ${canonical("/cv")} (markdown: ${canonical("/cv")}.md, PDF: ${absolute(site.links.cv)})`,
     "",
     "## Short bio",
     "",

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
 
 import nextConfig from "../next.config"
-import { collectConsoleErrors, PAGES, STORY_SLUGS } from "./helpers"
+import { BARE_PAGES, collectConsoleErrors, PAGES, STORY_SLUGS } from "./helpers"
 
 /**
  * Route health: every real page answers 200 with one `<h1>`, a title, a meta
@@ -46,9 +46,15 @@ test.describe("pages", () => {
 
       await expect(page.getByRole("main")).toBeVisible()
       await expect(page.getByRole("banner")).toBeVisible()
-      await expect(page.getByRole("contentinfo")).toBeVisible()
-      // `#contact` is where the no-JS Ask link points, on every page.
-      await expect(page.locator("#contact")).toHaveCount(1)
+      if (BARE_PAGES.includes(path)) {
+        // Only the CV: no footer, and no Ask whose no-JS link needs one.
+        await expect(page.getByRole("contentinfo")).toHaveCount(0)
+        await expect(page.locator(".ask-btn")).toHaveCount(0)
+      } else {
+        await expect(page.getByRole("contentinfo")).toBeVisible()
+        // `#contact` is where the no-JS Ask link points, on every page.
+        await expect(page.locator("#contact")).toHaveCount(1)
+      }
 
       expect(log.errors, `${path} console errors`).toEqual([])
     })
@@ -63,6 +69,8 @@ test.describe("icons", () => {
     ["/icon.svg", "image/svg+xml"],
     ["/icon1.png", "image/png"],
     ["/apple-icon.png", "image/png"],
+    // The manifest's maskable icon (public/), full bleed.
+    ["/icon-512.png", "image/png"],
   ]
   for (const [path, type] of ICONS) {
     test(`${path} answers 200 as ${type}`, async ({ request }) => {
@@ -141,7 +149,8 @@ test.describe("redirects", () => {
     ["/about", 200],
     ["/work", 200],
     ["/uses", 308],
-    ["/cv", 308],
+    // A page since 17 Nov 2026 (a redirect to the PDF before).
+    ["/cv", 200],
     ["/cv.pdf", 200],
     ["/manifest.json", 200],
     ["/mladen-ruzicic.png", 200],

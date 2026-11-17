@@ -7,6 +7,7 @@ import { ASK } from "@/content/ask"
 import { COMPANIES } from "@/content/companies"
 import { MEDIA } from "@/content/media"
 import { ABOUT } from "@/content/pages/about"
+import { CV } from "@/content/pages/cv"
 import { ERROR_PAGE } from "@/content/pages/error"
 import { HOME } from "@/content/pages/home"
 import { MENTORING } from "@/content/pages/mentoring"
@@ -31,6 +32,7 @@ import {
   type Ask,
   type BuiltList,
   type Company,
+  type Cv,
   type Home,
   type ListRow,
   type MediaSlot,
@@ -369,6 +371,7 @@ function checkNoPlaceholders() {
   scan("content/pages/about.ts", ABOUT)
   scan("content/pages/mentoring.ts", MENTORING)
   scan("content/pages/press.ts", PRESS)
+  scan("content/pages/cv.ts", CV)
   scan("content/pages/work.ts", WORK_PAGE)
   scan("content/pages/not-found.ts", NOT_FOUND)
   scan("content/pages/error.ts", ERROR_PAGE)
@@ -449,8 +452,169 @@ function checkPress() {
     fail(src, `"${dropped[0]}" was removed from the site on 16 Nov 2026.`)
 }
 
+/**
+ * "Oct 2023 to present" as About's CV row writes the same years, "2023 to
+ * now"; "Apr 2021 to May 2023" as "2021 to 2023"; "2026" as "2026".
+ */
+function cvYears(dates: string): string {
+  const [from, to] = dates.split(" to ")
+  const year = (part: string) => part.match(/\d{4}/)?.[0] ?? part
+  if (!to) return year(from)
+  return `${year(from)} to ${to === "present" ? "now" : year(to)}`
+}
+
+/**
+ * The CV page repeats facts that About, the product registry, the press kit
+ * and the mentoring page already hold (owner, 17 Nov 2026). The CV's words
+ * are his document's, so they are typed in `content/pages/cv.ts`; here they
+ * are held to those sources, and a role title, a year, a name or a domain
+ * that drifts on one side fails the build.
+ */
+function checkCv() {
+  const src = "content/pages/cv.ts"
+  const product = (slug: string) => PRODUCTS.find((p) => p.slug === slug)
+  for (const job of CV.experience.jobs) {
+    const p = product(job.ref)
+    if (!p) fail(src, `job "${job.company}": no product "${job.ref}".`)
+    if (p.name !== job.company)
+      fail(
+        src,
+        `the company is "${job.company}", but content/products.ts names "${job.ref}" "${p.name}".`
+      )
+    const row = ABOUT.cv.rows.find((r) => r.ref === job.ref)
+    if (!row) fail(src, `"${job.company}" is not in the About CV.`)
+    // The current (or only) role is the one About names.
+    const role = job.role ?? job.roles?.[0]?.title
+    if (role !== row.role)
+      fail(
+        src,
+        `the role at ${job.company} is "${role}", but the About CV row says "${row.role}" (content/pages/about.ts).`
+      )
+    if (cvYears(job.dates) !== row.year)
+      fail(
+        src,
+        `${job.company} runs "${job.dates}" (${cvYears(job.dates)}), but the About CV row says "${row.year}".`
+      )
+    if (job.roles) {
+      // Newest first: the job starts with its last role and ends with its first.
+      const first = job.roles[job.roles.length - 1].dates.split(" to ")[0]
+      const last = job.roles[0].dates.split(" to ")[1]
+      if (`${first} to ${last}` !== job.dates)
+        fail(
+          src,
+          `${job.company} runs "${job.dates}", but its roles run "${first} to ${last}".`
+        )
+    }
+  }
+  for (const item of CV.projects.items) {
+    const p = item.ref ? product(item.ref) : undefined
+    if (!p?.url) fail(src, `project "${item.name}": no product with a url.`)
+    if (p.name !== item.name)
+      fail(
+        src,
+        `the project is "${item.name}", but content/products.ts names it "${p.name}".`
+      )
+    if (domainOf(p.url) !== item.domain || item.href !== p.url)
+      fail(
+        src,
+        `${item.name}'s domain is "${item.domain}" (${item.href}), but its site is ${p.url}.`
+      )
+    // Still running on both sides, or ended on both.
+    if (/present$/.test(item.dates) !== /now$/.test(p.year ?? ""))
+      fail(
+        src,
+        `${item.name} runs "${item.dates}", but content/products.ts says "${p.year}".`
+      )
+  }
+  // A job's months against its case study's period (Shopify ended in May
+  // 2023, his CV; the story said June until 17 Nov 2026).
+  const MON = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ")
+  const asCv = (v: string) => {
+    if (v === "now") return "present"
+    const [y, m] = v.split("-")
+    return m ? `${MON[Number(m) - 1]} ${y}` : y
+  }
+  for (const job of CV.experience.jobs) {
+    const story = WORK.find((w) => w.slug === job.ref)
+    if (!story) continue
+    const months = `${asCv(story.period.from)} to ${asCv(String(story.period.to))}`
+    if (months !== job.dates)
+      fail(
+        src,
+        `${job.company} runs "${job.dates}", but content/work/${story.slug}.mdx gives ${months}.`
+      )
+  }
+  // The headline: his current role and where he lives, never an employer.
+  const zfRow = ABOUT.cv.rows.find((r) => r.ref === "zf-scalar")
+  if (!zfRow || !CV.headline.role.startsWith(zfRow.role))
+    fail(
+      src,
+      `the headline "${CV.headline.role}" does not start with the About CV's current role "${zfRow?.role}".`
+    )
+  if (CV.headline.location !== SITE.location.label)
+    fail(
+      src,
+      `the headline's place is "${CV.headline.location}", the site's "${SITE.location.label}".`
+    )
+  for (const p of PRODUCTS.filter((x) => x.kind === "employer"))
+    if (new RegExp(`\\b${p.name}\\b`).test(CV.headline.role))
+      fail(src, `the headline names an employer, ${p.name}.`)
+  const tl = CV.projects.items.find((i) => i.ref === "tenderlift")
+  if (tl?.role !== OWN_PRODUCT_ROLE)
+    fail(
+      src,
+      `TenderLift's role is "${tl?.role}", but the press kit and the case study say "${OWN_PRODUCT_ROLE}".`
+    )
+  // MentorCruise: the profile link, and the public figures of /mentoring.
+  const mc = CV.mentoring.items.find((i) => i.name === "MentorCruise")
+  if (!mc) fail(src, "MentorCruise is not in the CV.")
+  if (mc.href !== SITE.links.mentorcruise || !mc.href.endsWith(mc.domain))
+    fail(
+      src,
+      `MentorCruise links ${mc.href} (${mc.domain}), the site ${SITE.links.mentorcruise}.`
+    )
+  const number = (test: (label: string) => boolean) =>
+    MENTORING.numbers.find((n) => test(n.label))?.value
+  const rating = number((l) => l === "average rating")
+  const reviews = number((l) => l.startsWith("reviews"))
+  const since = MENTORING.seo.description.match(/since (\d{4})/)?.[1]
+  // The start year is the row's ("2021 to Jan 2026"), the figures the sentence's.
+  const states = `${rating} average from ${reviews} reviews.`
+  if (mc.text !== states)
+    fail(
+      src,
+      `the MentorCruise line reads "${mc.text}"; /mentoring says ${rating} from ${reviews} reviews.`
+    )
+  if (!mc.dates.startsWith(`${since} `))
+    fail(
+      src,
+      `MentorCruise runs "${mc.dates}"; /mentoring says since ${since}.`
+    )
+  // Copy rules: no em dash, and ZF and TenderLift never in one sentence.
+  const all = JSON.stringify(CV)
+  if (all.includes("\u2014")) fail(src, "an em dash in the CV.")
+  for (const sentence of cvSentences(CV))
+    if (/\bZF\b/.test(sentence) && /TenderLift/.test(sentence))
+      fail(src, `ZF and TenderLift share a sentence: "${sentence}"`)
+}
+
+/** Every sentence and line of the CV, for the copy rules. */
+function cvSentences(cv: Cv): string[] {
+  const out: string[] = [...cv.summary]
+  for (const job of cv.experience.jobs) {
+    out.push(`${job.company} ${job.role ?? ""} ${job.dates}`)
+    if (job.line) out.push(job.line)
+    out.push(...(job.bullets ?? []))
+    for (const r of job.roles ?? []) out.push(r.title, ...r.bullets)
+  }
+  for (const i of [...cv.projects.items, ...cv.mentoring.items])
+    out.push(`${i.name} ${i.role ?? ""}`, i.text)
+  return out.flatMap((t) => t.split(/(?<=\.) /))
+}
+
 crossCheck()
 checkPress()
+checkCv()
 checkNoPlaceholders()
 
 /* -------------------------------------------------------------------------- */
@@ -594,6 +758,11 @@ export function getMentoring(): Mentoring {
 /** `/about` copy. */
 export function getAbout(): About {
   return ABOUT
+}
+
+/** `/cv` (and `/cv.pdf`, made from it): his CV document, word for word. */
+export function getCv(): Cv {
+  return CV
 }
 
 /** `/press` copy, including the press menu on his name. */

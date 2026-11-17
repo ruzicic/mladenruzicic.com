@@ -1,6 +1,5 @@
 import { expect, test, type Page } from "@playwright/test"
 
-import { ABOUT } from "@/content/pages/about"
 import { SITE } from "@/content/site"
 
 import { gotoReady } from "./helpers"
@@ -99,10 +98,10 @@ test("the footer's content: ask, contact, newsletter, six links, the clock", asy
   await expect(links.nth(1)).toHaveAttribute("href", "/work")
   await expect(links.nth(2)).toHaveAttribute("href", "/mentoring")
   await expect(links.nth(3)).toHaveAttribute("href", "/about")
-  // The CV (owner, 16 Nov 2026): the file About's button downloads, the
-  // same way (a download, not a new tab).
-  await expect(links.nth(4)).toHaveAttribute("href", ABOUT.cv.download.href)
-  await expect(links.nth(4)).toHaveAttribute("download", "")
+  // The CV (owner, 17 Nov 2026): the page, which offers the PDF; About's
+  // button still downloads the file.
+  await expect(links.nth(4)).toHaveAttribute("href", "/cv")
+  await expect(links.nth(4)).not.toHaveAttribute("download", /.*/)
   await expect(links.nth(4)).not.toHaveAttribute("target", /.*/)
   await expect(links.nth(5)).toHaveAttribute(
     "href",

@@ -4,6 +4,7 @@ import { join } from "node:path"
 import {
   getAbout,
   getBuiltList,
+  getCv,
   getHome,
   getMentoring,
   getPress,
@@ -513,6 +514,62 @@ export function buildAskContext(root = process.cwd()): AskContext {
     ""
   )
 
+  /* The CV ----------------------------------------------------------------- */
+
+  // His CV document, word for word (`/cv`, and the PDF made from it).
+  const cv = getCv()
+  const cvEntry = (i: (typeof cv.projects.items)[number]) =>
+    c.fact(
+      `${[i.name, i.role, i.dates, i.domain].filter(Boolean).join(" · ")}: ${i.text}`,
+      "/cv"
+    )
+  const cvPart = lines(
+    "## His CV",
+    "",
+    c.fact(
+      `His CV is a page of the site, /cv, with a PDF of it at ${site.links.cv}.`,
+      "/cv"
+    ),
+    c.fact(
+      `The lines under his name on the CV: "${cv.headline.role}", then "${cv.headline.location}".`,
+      "/cv"
+    ),
+    cv.summary.map((p) => c.fact(p, "/cv")),
+    "",
+    `### ${cv.experience.title}`,
+    "",
+    cv.experience.jobs.flatMap((job) => [
+      c.fact(
+        `${[job.company, job.role].filter(Boolean).join(", ")}, ${job.dates}.${job.line ? ` ${job.line}` : ""}`,
+        "/cv"
+      ),
+      ...(job.bullets ?? []).map((b) =>
+        c.fact(`At ${job.company}: ${b}`, "/cv")
+      ),
+      ...(job.roles ?? []).flatMap((r) => [
+        c.fact(`At ${job.company}, ${r.title}, ${r.dates}.`, "/cv"),
+        ...r.bullets.map((b) =>
+          c.fact(`At ${job.company}, as ${r.title}: ${b}`, "/cv")
+        ),
+      ]),
+    ]),
+    "",
+    `### ${cv.projects.title}`,
+    "",
+    cv.projects.items.map(cvEntry),
+    "",
+    `### ${cv.mentoring.title}`,
+    "",
+    cv.mentoring.items.map(cvEntry),
+    "",
+    `### ${cv.skills.title}`,
+    "",
+    cv.skills.groups.map((g) =>
+      c.fact(`${g.label}: ${g.items.join(" · ")}`, "/cv")
+    ),
+    ""
+  )
+
   /* Mentoring -------------------------------------------------------------- */
 
   const mentoringPart = lines(
@@ -591,7 +648,7 @@ export function buildAskContext(root = process.cwd()): AskContext {
     `- X: ${site.links.x} (source: /#contact)`,
     `- GitHub: ${site.links.github} (source: /#contact)`,
     `- MentorCruise: ${site.links.mentorcruise} (source: /mentoring)`,
-    `- CV as a PDF: ${site.links.cv} (source: /about)`,
+    `- CV: /cv, and as a PDF: ${site.links.cv} (source: /cv)`,
     "",
     "### Press",
     "",
@@ -711,7 +768,12 @@ export function buildAskContext(root = process.cwd()): AskContext {
       label: "Press kit",
       what: "Short bio, one-liners, facts and a headshot, ready to copy.",
     },
-    { href: site.links.cv, label: "CV (PDF)", what: about.cv.download.label },
+    {
+      href: "/cv",
+      label: "CV",
+      what: "His CV: experience, projects, mentoring and skills.",
+    },
+    { href: site.links.cv, label: "CV (PDF)", what: cv.download.label },
     {
       href: site.links.booking,
       label: "Book a 15-minute call",
@@ -761,6 +823,7 @@ export function buildAskContext(root = process.cwd()): AskContext {
     now,
     entries.join("\n"),
     early,
+    cvPart,
     mentoringPart,
     work,
     postscript,

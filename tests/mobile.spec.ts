@@ -68,6 +68,16 @@ test.describe("touch targets", () => {
     await expectTarget(askButton(page), "Ask")
   })
 
+  test("the top row on /cv: Close CV and Download PDF", async ({ page }) => {
+    await gotoReady(page, "/cv")
+    const top = page.getByRole("banner")
+    await expectTarget(top.getByRole("link", { name: "Close CV" }), "close")
+    await expectTarget(
+      top.getByRole("link", { name: "Download PDF" }),
+      "download"
+    )
+  })
+
   test("top block elsewhere: the home link", async ({ page }) => {
     await gotoReady(page, "/about")
     await expectTarget(

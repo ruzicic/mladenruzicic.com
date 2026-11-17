@@ -37,7 +37,7 @@ import { SITE } from "@/content/site"
 
 const SITE_URL = SITE.url
 
-const TWINNED = new Set(["/", "/work", "/mentoring", "/about", "/press"])
+const TWINNED = new Set(["/", "/work", "/mentoring", "/about", "/cv", "/press"])
 
 /** `/` has no path segment, so its twin is `/md/index` (`/index.md`). */
 const mdPath = (pathname: string) =>
@@ -173,6 +173,7 @@ export const config = {
     "/work",
     "/mentoring",
     "/about",
+    "/cv",
     "/press",
     "/work/:slug",
     "/md/:path*",

@@ -409,7 +409,7 @@ Developer experience is product work. It has users, a roadmap, competitors (the 
 Case study page: /work/shopify (source: /work/shopify)
 
 - Role: Senior Software Engineer, Shop Minis. (source: /work/shopify)
-- When: April 2021 to June 2023. (source: /work/shopify)
+- When: April 2021 to May 2023. (source: /work/shopify)
 - In one line: Shop Minis from zero: mini React Native apps inside Shop.app, plus the SDK and partner ecosystem. (source: /work/shopify)
 - Worked on Shop Minis from the first prototype: a system for embedding third-party mini apps inside Shop.app, with the SDK, review pipeline and partner tooling that had to exist around it. Forward-deployed with the earliest partner builders, and contributed to Shopify checkout. (source: /work/shopify)
 - This was employed work. The site describes the role and the shape of the contribution only; private metrics, internal screenshots and system details are left out on purpose. (source: /work/shopify)
@@ -567,6 +567,58 @@ The pictures were recreated in 2026 with invented data: no campus, building, dev
 - iglica.rs, a news magazine, 2011. Caption: iglica.rs, 2011. A digital magazine I ran for more than a year. (source: /about)
 - otompotom.com, a humour site, 2012. Caption: otompotom.com, 2012. Co-founded with the owners of a huge Facebook community. It made money, and we never met in person. (source: /about)
 
+## His CV
+
+- His CV is a page of the site, /cv, with a PDF of it at /cv.pdf. (source: /cv)
+- The lines under his name on the CV: "Global Product Owner with an engineering background", then "Ticino, Switzerland". (source: /cv)
+- I'm most useful between the people with a problem and the technology that can solve it. Engineer since 2016, engineering manager from 2024, product owner since 2025. (source: /cv)
+- Outside work hours, I build and run my own products. Swiss citizen. Languages: Serbian (native), English (fluent, my working language), Italian (B1). (source: /cv)
+
+### Experience
+
+- ZF, Oct 2023 to present. From individual contributor to technical lead of a new project, to engineering manager, to product owner. (source: /cv)
+- At ZF, Global Product Owner, May 2025 to present. (source: /cv)
+- At ZF, as Global Product Owner: Own the vision, roadmap, and delivery of driver products for commercial vehicles, mobile, and in-vehicle, and keep their roadmaps aligned. (source: /cv)
+- At ZF, as Global Product Owner: Work with existing customers on what their drivers need and what the law asks of them, including the European rules on eco-driving. (source: /cv)
+- At ZF, Engineering Manager, UI Platform team, Jun 2024 to May 2025. (source: /cv)
+- At ZF, as Engineering Manager, UI Platform team: Led the team that built Velocity, the company's design system, and stayed about half hands-on. (source: /cv)
+- At ZF, as Engineering Manager, UI Platform team: At handover in May 2025, 50% of 300 engineers had adopted Velocity. (source: /cv)
+- At ZF, Senior Software Engineer, then UI Platform Engineer, Oct 2023 to Jun 2024. (source: /cv)
+- At ZF, as Senior Software Engineer, then UI Platform Engineer: Joined as an individual contributor in the middle of a platform migration, wrote up why everyday interface work was slow, and proposed a shared design system. (source: /cv)
+- At ZF, as Senior Software Engineer, then UI Platform Engineer: Built its proof of concept, made the case for it across the organisation, and became technical lead of the new project, Velocity. (source: /cv)
+- Shopify, Senior Software Engineer, Apr 2021 to May 2023. (source: /cv)
+- At Shopify: Helped build Shop Minis from zero: small apps that other companies run inside the Shop app, with the SDK and CLI their developers use. (source: /cv)
+- At Shopify: The first ten partners shipped into an app with more than 30 million monthly active users. (source: /cv)
+- At Shopify: Automated how partner apps are submitted and tested, with a GitHub App and Actions. (source: /cv)
+- At Shopify: Ran 30+ technical interviews for senior roles. (source: /cv)
+- HEGIAS, Senior Full Stack Developer, Jul 2020 to Apr 2021. (source: /cv)
+- At HEGIAS: Led a team of six building the web app behind browser-based VR for architects. (source: /cv)
+- At HEGIAS: Moved a monolithic Node.js app to an event-driven architecture on AWS, migrated in steps. (source: /cv)
+- At HEGIAS: Built a design system and released it as a UI library used across internal projects. (source: /cv)
+- WolkAbout, Senior Frontend Engineer, Jul 2017 to Jun 2020. (source: /cv)
+- At WolkAbout: Built the Angular screens of an IoT platform: dashboards of live data, device lists, rules. Joined as a junior, senior and team lead by the end. (source: /cv)
+- At WolkAbout: Started and led the WolkAbout SDK, and led a team of four on a client project. (source: /cv)
+- At WolkAbout: Led Ready2Wash, the customer app for self-service car wash stations, and built the X-Cloud mobile app alone in React Native. (source: /cv)
+- Execom, Frontend Engineer, Feb 2016 to Jul 2017. (source: /cv)
+- At Execom: Many client projects at a fast pace: the company website, internal tools, and microservices in Angular and Node.js. (source: /cv)
+
+### Projects
+
+- TenderLift · Co-founder · Sep 2025 to present · tenderlift.ch: Swiss public tenders, sorted by what a company can actually win. 30,000+ tenders read, 1,500 open on average (October 2026). (source: /cv)
+- studenti.rs · Owner and sole developer · Sep 2022 to present · studenti.rs: A student community in Serbia: 250,000 sign-ups since 2008 and 40,000 shared documents. I built the original, bought it back in 2022 and rebuilt it in 2026. (source: /cv)
+- FontAlternatives · Founder · 2026 · fontalternatives.com: Free alternatives to paid typefaces. About 16,400 visits a month, all from search (mid-2026). (source: /cv)
+- Zarez · Founder · 2026 · zarez.rs: A spelling checker for Serbian, in Latin and Cyrillic. (source: /cv)
+
+### Mentoring
+
+- MentorCruise · 2021 to Jan 2026 · mentors.to/ruzicic: 5.0 average from 51 reviews. (source: /cv)
+
+### Skills
+
+- Product: Product strategy, discovery and roadmaps · Stakeholder management · Team leadership · B2B SaaS (source: /cv)
+- Engineering: Design systems · Developer experience · TypeScript · JavaScript · React · React Native · Angular · Node.js · AWS · CI/CD · Mobile apps (source: /cv)
+- AI: AI agents and automation · Agent skills and MCP · LLM evaluation (source: /cv)
+
 ## Mentoring
 
 - I've mentored on MentorCruise since 2021, with a 5.0 average from 51 reviews. These days I take someone on only when I can really help. (source: /mentoring)
@@ -637,7 +689,7 @@ The pictures were recreated in 2026 with invented data: no campus, building, dev
 - X: https://x.com/ruzicic (source: /#contact)
 - GitHub: https://github.com/ruzicic (source: /#contact)
 - MentorCruise: https://mentors.to/ruzicic (source: /mentoring)
-- CV as a PDF: /cv.pdf (source: /about)
+- CV: /cv, and as a PDF: /cv.pdf (source: /cv)
 
 ### Press
 
@@ -696,7 +748,8 @@ The only links an answer may point to, one per line: `- <href> | <label> | <what
 - /about | About | From engineering to product owner and founder: the longer story, the early work and the CV.
 - /mentoring | Mentoring | Mentoring, for a strong fit.
 - /press | Press kit | Short bio, one-liners, facts and a headshot, ready to copy.
-- /cv.pdf | CV (PDF) | Download my CV
+- /cv | CV | His CV: experience, projects, mentoring and skills.
+- /cv.pdf | CV (PDF) | Download PDF
 - https://cal.com/ruzicic/15m-discovery-session | Book a 15-minute call | A 15-minute discovery call with him.
 - mailto:me@mladenruzicic.com | Email Mladen | me@mladenruzicic.com
 - https://www.linkedin.com/in/ruzicic/ | LinkedIn | His LinkedIn profile.

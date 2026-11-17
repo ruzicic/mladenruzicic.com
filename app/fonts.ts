@@ -35,6 +35,13 @@ import localFont from "next/font/local"
  *   pyftsubset mono.ttf --unicodes="$U" --layout-features='*' --flavor=woff2 --output-file=app/fonts/geist-mono-regular-latin.woff2
  *
  * (`uvx --from fonttools --with brotli pyftsubset …` runs either tool.)
+ *
+ * The CV's print faces (`app/styles/cv.css`, `@font-face "Geist CV Print"`,
+ * loaded only under `@media print`): static cuts, because Chromium embeds a
+ * variable font in a PDF as Type 3 glyphs without real word spaces.
+ *
+ *   pyftsubset $G/geist-sans/Geist-Regular.woff2 --unicodes="$U" --layout-features='*' --flavor=woff2 --output-file=app/fonts/geist-sans-regular-latin.woff2
+ *   pyftsubset $G/geist-sans/Geist-SemiBold.woff2 --unicodes="$U" --layout-features='*' --flavor=woff2 --output-file=app/fonts/geist-sans-semibold-latin.woff2
  * A new character outside these ranges falls back to the system face for
  * that glyph only; add its range here and regenerate.
  *

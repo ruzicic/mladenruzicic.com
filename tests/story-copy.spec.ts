@@ -215,6 +215,8 @@ test("he has been building websites since 2004; nothing says he built studenti.r
     await readerView(page, "/work/studenti-rs"),
     await twin(request, "/work/studenti-rs.md"),
     await twin(request, "/llms-full.txt"),
+    // The CV too (owner, 17 Nov 2026: "I built it at my first job").
+    await twin(request, "/cv.md"),
   ]
   for (const text of sources) {
     expect(text).not.toMatch(/\bI built it in 2008\b/)

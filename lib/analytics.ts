@@ -21,7 +21,7 @@ export type TrackEvent =
   | "ask: typed question"
   /** 2. A product's own site, from a list row, a strip card or a cover. */
   | `website: ${string}`
-  /** 3. The CV, from the footer or the About page. */
+  /** 3. The CV as a PDF, from `/cv`'s "Download PDF" or About's button. */
   | "cv: download"
   /** 4. Mentoring: the MentorCruise profile, the 15-minute call. */
   | "mentoring: mentorcruise"

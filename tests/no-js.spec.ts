@@ -4,7 +4,14 @@ import { ASK } from "@/content/ask"
 import { HOME } from "@/content/pages/home"
 import { TESTIMONIALS } from "@/content/testimonials"
 
-import { LIST, LIST_ROWS, PAGES, projectLinks, STRIP_REGION } from "./helpers"
+import {
+  BARE_PAGES,
+  LIST,
+  LIST_ROWS,
+  PAGES,
+  projectLinks,
+  STRIP_REGION,
+} from "./helpers"
 
 /**
  * The site without JavaScript (PLAN.md §2 "Works without JavaScript"): all
@@ -117,7 +124,8 @@ test.describe("/", () => {
 test("the Ask button is a link to the contact line on every page", async ({
   page,
 }) => {
-  for (const path of PAGES) {
+  // `/cv` is only the CV: no Ask, no footer (`BARE_PAGES`).
+  for (const path of PAGES.filter((p) => !BARE_PAGES.includes(p))) {
     await page.goto(path)
     const ask = page
       .getByRole("banner")
