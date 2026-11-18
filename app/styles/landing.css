@@ -83,6 +83,16 @@
   grid-area: 1 / 1;
 }
 
+/* The face keeps its square while the tile's room opens (lw-open): pinned
+   to the middle of the room at the tile's side, which is the face's own
+   1em (ProductTile sets the face's font size to the tile's size). */
+.lw-slot [data-tile-face] {
+  left: 50%;
+  right: auto;
+  width: 1em;
+  translate: -50% 0;
+}
+
 .lw-row {
   margin-top: 13px;
   display: flex;
@@ -128,11 +138,13 @@
   visibility: hidden;
 }
 
+/* The tile's entrance. No blur at any point (owner, 18 Nov 2026: a blurred
+   tile reads as a slow or heavy image; the marks are inline SVG and are
+   never loading). */
 @keyframes lw-pop {
   0% {
     opacity: 0;
     transform: scale(0.72);
-    filter: blur(7px);
   }
   45% {
     opacity: 1;
@@ -147,7 +159,17 @@
   100% {
     opacity: 1;
     transform: scale(1);
-    filter: blur(0);
+  }
+}
+
+/* The first tile's room opens from nothing (mobbin.com's hero, the
+   owner's reference, 18 Nov 2026): the phrase is drawn flush left, the gap
+   grows and pushes it right, then the tile comes up in the gap. `from`
+   only, so it ends on the tile's own size and gap (ProductTile, headline). */
+@keyframes lw-open {
+  from {
+    width: 0;
+    margin-right: 0;
   }
 }
 
@@ -201,8 +223,17 @@
    The board's load-time rise of the whole headline is not ported: the first
    phrase is the page's largest paint and is drawn at once. */
 @media (prefers-reduced-motion: no-preference) {
+  /* Every headline tile is inline SVG already in the HTML (and the four
+     others in the island's props), so all of them are loaded at first
+     paint: the reveal waits only for a short beat, in CSS, without
+     JavaScript. The line box is still reserved by the sizer (padding-left
+     on .lw-slot::before), so only the phrase moves sideways, never the
+     lines below it. */
+  .lw-first > [data-tile] {
+    animation: lw-open 320ms cubic-bezier(0.16, 1, 0.3, 1) 450ms both;
+  }
   .lw-first [data-tile-face] {
-    animation: lw-pop 440ms ease-out 700ms both;
+    animation: lw-pop 440ms ease-out 540ms both;
   }
   .lw-layer.lw-in {
     animation: lw-swin 300ms ease-out both;
