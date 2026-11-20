@@ -355,7 +355,10 @@ describe("repeats", () => {
     const { deps: d, calls } = deps({
       model: async () => {
         if (fail) throw new Error("capacity")
-        return modelStream(["He runs it. ", '<<<META>>>{"kind":"answer"}'])
+        return modelStream([
+          "He runs it. ",
+          '<<<META>>>{"kind":"answer","sources":["/about"]}',
+        ])
       },
     })
     const session = await sessionFor()
@@ -481,22 +484,48 @@ describe("streaming", () => {
     expect(a.sources).toEqual([])
   })
 
-  it("treats a missing or broken final line as a plain answer", async () => {
+  it("treats a labelled answer with no source as a decline", async () => {
+    const { deps: d } = deps({
+      reply: [
+        "That's a general programming question, and Ask only answers questions about Mladen's work. ",
+        '<<<META>>>{"kind":"answer","sources":["/work/made-up"]}',
+      ],
+    })
+    const a = await readAnswer(await handleRequest(ask(Q), d))
+    expect(a.outcome).toBe("out_of_scope")
+    expect(a.sources).toEqual([])
+  })
+
+  it("treats a missing or broken final line as a plain answer when it cites a page", async () => {
     const a = await readAnswer(
       await handleRequest(
         ask(Q),
-        deps({ reply: ["He lives in Ticino, ", "Switzerland."] }).deps
+        deps({ reply: ["He lives in Ticino, ", "see /about."] }).deps
       )
     )
-    expect(a.text).toBe("He lives in Ticino, Switzerland.")
     expect(a.outcome).toBe("answer")
+    expect(a.sources.map((s) => s.href)).toEqual(["/about"])
     const b = await readAnswer(
       await handleRequest(
         ask(Q),
-        deps({ reply: ["Yes. ", "<<<META>>>{nope"] }).deps
+        deps({ reply: ["Yes, see /about. ", "<<<META>>>{nope"] }).deps
       )
     )
     expect(b.outcome).toBe("answer")
+  })
+
+  it("logs an unlabelled reply that cites no page as a decline", async () => {
+    const a = await readAnswer(
+      await handleRequest(
+        ask(Q),
+        deps({
+          reply: ["That's a general programming question, ", "not his work."],
+        }).deps
+      )
+    )
+    expect(a.text).toBe("That's a general programming question, not his work.")
+    expect(a.outcome).toBe("out_of_scope")
+    expect(a.sources).toEqual([])
   })
 
   it("ends an empty answer as unavailable", async () => {
