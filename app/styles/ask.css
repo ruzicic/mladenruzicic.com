@@ -1042,13 +1042,15 @@
   color: var(--ask-muted);
 }
 
-.ask-ft {
-  opacity: 0;
-  transition: opacity 200ms ease;
+/* Ask is done for today (`maxTurns`): a line and the booking card. */
+.ask-done {
+  padding-top: 18px;
+}
 
-  &[data-on] {
-    opacity: 1;
-  }
+.ask-done__line {
+  margin: 0;
+  font-size: var(--fs-15);
+  line-height: calc(23px * var(--type-scale));
 }
 
 /* Phones: one chip per row, 44px targets, 16px input (no zoom on iOS). */

@@ -44,8 +44,21 @@ export const ASK: Ask = parseOrThrow(
     sendLabel: "Send",
     thinkingVerbs: ["Reading his work", "Checking the story", "Writing"],
     footNote: "PROTOTYPE · SCRIPTED ANSWERS",
-    turnFormat: "TURN {n} OF {max} · QUESTIONS SAVED ANONYMOUSLY",
-    maxTurns: 8,
+    savedNote: "QUESTIONS SAVED ANONYMOUSLY",
+    // Not shown: after this many questions in a day (this browser) the
+    // field goes and `done` takes its place. The Worker holds the same
+    // number per visitor (`ASK_VISITOR_DAILY_CAP`).
+    maxTurns: 20,
+    done: {
+      line: "Twenty questions. That's the whole game, and you won. Let's stop here before Ask starts making things up. Anything else, Mladen answers in person.",
+      card: {
+        kind: "link",
+        href: "https://cal.com/ruzicic/15m-discovery-session",
+        title: "Book a 15-minute call",
+        body: "cal.com/ruzicic",
+        visual: { kind: "icon", icon: "calendar" },
+      },
+    },
     chipsShown: 6,
     questions: [
       {

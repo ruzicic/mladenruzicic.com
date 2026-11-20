@@ -121,6 +121,51 @@ test("a question it cannot answer gets the fallback and the email link", async (
     await expect(dialog.getByText(q.answer)).toHaveCount(0)
 })
 
+test("after maxTurns questions a day the field goes, also after closing and reopening", async ({
+  page,
+}) => {
+  // Seed the day's count one short of the limit, as earlier visits would.
+  await page.addInitScript(
+    ([key, n]) => {
+      // Once only: the reopen below reloads the page and runs this again.
+      if (localStorage.getItem(key as string) === null)
+        localStorage.setItem(
+          key as string,
+          JSON.stringify({ d: new Date().toISOString().slice(0, 10), n })
+        )
+    },
+    ["ask:used", ASK.maxTurns - 1] as const
+  )
+  let dialog = await openAsk(page)
+  const box = dialog.getByRole("textbox", { name: ASK.inputLabel })
+  await expect(box).toBeVisible()
+  await chips(dialog).getByRole("button").first().click()
+  await expect(dialog.getByText(ASK.done.line)).toBeVisible()
+  await expect(box).toHaveCount(0)
+  await expect(chips(dialog)).not.toBeVisible()
+
+  // Close and open again: still done (the reported bug).
+  await page.keyboard.press("Escape")
+  await expect(dialog).toBeHidden()
+  await page
+    .getByRole("banner")
+    .getByRole("button", { name: ASK.ariaOpen })
+    .click()
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByText(ASK.done.line)).toBeVisible()
+  await expect(
+    dialog.getByRole("textbox", { name: ASK.inputLabel })
+  ).toHaveCount(0)
+
+  // And after a reload.
+  dialog = await openAsk(page)
+  await expect(dialog.getByText(ASK.done.line)).toBeVisible()
+  if (ASK.done.card.kind === "link")
+    await expect(
+      dialog.locator(`a[href="${ASK.done.card.href}"]`)
+    ).toBeVisible()
+})
+
 test("data-ask-open is set on <html> only while the panel is open", async ({
   page,
 }) => {
@@ -590,6 +635,14 @@ test.describe("with the live model", () => {
       await expect(dialog.locator('a[href^="mailto:"]')).toHaveCount(
         o.email ? 1 : 0
       )
+      if (o.outcome === "daily_limit") {
+        // The Worker's per-visitor cap ends Ask for the day here too.
+        await expect(dialog.getByText(ASK.done.line)).toBeVisible()
+        await expect(
+          dialog.getByRole("textbox", { name: ASK.inputLabel })
+        ).toHaveCount(0)
+        return
+      }
       // The suggestions are still there to use.
       await expect(
         chips(dialog).getByRole("button", { name: ASK.questions[0].chip })

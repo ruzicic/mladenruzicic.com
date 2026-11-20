@@ -69,8 +69,9 @@ function askClientData(): AskClientData {
     thinkingVerbs: ask.thinkingVerbs,
     // With the live model behind it, the panel is no longer scripted.
     footNote: liveConfig ? ask.live.footNote : ask.footNote,
-    turnFormat: ask.turnFormat,
+    savedNote: ask.savedNote,
     maxTurns: ask.maxTurns,
+    done: ask.done,
     questions: ask.questions.map((q) => ({
       id: q.id,
       chip: q.chip,

@@ -107,6 +107,35 @@ const SENT_MS = 200
 const VERB_MS = 300
 const WORD_MS = 40
 
+/**
+ * Questions asked today in this browser, kept across closing the panel and
+ * reloading the page (a friend's report, 2026-11-20: the count reset on
+ * close). Only a date and a number, never a question; the Worker's
+ * per-visitor cap is the real limit, this keeps the panel honest about it.
+ */
+const USED_KEY = "ask:used"
+const today = () => new Date().toISOString().slice(0, 10)
+
+function readUsed(): number {
+  try {
+    const v = JSON.parse(localStorage.getItem(USED_KEY) ?? "null") as {
+      d?: unknown
+      n?: unknown
+    } | null
+    return v?.d === today() && typeof v.n === "number" ? v.n : 0
+  } catch {
+    return 0
+  }
+}
+
+function writeUsed(n: number) {
+  try {
+    localStorage.setItem(USED_KEY, JSON.stringify({ d: today(), n }))
+  } catch {
+    // Storage off (private mode, a policy): the count lives for this visit.
+  }
+}
+
 const reducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
@@ -190,6 +219,7 @@ export default function AskDialog({
   const [phase, setPhase] = useState<Phase>("closed")
   const [ex, setEx] = useState<Exchange>(EMPTY)
   const [draft, setDraft] = useState("")
+  const [used, setUsed] = useState(0)
 
   useEffect(() => {
     providePrepared(data)
@@ -295,6 +325,7 @@ export default function AskDialog({
   const show = useEffectEvent(() => {
     const el = dialogRef.current
     if (!el || el.open) return
+    setUsed(readUsed())
     shown.current = true
     place()
     el.showModal()
@@ -430,7 +461,7 @@ export default function AskDialog({
 
   const busy =
     ex.step === "sent" || ex.step === "thinking" || ex.step === "answer"
-  const limitReached = ex.turns >= data.maxTurns
+  const limitReached = used >= data.maxTurns
 
   /**
    * The answer, word by word, as it arrives. A prepared answer is complete at
@@ -512,7 +543,12 @@ export default function AskDialog({
       signal: controller.signal,
     })
       .then((res) => {
-        if (!controller.signal.aborted) feed.final = res
+        if (controller.signal.aborted) return
+        feed.final = res
+        if (res.exhausted) {
+          setUsed(data.maxTurns)
+          writeUsed(data.maxTurns)
+        }
       })
       .catch(() => {
         // Only an abort rejects; anything else still ends the wait.
@@ -525,6 +561,9 @@ export default function AskDialog({
           }
       })
     const t0 = reducedMotion() ? 0 : SENT_MS
+    const next = Math.max(used, readUsed()) + 1
+    setUsed(next)
+    writeUsed(next)
     setDraft("")
     setEx((e) => ({
       ...e,
@@ -592,9 +631,7 @@ export default function AskDialog({
     remaining.length > 0 &&
     !limitReached
   const answering = ex.step === "answer" || ex.step === "done"
-  const turnText = data.turnFormat
-    .replace("{n}", String(Math.max(1, ex.turns)))
-    .replace("{max}", String(data.maxTurns))
+  const showDone = limitReached && (ex.step === "idle" || ex.step === "done")
   const titleId = "ask-title"
   const head = (
     <div className="ask-head">
@@ -794,32 +831,49 @@ export default function AskDialog({
               </div>
             </Expand>
 
-            <form className="ask-form" onSubmit={onSubmit}>
-              <label htmlFor="ask-q" className="ask-label">
-                {data.inputLabel}
-              </label>
-              <div className="ask-inputrow">
-                <input
-                  id="ask-q"
-                  className="ask-qin"
-                  type="text"
-                  autoComplete="off"
-                  enterKeyHint="send"
-                  placeholder={data.placeholder}
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  className="ask-send"
-                  aria-label={data.sendLabel}
-                  aria-disabled={busy || limitReached ? true : undefined}
-                >
-                  <SendIcon />
-                </Button>
+            <Expand open={showDone}>
+              <div className="ask-done">
+                <p className="ask-done__line">{data.done.line}</p>
+                <div className="ask-cardwrap">
+                  <Card
+                    card={data.done.card}
+                    data={data}
+                    copied={ex.copied}
+                    onCopy={copyBio}
+                    onNavigate={finish}
+                  />
+                </div>
               </div>
-            </form>
+            </Expand>
+
+            {limitReached ? null : (
+              <form className="ask-form" onSubmit={onSubmit}>
+                <label htmlFor="ask-q" className="ask-label">
+                  {data.inputLabel}
+                </label>
+                <div className="ask-inputrow">
+                  <input
+                    id="ask-q"
+                    className="ask-qin"
+                    type="text"
+                    autoComplete="off"
+                    enterKeyHint="send"
+                    placeholder={data.placeholder}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className="ask-send"
+                    aria-label={data.sendLabel}
+                    aria-disabled={busy || limitReached ? true : undefined}
+                  >
+                    <SendIcon />
+                  </Button>
+                </div>
+              </form>
+            )}
             <div
               ref={challengeRef}
               className="ask-challenge"
@@ -828,12 +882,7 @@ export default function AskDialog({
 
             <div className="ask-foot">
               <span>{data.footNote}</span>
-              <span
-                className="ask-ft"
-                data-on={ex.step === "done" ? "" : undefined}
-              >
-                {turnText}
-              </span>
+              <span className="ask-ft">{data.savedNote}</span>
             </div>
           </div>
         </div>
