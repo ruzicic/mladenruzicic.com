@@ -124,6 +124,8 @@ test("a question it cannot answer gets the fallback and the email link", async (
 test("after maxTurns questions a day the field goes, also after closing and reopening", async ({
   page,
 }) => {
+  // Two page loads and a close: past the default budget on CI's WebKit.
+  test.slow()
   // Seed the day's count one short of the limit, as earlier visits would.
   await page.addInitScript(
     ([key, n]) => {
