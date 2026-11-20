@@ -39,8 +39,9 @@ export interface AskClientData {
   sendLabel: string
   thinkingVerbs: string[]
   footNote: string
-  turnFormat: string
+  savedNote: string
   maxTurns: number
+  done: { line: string; card: AskCard }
   questions: AskPrepared[]
   /** How many suggestion chips show at once (the first remaining ones). */
   chipsShown: number
@@ -90,4 +91,6 @@ export interface AskAnswer {
   card?: AskCard
   /** A line after the answer, such as "the answer was cut short". */
   notice?: string
+  /** The Worker's per-visitor daily cap answered: Ask is done for today. */
+  exhausted?: boolean
 }

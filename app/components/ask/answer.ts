@@ -178,6 +178,7 @@ function refused(
         : line,
     source: "",
     card: EMAIL_CARD.has(outcome) ? data.fallback.card : undefined,
+    exhausted: outcome === "daily_limit" ? true : undefined,
   }
 }
 

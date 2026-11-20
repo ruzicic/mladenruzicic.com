@@ -474,9 +474,17 @@ export const askSchema = z.object({
   sendLabel: z.string().min(1),
   thinkingVerbs: z.array(z.string().min(1)).min(1),
   footNote: z.string().min(1),
-  /** `{n}` the turn, `{max}` the limit. */
-  turnFormat: z.string().includes("{n}"),
+  /** The foot's disclosure that typed questions are logged. */
+  savedNote: z.string().min(1),
+  /**
+   * Questions per browser per UTC day, never shown. Then the field and the
+   * chips go and `done` (a line and a card) takes their place.
+   */
   maxTurns: z.number().int().positive(),
+  done: z.object({
+    line: z.string().min(1),
+    card: askCardSchema,
+  }),
   /** Prepared questions, answered instantly and without the live model. */
   questions: z.array(askQuestionSchema).min(6).max(10),
   /** How many suggestion chips the panel shows at once (the first ones). */
