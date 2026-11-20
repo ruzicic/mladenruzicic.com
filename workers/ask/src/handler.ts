@@ -521,6 +521,12 @@ export function finish(
     .filter((s) => safeHref(s.href))
     .filter((s) => !NAMED_ONLY_SOURCES.has(s.href) || namesOna(question))
     .slice(0, 3)
+  // A decline the model forgot to label: it skips the final line (or says
+  // "answer") about one time in three on a coding request or a poem (local
+  // probe, 2026-11-20). An answer that cites no page of the site is logged
+  // as a decline; the panel shows the two the same way.
+  if (outcome === "answer" && sources.length === 0)
+    return { outcome: "out_of_scope", sources: [] }
   if (outcome === "unknown") {
     const email = index.email
     sources = email
