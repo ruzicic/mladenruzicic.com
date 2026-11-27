@@ -745,7 +745,7 @@ The only links an answer may point to, one per line: `- <href> | <label> | <what
 - /#mentoring | Mentoring on the home page | 5.0 from 51 reviews on MentorCruise, mentoring since 2021. These days I take someone on only when I can really help.
 - /#contact | Contact | Happy to connect and meet new people.
 - /work | All work | Below is a list of projects I put a fairly significant chunk of time into. There's a lot more, but it would make the list too noisy.
-- /about | About | From engineering to product owner and founder: the longer story, the early work and the CV.
+- /about | About | From engineering to product owner and founder: the longer story, the early work and the CV. Building websites since 2004, now in Ticino.
 - /mentoring | Mentoring | Mentoring, for a strong fit.
 - /press | Press kit | Short bio, one-liners, facts and a headshot, ready to copy.
 - /cv | CV | His CV: experience, projects, mentoring and skills.

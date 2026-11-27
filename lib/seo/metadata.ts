@@ -31,6 +31,12 @@ function markdownPath(path: string): string {
   return path === "/" ? "/index.md" : `${path}.md`
 }
 
+/**
+ * Longest `<title>` that keeps the ` · <name>` suffix: about what a results
+ * page shows before it cuts a title off.
+ */
+const TITLE_MAX = 60
+
 /** Shared `metadataBase`, title template, robots and card defaults. */
 export const baseMetadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -128,7 +134,13 @@ export function pageMetadata({
   // template (`%s · <name>`), which Next does not apply to `og:title` or
   // `twitter:title`, so it is spelled out here. `/` has no `metadata` of its
   // own and keeps the layout's.
-  const shared = path === "/" ? title : `${title} · ${site.name}`
+  //
+  // A title that would pass TITLE_MAX with the name on it goes without the
+  // name (Ahrefs, 2026-11-27: three case studies at 72 to 76 characters,
+  // past what a results page shows). The page's own words come first.
+  const suffixed = `${title} · ${site.name}`
+  const bare = path === "/" || suffixed.length > TITLE_MAX
+  const shared = bare ? title : suffixed
   const images = image ? [{ url: image }] : undefined
   const person = {
     firstName: site.name.split(" ")[0],
@@ -171,7 +183,7 @@ export function pageMetadata({
           }
 
   return {
-    title,
+    title: bare && path !== "/" ? { absolute: title } : title,
     description,
     alternates: {
       canonical: path,

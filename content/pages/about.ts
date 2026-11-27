@@ -20,7 +20,7 @@ export const ABOUT: About = parseOrThrow(
       title: "About",
       // The Ask card's line for this page.
       description:
-        "From engineering to product owner and founder: the longer story, the early work and the CV.",
+        "From engineering to product owner and founder: the longer story, the early work and the CV. Building websites since 2004, now in Ticino.",
     },
     section: "About",
     headshot: { src: "/mladen-ruzicic.png", alt: "Mladen Ružičić" },

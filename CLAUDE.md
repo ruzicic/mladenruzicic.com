@@ -272,7 +272,9 @@ describe `/mcp` from `lib/mcp/info.ts` (its `serverInfo` and tool names), and
   card opened through the card in focus, `data-track-open` read by
   `useRail`). Links are counted by one listener in `FathomAnalytics.tsx`:
   `data-track`, else `linkEvent(href)`; an email link carries `data-track`
-  because Cloudflare rewrites `mailto:`. Names are typed (`TrackEvent`);
+  because Cloudflare's Email Obfuscation rewrites `mailto:`
+  (off for the zone since 2026-11-27: its link 404s for crawlers; keep it
+  off). Names are typed (`TrackEvent`);
   only fixed names and product slugs, never a question's text, an address
   or a URL. Add none without the owner asking.
 - **Hidden products**: `hidden: true` in `content/products.ts` removes an
