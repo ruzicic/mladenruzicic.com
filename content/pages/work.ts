@@ -17,7 +17,7 @@ export const WORK_PAGE: WorkPage = parseOrThrow(
     seo: {
       title: "All work",
       description:
-        "The products and jobs I put the most time into, with what happened to each.",
+        "The products and jobs I put the most time into, with what happened to each: TenderLift, FontAlternatives, studenti.rs, Zarez and more.",
     },
     title: "Stuff I've put real time into",
     // The owner's words of 15 Nov 2026: the list is a selection, not all.

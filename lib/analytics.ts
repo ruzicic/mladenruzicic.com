@@ -50,8 +50,10 @@ export function isTrackEvent(name: unknown): name is TrackEvent {
  * The event a link's destination stands for, by its `href`, or `undefined`.
  * Applied at render (`data-track`) and again, as a fallback, by the click
  * listener, so every way the site renders these destinations counts:
- * - `mailto:` (and the `/cdn-cgi/l/email-protection` link Cloudflare
- *   rewrites it into on the live site): `contact: email`;
+ * - `mailto:` (and the `/cdn-cgi/l/email-protection` link Cloudflare's
+ *   Email Obfuscation rewrites it into; that setting is off for the zone
+ *   since 2026-11-27, because the link 404s for crawlers, but the match
+ *   stays in case it is turned back on): `contact: email`;
  * - `/cv.pdf` (`SITE.links.cv`): `cv: download`;
  * - MentorCruise (`mentors.to`, `mentorcruise.com`): `mentoring: mentorcruise`;
  * - the booking link (`cal.com`, `SITE.links.booking`): `mentoring: call`.

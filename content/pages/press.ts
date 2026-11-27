@@ -71,7 +71,8 @@ export const PRESS: Press = parseOrThrow(
   {
     seo: {
       title: "Press",
-      description: "Short bio, one-liners, facts and a headshot.",
+      description:
+        "Short bio, one-liners, facts and a headshot, for anyone writing about Mladen Ružičić, his products or his work.",
     },
     title: "Press",
     shortBio: {

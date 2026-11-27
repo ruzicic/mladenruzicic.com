@@ -37,9 +37,12 @@ import { dateTime } from "./metadata"
  * sit on top and point into the core.
  *
  * Cross-linking (the owner's "cross-link my projects to and from me"): every
- * product he made names the Person as `creator`, and the Person lists them
- * back with `@reverse: { creator }`; TenderLift the company names him as
- * `founder` and appears in his `worksFor`.
+ * product he made names the Person as `creator` (a product from a job names
+ * him as `contributor`), and TenderLift the company names him as `founder`
+ * and appears in his `worksFor`. The Person carries no `@reverse` block: it
+ * only restated those links, and validators read it as the Person's own
+ * `creator`/`contributor` (Ahrefs Site Audit, 2026-11-27: 11 schema.org errors
+ * on every page).
  *
  * Deliberately absent:
  *   · Employers in the identity. `description` and `jobTitle` are generic;
@@ -117,18 +120,21 @@ const EMPLOYER_PRODUCTS: Record<string, string> = {
  * schema.org type and `applicationCategory` per own product. An SEO judgement,
  * not copy, so it lives here rather than in content. Retired products are
  * plain `CreativeWork`s: there is nothing left to install or visit.
+ *
+ * No plain `SoftwareApplication` (2026-11-27): Google's Software App check
+ * wants `offers` and a rating on one, and nothing here has a price or a
+ * rating the site can state. Zarez runs in the browser, so it is a
+ * `WebApplication` like TenderLift; the products from a job (EVO Touch, Shop
+ * Minis) are `CreativeWork`s, since the app is the employer's to describe.
  */
 const PRODUCT_TYPES: Record<string, { type: string; category?: string }> = {
   tenderlift: { type: "WebApplication", category: "BusinessApplication" },
-  zarez: { type: "SoftwareApplication", category: "UtilitiesApplication" },
+  zarez: { type: "WebApplication", category: "UtilitiesApplication" },
   fontalternatives: { type: "WebSite" },
   "studenti-rs": { type: "WebSite" },
   ona: { type: "Organization" },
-  "evo-touch": { type: "SoftwareApplication", category: "BusinessApplication" },
-  "shop-minis": {
-    type: "SoftwareApplication",
-    category: "ShoppingApplication",
-  },
+  "evo-touch": { type: "CreativeWork" },
+  "shop-minis": { type: "CreativeWork" },
 }
 
 const IN_LANGUAGE: Record<string, string> = { "studenti-rs": "sr", zarez: "sr" }
@@ -161,6 +167,7 @@ function storyStub(slug: string): Node | undefined {
 /** Where content says what it runs on. Everything else is left unsaid. */
 const OPERATING_SYSTEM: Record<string, string> = {
   tenderlift: "Web",
+  zarez: "Web",
 }
 
 function productNode(p: Product): Node {
@@ -255,11 +262,6 @@ function headshotNode(): Node {
   }
 }
 
-/** Products he made himself, the targets of the Person's `@reverse.creator`. */
-function madeProducts(): Product[] {
-  return ownProducts()
-}
-
 function personNode(): Node {
   const [current, ...past] = EMPLOYERS
   return {
@@ -310,14 +312,6 @@ function personNode(): Node {
       site.links.github,
       site.links.mentorcruise,
     ],
-    "@reverse": {
-      creator: madeProducts()
-        .filter((p) => PRODUCT_TYPES[p.slug]?.type !== "Organization")
-        .map((p) => ref(ID.entity(p.slug))),
-      contributor: Object.keys(EMPLOYER_PRODUCTS).map((slug) =>
-        ref(ID.entity(slug))
-      ),
-    },
   }
 }
 
@@ -345,7 +339,7 @@ function core(): Node[] {
     tenderliftOrgNode(),
     ...EMPLOYERS.map(employerNode),
     ...CLIENTS.map(clientNode),
-    ...madeProducts().map(productNode),
+    ...ownProducts().map(productNode),
     ...Object.keys(EMPLOYER_PRODUCTS).map((slug) =>
       productNode(getProduct(slug)!)
     ),

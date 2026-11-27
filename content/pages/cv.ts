@@ -49,8 +49,9 @@ export const CV: Cv = parseOrThrow(
   {
     seo: {
       title: "CV",
-      // The summary's first sentence.
-      description: SUMMARY[0].split(/(?<=\.) /)[0],
+      // Who, then the summary's second sentence (the path in years). The
+      // first sentence alone was 87 characters (Ahrefs, 2026-11-27).
+      description: `CV of ${SITE.name}, product owner and founder in Switzerland. ${SUMMARY[0].split(/(?<=\.) /)[1]}`,
     },
     name: SITE.name,
     // The two lines under the name (owner, 17 Nov 2026), word for word:

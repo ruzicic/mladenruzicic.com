@@ -45,7 +45,10 @@ const PARSED_HOME: Home = parseOrThrow(
   homeSchema,
   {
     seo: {
-      title: "Mladen Ružičić",
+      // The tab and search title (Ahrefs, 2026-11-27: the name alone, 14
+      // characters, told search nothing past the name). Identity words from
+      // the Person description and the press bio; no employer.
+      title: "Mladen Ružičić · Product owner and founder in Switzerland",
       description:
         "Product + Tech, based in Switzerland. Global Product Owner by day, co-founder of TenderLift, and a few side projects that run themselves.",
     },
